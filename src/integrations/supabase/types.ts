@@ -656,6 +656,8 @@ export type Database = {
           full_name: string | null
           id: string
           locale: string | null
+          preferences: Json
+          role_title: string | null
           timezone: string | null
           updated_at: string
         }
@@ -667,6 +669,8 @@ export type Database = {
           full_name?: string | null
           id: string
           locale?: string | null
+          preferences?: Json
+          role_title?: string | null
           timezone?: string | null
           updated_at?: string
         }
@@ -678,6 +682,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           locale?: string | null
+          preferences?: Json
+          role_title?: string | null
           timezone?: string | null
           updated_at?: string
         }
