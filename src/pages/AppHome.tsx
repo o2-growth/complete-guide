@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { LogOut, Sparkles } from "lucide-react";
+import { Inbox, Sparkles, Command as CommandIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import logoOxy from "@/assets/logo-oxy.png";
 
 const AppHome = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<{ display_name: string | null; role_title: string | null } | null>(null);
 
   useEffect(() => {
@@ -23,52 +19,35 @@ const AppHome = () => {
       .then(({ data }) => setProfile(data));
   }, [user]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth", { replace: true });
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <img src={logoOxy} alt="Oxy Growth OS" className="h-9 w-9" />
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-bold tracking-tight">Oxy Growth OS</span>
-              <span className="text-[11px] text-muted-foreground">por O2 Inc.</span>
-            </div>
+    <div className="container py-8">
+      <div className="mx-auto max-w-4xl">
+        <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">
+          <Sparkles className="mr-1.5 h-3 w-3" /> Layout shell ativo
+        </Badge>
+        <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">
+          Olá, {profile?.display_name ?? "operador"} 👋
+        </h1>
+        <p className="mb-8 text-muted-foreground">
+          {profile?.role_title ? `${profile.role_title} · ` : ""}
+          Use{" "}
+          <kbd className="inline-flex items-center gap-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">
+            <CommandIcon className="h-3 w-3" />K
+          </kbd>{" "}
+          para abrir o command palette.
+        </p>
+
+        <Card className="p-8 md:p-10 text-center border-dashed">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Inbox className="h-7 w-7" />
           </div>
-          <Button variant="ghost" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
-        </div>
-      </header>
-
-      <main className="container py-12">
-        <div className="mx-auto max-w-3xl">
-          <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">
-            <Sparkles className="mr-1.5 h-3 w-3" /> Passo 3 concluído
-          </Badge>
-          <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">
-            Olá, {profile?.display_name ?? "operador"} 👋
-          </h1>
-          <p className="mb-8 text-muted-foreground">
-            {profile?.role_title ? `${profile.role_title} · ` : ""}Você está autenticado no Oxy Growth OS.
+          <h2 className="mb-1 text-xl font-semibold">Sua Inbox</h2>
+          <p className="mx-auto max-w-md text-sm text-muted-foreground">
+            Aqui vão aparecer todas as tarefas atribuídas a você. Vamos popular no Passo 5 com Smart
+            Lists e o Quick Add NLP em pt-BR.
           </p>
-
-          <Card className="p-6 md:p-8">
-            <h2 className="mb-2 text-lg font-semibold">Próximas etapas</h2>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Passo 4 — Layout shell (Sidebar + Topbar + Command Palette)</li>
-              <li>• Passo 5 — Inbox + Smart Lists + Quick Add NLP</li>
-              <li>• Passo 6 — Detalhe de tarefa (TipTap, anexos, comentários)</li>
-              <li>• Passo 7 — Kanban com drag-drop e auto-assign</li>
-            </ul>
-          </Card>
-        </div>
-      </main>
+        </Card>
+      </div>
     </div>
   );
 };
