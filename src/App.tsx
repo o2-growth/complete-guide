@@ -13,6 +13,8 @@ import Auth from "./pages/Auth.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import AppHome from "./pages/AppHome.tsx";
 import Placeholder from "./pages/app/Placeholder.tsx";
+import SmartListPage from "./pages/app/SmartListPage.tsx";
+import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +48,52 @@ const App = () => (
                 <Route index element={<AppHome />} />
                 <Route
                   path="hoje"
-                  element={<Placeholder title="Hoje" description="Smart list com tarefas vencendo hoje + atrasadas." step={5} />}
+                  element={
+                    <SmartListPage
+                      list="today"
+                      title="Hoje"
+                      description="Tarefas que vencem hoje. Foco no que importa agora."
+                      icon={Sun}
+                      showQuickAdd
+                      emptyTitle="Sem tarefas para hoje"
+                      emptyDescription="Aproveite — ou puxe algo do backlog."
+                    />
+                  }
+                />
+                <Route
+                  path="proximos"
+                  element={
+                    <SmartListPage
+                      list="next7"
+                      title="Próximos 7 dias"
+                      description="Tudo o que vence na próxima semana."
+                      icon={CalendarClock}
+                    />
+                  }
+                />
+                <Route
+                  path="atrasadas"
+                  element={
+                    <SmartListPage
+                      list="overdue"
+                      title="Atrasadas"
+                      description="Tarefas com prazo vencido. Reagende ou conclua."
+                      icon={AlertTriangle}
+                      emptyTitle="Nada atrasado 🎉"
+                      emptyDescription="Você está em dia."
+                    />
+                  }
+                />
+                <Route
+                  path="atribuidas"
+                  element={
+                    <SmartListPage
+                      list="assigned"
+                      title="Atribuídas a mim"
+                      description="Todas as tarefas que estão com você no momento."
+                      icon={UserCheck}
+                    />
+                  }
                 />
                 <Route
                   path="calendario"

@@ -1506,6 +1506,7 @@ export type Database = {
       }
     }
     Functions: {
+      ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
       has_tenant_role: {
         Args: {
           _role: Database["public"]["Enums"]["tenant_role"]
