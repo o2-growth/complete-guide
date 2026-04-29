@@ -10,6 +10,10 @@ import {
   Settings,
   FolderKanban,
   ClipboardList,
+  Sun,
+  CalendarClock,
+  AlertTriangle,
+  UserCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,10 +31,17 @@ import {
 import logoOxy from "@/assets/logo-oxy.png";
 
 const principal = [
-  { title: "Inbox", url: "/app", icon: Inbox, end: true },
-  { title: "Hoje", url: "/app/hoje", icon: ListTodo },
+  { title: "Inbox", url: "/app", icon: Inbox, end: true as const },
+  { title: "Hoje", url: "/app/hoje", icon: Sun },
+  { title: "Próximos 7", url: "/app/proximos", icon: CalendarClock },
+  { title: "Atrasadas", url: "/app/atrasadas", icon: AlertTriangle },
+  { title: "Atribuídas", url: "/app/atribuidas", icon: UserCheck },
+];
+
+const visoes = [
   { title: "Calendário", url: "/app/calendario", icon: CalendarDays },
   { title: "Kanban", url: "/app/kanban", icon: KanbanSquare },
+  { title: "Lista", url: "/app/projetos", icon: ListTodo },
 ];
 
 const trabalho = [
@@ -93,6 +104,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         {renderGroup("Principal", principal)}
+        {renderGroup("Visões", visoes)}
         {renderGroup("Trabalho", trabalho)}
         {renderGroup("Insights", insights)}
         {renderGroup("Sistema", sistema)}

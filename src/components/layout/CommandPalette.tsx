@@ -23,6 +23,9 @@ import {
   Plus,
   Moon,
   Sun,
+  CalendarClock,
+  AlertTriangle,
+  UserCheck,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { toast } from "sonner";
@@ -43,7 +46,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   const navItems = [
     { label: "Inbox", icon: Inbox, path: "/app", shortcut: "G I" },
-    { label: "Hoje", icon: ListTodo, path: "/app/hoje", shortcut: "G H" },
+    { label: "Hoje", icon: Sun, path: "/app/hoje", shortcut: "G H" },
+    { label: "Próximos 7 dias", icon: CalendarClock, path: "/app/proximos" },
+    { label: "Atrasadas", icon: AlertTriangle, path: "/app/atrasadas" },
+    { label: "Atribuídas a mim", icon: UserCheck, path: "/app/atribuidas" },
     { label: "Calendário", icon: CalendarDays, path: "/app/calendario", shortcut: "G C" },
     { label: "Kanban", icon: KanbanSquare, path: "/app/kanban", shortcut: "G K" },
     { label: "Projetos", icon: FolderKanban, path: "/app/projetos" },
