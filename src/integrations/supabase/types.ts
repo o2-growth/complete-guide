@@ -1000,6 +1000,80 @@ export type Database = {
         }
         Relationships: []
       }
+      copilot_conversations: {
+        Row: {
+          context: Json
+          created_at: string
+          id: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          id?: string
+          tenant_id: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          id?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      copilot_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          tenant_id: string
+          tool_calls: Json | null
+          tool_name: string | null
+          tool_result: Json | null
+        }
+        Insert: {
+          content?: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+          tenant_id: string
+          tool_calls?: Json | null
+          tool_name?: string | null
+          tool_result?: Json | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          tenant_id?: string
+          tool_calls?: Json | null
+          tool_name?: string | null
+          tool_result?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copilot_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "copilot_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_contracts: {
         Row: {
           briefing: string | null
@@ -1589,6 +1663,45 @@ export type Database = {
         }
         Relationships: []
       }
+      industry_benchmarks: {
+        Row: {
+          created_at: string
+          id: string
+          industry: string
+          metric: string
+          notes: string | null
+          p25: number
+          p50: number
+          p75: number
+          source: string | null
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          industry: string
+          metric: string
+          notes?: string | null
+          p25: number
+          p50: number
+          p75: number
+          source?: string | null
+          unit?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          industry?: string
+          metric?: string
+          notes?: string | null
+          p25?: number
+          p50?: number
+          p75?: number
+          source?: string | null
+          unit?: string
+        }
+        Relationships: []
+      }
       key_results: {
         Row: {
           baseline: number
@@ -1879,6 +1992,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      monthly_scorecards: {
+        Row: {
+          ai_summary: string | null
+          benchmarks: Json
+          created_at: string
+          id: string
+          metrics: Json
+          period_month: string
+          recommendations: Json | null
+          tenant_id: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          benchmarks?: Json
+          created_at?: string
+          id?: string
+          metrics?: Json
+          period_month: string
+          recommendations?: Json | null
+          tenant_id: string
+        }
+        Update: {
+          ai_summary?: string | null
+          benchmarks?: Json
+          created_at?: string
+          id?: string
+          metrics?: Json
+          period_month?: string
+          recommendations?: Json | null
+          tenant_id?: string
+        }
+        Relationships: []
       }
       notification_preferences: {
         Row: {
@@ -2735,6 +2881,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      simulation_scenarios: {
+        Row: {
+          ai_narrative: string | null
+          created_at: string
+          created_by: string
+          id: string
+          inputs: Json
+          kind: string
+          name: string
+          result: Json | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_narrative?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          inputs?: Json
+          kind: string
+          name: string
+          result?: Json | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_narrative?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          inputs?: Json
+          kind?: string
+          name?: string
+          result?: Json | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       skills: {
         Row: {
@@ -3631,6 +3816,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          industry: string
           logo_url: string | null
           name: string
           primary_color: string | null
@@ -3643,6 +3829,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          industry?: string
           logo_url?: string | null
           name: string
           primary_color?: string | null
@@ -3655,6 +3842,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          industry?: string
           logo_url?: string | null
           name?: string
           primary_color?: string | null
@@ -4090,6 +4278,7 @@ export type Database = {
         Args: { _notes?: string; _task_id: string; _workflow_id: string }
         Returns: string
       }
+      benchmark_compare: { Args: { _tenant: string }; Returns: Json }
       campaign_report: { Args: { _campaign_id: string }; Returns: Json }
       campaign_roas: { Args: { _campaign_id: string }; Returns: Json }
       capacity_for_user: {
@@ -4114,6 +4303,7 @@ export type Database = {
         Args: { _assignee_id?: string; _inbox_id: string; _project_id?: string }
         Returns: string
       }
+      copilot_context: { Args: { _tenant: string }; Returns: Json }
       decide_social_approval: {
         Args: {
           _comment: string
@@ -4303,6 +4493,10 @@ export type Database = {
         }
       }
       run_report: { Args: { _report_id: string }; Returns: Json }
+      run_simulation: {
+        Args: { _inputs: Json; _kind: string; _tenant: string }
+        Returns: Json
+      }
       save_project_as_template: {
         Args: { p_description?: string; p_name: string; p_project_id: string }
         Returns: string
