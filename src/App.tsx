@@ -60,6 +60,7 @@ import OKRsPage from "./pages/app/OKRsPage.tsx";
 import NotificationsPage from "./pages/app/NotificationsPage.tsx";
 import AutomationsPage from "./pages/app/AutomationsPage.tsx";
 import ExecutivePage from "./pages/app/ExecutivePage.tsx";
+import DeveloperHubPage from "./pages/app/DeveloperHubPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -189,6 +190,7 @@ const App = () => (
                 <Route path="notificacoes" element={<NotificationsPage />} />
                 <Route path="automacoes" element={<AutomationsPage />} />
                 <Route path="exec" element={<ExecutivePage />} />
+                <Route path="developer" element={<DeveloperHubPage />} />
                 <Route path="skills" element={<SkillsPage />} />
                 <Route path="capacity" element={<CapacityPage />} />
                 <Route

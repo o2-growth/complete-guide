@@ -211,6 +211,56 @@ export type Database = {
           },
         ]
       }
+      api_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          scopes: string[]
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          scopes?: string[]
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          tenant_id?: string
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_tokens_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_decisions: {
         Row: {
           comment: string | null
@@ -693,6 +743,56 @@ export type Database = {
           usage_count?: number
         }
         Relationships: []
+      }
+      chat_integrations: {
+        Row: {
+          active: boolean
+          channel: string | null
+          created_at: string
+          created_by: string
+          events: string[]
+          id: string
+          last_sent_at: string | null
+          name: string
+          provider: string
+          tenant_id: string
+          webhook_url: string
+        }
+        Insert: {
+          active?: boolean
+          channel?: string | null
+          created_at?: string
+          created_by: string
+          events?: string[]
+          id?: string
+          last_sent_at?: string | null
+          name: string
+          provider: string
+          tenant_id: string
+          webhook_url: string
+        }
+        Update: {
+          active?: boolean
+          channel?: string | null
+          created_at?: string
+          created_by?: string
+          events?: string[]
+          id?: string
+          last_sent_at?: string | null
+          name?: string
+          provider?: string
+          tenant_id?: string
+          webhook_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_integrations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       comments: {
         Row: {
@@ -2284,6 +2384,50 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_used_at: string | null
+          p256dh: string
+          tenant_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_used_at?: string | null
+          p256dh: string
+          tenant_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_used_at?: string | null
+          p256dh?: string
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurrences: {
         Row: {
           active: boolean
@@ -3795,6 +3939,113 @@ export type Database = {
           },
         ]
       }
+      webhook_deliveries: {
+        Row: {
+          attempts: number
+          created_at: string
+          delivered_at: string | null
+          event: string
+          http_status: number | null
+          id: string
+          payload: Json
+          response_body: string | null
+          status: string
+          tenant_id: string
+          webhook_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          delivered_at?: string | null
+          event: string
+          http_status?: number | null
+          id?: string
+          payload: Json
+          response_body?: string | null
+          status?: string
+          tenant_id: string
+          webhook_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          delivered_at?: string | null
+          event?: string
+          http_status?: number | null
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          status?: string
+          tenant_id?: string
+          webhook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhooks: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          events: string[]
+          id: string
+          last_delivery_at: string | null
+          last_status: number | null
+          name: string
+          secret: string
+          tenant_id: string
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by: string
+          events?: string[]
+          id?: string
+          last_delivery_at?: string | null
+          last_status?: number | null
+          name: string
+          secret?: string
+          tenant_id: string
+          url: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          events?: string[]
+          id?: string
+          last_delivery_at?: string | null
+          last_status?: number | null
+          name?: string
+          secret?: string
+          tenant_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhooks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       mv_workload_by_user: {
@@ -3926,6 +4177,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      enqueue_webhook: {
+        Args: { _event: string; _payload: Json; _tenant: string }
+        Returns: number
+      }
       ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
       exec_kpis: { Args: { _tenant: string }; Returns: Json }
       forecast_metric: {
@@ -3991,6 +4246,18 @@ export type Database = {
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
       kr_progress: { Args: { _tenant: string }; Returns: number }
       mark_notifications_read: { Args: { _ids?: string[] }; Returns: number }
+      pending_webhook_deliveries: {
+        Args: { _limit?: number }
+        Returns: {
+          attempts: number
+          delivery_id: string
+          event: string
+          payload: Json
+          secret: string
+          url: string
+          webhook_id: string
+        }[]
+      }
       recommend_boosts: {
         Args: { _limit?: number; _tenant: string }
         Returns: {

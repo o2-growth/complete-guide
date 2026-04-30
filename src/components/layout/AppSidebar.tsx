@@ -43,6 +43,7 @@ import {
   Target,
   Crown,
   Bell,
+  Code2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -116,6 +117,7 @@ const insights = [
 const sistema = [
   { title: "Notificações", url: "/app/notificacoes", icon: Bell },
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
+  { title: "Developer Hub", url: "/app/developer", icon: Code2 },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
   { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
   { title: "Audit log", url: "/app/audit", icon: History },
@@ -179,7 +181,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 32/43
+            v1.0 · 33/43
           </p>
         )}
       </SidebarFooter>
