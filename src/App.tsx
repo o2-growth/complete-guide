@@ -21,6 +21,7 @@ import FocusPage from "./pages/app/FocusPage.tsx";
 import WorkloadPage from "./pages/app/WorkloadPage.tsx";
 import DemandsPage from "./pages/app/DemandsPage.tsx";
 import MediaPage from "./pages/app/MediaPage.tsx";
+import GeniusPage from "./pages/app/GeniusPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
@@ -126,10 +127,7 @@ const App = () => (
                 <Route path="demandas" element={<DemandsPage />} />
                 <Route path="workload" element={<WorkloadPage />} />
                 <Route path="midias" element={<MediaPage />} />
-                <Route
-                  path="genio"
-                  element={<Placeholder title="Gênio Growth" description="Assistente de IA: copy, classificação, busca semântica e resumos." step={14} />}
-                />
+                <Route path="genio" element={<GeniusPage />} />
                 <Route
                   path="configuracoes"
                   element={<Placeholder title="Configurações" description="Tipos de tarefa, integrações, equipe, preferências." step={9} />}
