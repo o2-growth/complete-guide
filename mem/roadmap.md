@@ -30,7 +30,7 @@ Executar UM passo por turno. Não pular. Não amontoar.
 20. ✅ Página real de Projetos (criação, lista agrupada por squad, busca, arquivar; detalhe com Lista + Kanban + progresso)
 21. ✅ Aprovações multi-etapas (workflows com etapas por papel/pessoa, quórum, painel visual de progresso na tarefa)
 22. ✅ SLAs + alertas automáticos por tipo de tarefa (políticas por tipo+prioridade, badge ok/warning/breached em tarefas)
-23. Templates de projeto recorrentes (clone com 1 clique)
+23. ✅ Templates de projeto recorrentes (tabela project_templates + RPCs save/apply, página /app/templates, clone com 1 clique)
 24. Audit log navegável
 
 Fases agrupadas: 1-15 = Fase 1 (núcleo TickTick), 16-24 = Fase 2 (Ekyte), 25-31 = Fase 3 (mídias), 32-36 = Fase 4 (relatórios+IA), 37-43 = Fase 5 (polish).

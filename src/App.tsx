@@ -32,6 +32,7 @@ import ProjectsPage from "./pages/app/ProjectsPage.tsx";
 import ProjectDetailPage from "./pages/app/ProjectDetailPage.tsx";
 import ApprovalsPage from "./pages/app/ApprovalsPage.tsx";
 import SLAPage from "./pages/app/SLAPage.tsx";
+import TemplatesPage from "./pages/app/TemplatesPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
@@ -131,6 +132,7 @@ const App = () => (
                 <Route path="projetos/:id" element={<ProjectDetailPage />} />
                 <Route path="aprovacoes" element={<ApprovalsPage />} />
                 <Route path="slas" element={<SLAPage />} />
+                <Route path="templates" element={<TemplatesPage />} />
                 <Route path="squads" element={<SquadsPage />} />
                 <Route path="demandas" element={<DemandsPage />} />
                 <Route path="workload" element={<WorkloadPage />} />

@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ListTodo, KanbanSquare, Loader2 } from "lucide-react";
+import { ArrowLeft, ListTodo, KanbanSquare, Loader2, FileStack } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useProject, useProjectTasks } from "@/hooks/useProjects";
+import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskRow as TaskRowItem } from "@/components/tasks/TaskRow";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
@@ -41,6 +45,10 @@ export default function ProjectDetailPage() {
   const total = allTasks.length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
 
+  const [tplOpen, setTplOpen] = useState(false);
+  const [tplName, setTplName] = useState("");
+  const saveTpl = useSaveProjectAsTemplate();
+
   return (
     <div className="container max-w-7xl py-6 space-y-5">
       <div>
@@ -55,6 +63,30 @@ export default function ProjectDetailPage() {
             {project.description && <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{project.description}</p>}
           </div>
           <div className="flex min-w-[220px] flex-col items-end gap-1">
+            <Dialog open={tplOpen} onOpenChange={setTplOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="mb-1">
+                  <FileStack className="mr-1.5 h-3.5 w-3.5" /> Salvar como template
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Salvar como template</DialogTitle></DialogHeader>
+                <div className="space-y-1.5">
+                  <Label>Nome do template</Label>
+                  <Input value={tplName} onChange={(e) => setTplName(e.target.value)} placeholder={project.name} />
+                </div>
+                <DialogFooter>
+                  <Button variant="ghost" onClick={() => setTplOpen(false)}>Cancelar</Button>
+                  <Button
+                    disabled={!tplName || saveTpl.isPending}
+                    onClick={async () => {
+                      await saveTpl.mutateAsync({ project_id: project.id, name: tplName });
+                      setTplOpen(false); setTplName("");
+                    }}
+                  >Salvar</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <span className="text-xs text-muted-foreground">{done} de {total} concluídas</span>
             <Progress value={progress} className="h-1.5 w-full" />
             <span className="text-[11px] font-medium">{progress}%</span>

@@ -22,6 +22,7 @@ import {
   CalendarRange,
   GitBranch,
   Shield,
+  FileStack,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,6 +55,7 @@ const visoes = [
 
 const trabalho = [
   { title: "Projetos", url: "/app/projetos", icon: FolderKanban },
+  { title: "Templates", url: "/app/templates", icon: FileStack },
   { title: "Squads", url: "/app/squads", icon: Users },
   { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
   { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
@@ -131,7 +133,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 22/43
+            v1.0 · 23/43
           </p>
         )}
       </SidebarFooter>
