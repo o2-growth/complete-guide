@@ -1,1 +1,10 @@
 project_id = "dboftogzjobfvtjaoifh"
+
+[functions.api-public]
+verify_jwt = false
+
+[functions.webhook-dispatcher]
+verify_jwt = false
+
+[functions.bio-redirect]
+verify_jwt = false
