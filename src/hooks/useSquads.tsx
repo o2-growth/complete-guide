@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 
-export type SquadKind = "ia_automacao" | "marketing" | "expansao" | "custom";
-export type SquadRole = "lead" | "specialist" | "support";
+export type SquadKind = "ia" | "marketing" | "expansao" | "custom";
+export type SquadRole = "lead" | "specialist";
 
 export interface Squad {
   id: string;
