@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export type ApproverKind = "user" | "tenant_role";
 export type ApprovalStatus = "draft" | "in_progress" | "approved" | "rejected" | "cancelled";
 export type DecisionKind = "approved" | "rejected";
-export type TenantRole = "admin" | "manager" | "specialist" | "client";
+export type TenantRole = "admin" | "manager" | "specialist" | "requester";
 
 export interface ApprovalWorkflow {
   id: string;
