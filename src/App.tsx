@@ -46,6 +46,9 @@ import SocialAnalyticsPage from "./pages/app/SocialAnalyticsPage.tsx";
 import SocialStudioPage from "./pages/app/SocialStudioPage.tsx";
 import SocialIntelPage from "./pages/app/SocialIntelPage.tsx";
 import IntegrationsPage from "./pages/app/IntegrationsPage.tsx";
+import SocialInboxPage from "./pages/app/SocialInboxPage.tsx";
+import SocialCadencePage from "./pages/app/SocialCadencePage.tsx";
+import CampaignReportPage from "./pages/app/CampaignReportPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -152,12 +155,15 @@ const App = () => (
                 <Route path="midias" element={<MediaPage />} />
                 <Route path="social" element={<SocialCalendarPage />} />
                 <Route path="campanhas" element={<CampaignsPage />} />
+                <Route path="campanhas/:id" element={<CampaignReportPage />} />
                 <Route path="biblioteca" element={<MediaLibraryPage />} />
                 <Route path="snippets" element={<SnippetsPage />} />
                 <Route path="social/pipeline" element={<SocialPipelinePage />} />
                 <Route path="social/analytics" element={<SocialAnalyticsPage />} />
                 <Route path="social/studio" element={<SocialStudioPage />} />
                 <Route path="social/intel" element={<SocialIntelPage />} />
+                <Route path="social/inbox" element={<SocialInboxPage />} />
+                <Route path="social/cadencia" element={<SocialCadencePage />} />
                 <Route path="configuracoes/integracoes" element={<IntegrationsPage />} />
                 <Route path="genio" element={<GeniusPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
