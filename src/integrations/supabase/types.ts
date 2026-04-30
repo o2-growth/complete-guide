@@ -129,6 +129,190 @@ export type Database = {
           },
         ]
       }
+      approval_decisions: {
+        Row: {
+          comment: string | null
+          created_at: string
+          decided_by: string
+          decision: Database["public"]["Enums"]["decision_kind"]
+          id: string
+          instance_id: string
+          step_id: string
+          tenant_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          decided_by: string
+          decision: Database["public"]["Enums"]["decision_kind"]
+          id?: string
+          instance_id: string
+          step_id: string
+          tenant_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          decided_by?: string
+          decision?: Database["public"]["Enums"]["decision_kind"]
+          id?: string
+          instance_id?: string
+          step_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_decisions_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "approval_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_decisions_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "approval_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_instances: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_step_position: number
+          id: string
+          notes: string | null
+          requested_by: string
+          status: Database["public"]["Enums"]["approval_status"]
+          task_id: string | null
+          tenant_id: string
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_step_position?: number
+          id?: string
+          notes?: string | null
+          requested_by: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          task_id?: string | null
+          tenant_id: string
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_step_position?: number
+          id?: string
+          notes?: string | null
+          requested_by?: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          task_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_instances_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_steps: {
+        Row: {
+          allow_skip: boolean
+          approver_kind: Database["public"]["Enums"]["approver_kind"]
+          approver_role: Database["public"]["Enums"]["tenant_role"] | null
+          approver_user_id: string | null
+          created_at: string
+          id: string
+          name: string
+          position: number
+          required_approvals: number
+          tenant_id: string
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          allow_skip?: boolean
+          approver_kind?: Database["public"]["Enums"]["approver_kind"]
+          approver_role?: Database["public"]["Enums"]["tenant_role"] | null
+          approver_user_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          position: number
+          required_approvals?: number
+          tenant_id: string
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          allow_skip?: boolean
+          approver_kind?: Database["public"]["Enums"]["approver_kind"]
+          approver_role?: Database["public"]["Enums"]["tenant_role"] | null
+          approver_user_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          required_approvals?: number
+          tenant_id?: string
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_workflows: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       assignment_matrix: {
         Row: {
           assignee_id: string | null
@@ -1676,6 +1860,18 @@ export type Database = {
       }
     }
     Functions: {
+      approval_decide: {
+        Args: {
+          _comment?: string
+          _decision: Database["public"]["Enums"]["decision_kind"]
+          _instance_id: string
+        }
+        Returns: Database["public"]["Enums"]["approval_status"]
+      }
+      approval_start: {
+        Args: { _notes?: string; _task_id: string; _workflow_id: string }
+        Returns: string
+      }
       capacity_for_user: {
         Args: {
           _from: string
@@ -1852,6 +2048,14 @@ export type Database = {
         | "deleted"
         | "attached"
         | "time_logged"
+      approval_status:
+        | "draft"
+        | "in_progress"
+        | "approved"
+        | "rejected"
+        | "cancelled"
+      approver_kind: "user" | "tenant_role"
+      decision_kind: "approved" | "rejected"
       notification_channel: "in_app" | "email" | "push"
       project_role: "owner" | "editor" | "commenter" | "viewer"
       squad_kind: "ia" | "marketing" | "expansao" | "custom"
@@ -1997,6 +2201,15 @@ export const Constants = {
         "attached",
         "time_logged",
       ],
+      approval_status: [
+        "draft",
+        "in_progress",
+        "approved",
+        "rejected",
+        "cancelled",
+      ],
+      approver_kind: ["user", "tenant_role"],
+      decision_kind: ["approved", "rejected"],
       notification_channel: ["in_app", "email", "push"],
       project_role: ["owner", "editor", "commenter", "viewer"],
       squad_kind: ["ia", "marketing", "expansao", "custom"],
