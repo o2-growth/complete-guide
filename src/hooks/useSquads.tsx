@@ -121,13 +121,15 @@ export function useCreateSquad() {
   return useMutation({
     mutationFn: async (input: { name: string; kind: SquadKind; color?: string; description?: string }) => {
       if (!tenantId) throw new Error("Sem workspace");
-      const { error } = await supabase.from("squads").insert({
-        tenant_id: tenantId,
-        name: input.name,
-        kind: input.kind,
-        color: input.color ?? null,
-        description: input.description ?? null,
-      });
+      const { error } = await supabase.from("squads").insert([
+        {
+          tenant_id: tenantId,
+          name: input.name,
+          kind: input.kind,
+          color: input.color ?? null,
+          description: input.description ?? null,
+        },
+      ]);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -143,12 +145,14 @@ export function useAddSquadMember() {
   const { tenantId } = useWorkspace();
   return useMutation({
     mutationFn: async (input: { squad_id: string; user_id: string; role: SquadRole; capacity?: number }) => {
-      const { error } = await supabase.from("squad_members").insert({
-        squad_id: input.squad_id,
-        user_id: input.user_id,
-        role_in_squad: input.role,
-        capacity_hours_week: input.capacity ?? 40,
-      });
+      const { error } = await supabase.from("squad_members").insert([
+        {
+          squad_id: input.squad_id,
+          user_id: input.user_id,
+          role_in_squad: input.role,
+          capacity_hours_week: input.capacity ?? 40,
+        },
+      ]);
       if (error) throw error;
     },
     onSuccess: () => {
