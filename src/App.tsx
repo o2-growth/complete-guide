@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,60 +14,68 @@ import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/Auth.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import AppHome from "./pages/AppHome.tsx";
-import Placeholder from "./pages/app/Placeholder.tsx";
 import SmartListPage from "./pages/app/SmartListPage.tsx";
-import KanbanPage from "./pages/app/KanbanPage.tsx";
-import CalendarPage from "./pages/app/CalendarPage.tsx";
-import TaskTypesPage from "./pages/app/TaskTypesPage.tsx";
-import FocusPage from "./pages/app/FocusPage.tsx";
-import WorkloadPage from "./pages/app/WorkloadPage.tsx";
-import DemandsPage from "./pages/app/DemandsPage.tsx";
-import MediaPage from "./pages/app/MediaPage.tsx";
-import GeniusPage from "./pages/app/GeniusPage.tsx";
-import DashboardPage from "./pages/app/DashboardPage.tsx";
-import SettingsPage from "./pages/app/SettingsPage.tsx";
-import SkillsPage from "./pages/app/SkillsPage.tsx";
-import CapacityPage from "./pages/app/CapacityPage.tsx";
-import SquadsPage from "./pages/app/SquadsPage.tsx";
-import ProjectsPage from "./pages/app/ProjectsPage.tsx";
-import ProjectDetailPage from "./pages/app/ProjectDetailPage.tsx";
-import ApprovalsPage from "./pages/app/ApprovalsPage.tsx";
-import SLAPage from "./pages/app/SLAPage.tsx";
-import TemplatesPage from "./pages/app/TemplatesPage.tsx";
-import AuditLogPage from "./pages/app/AuditLogPage.tsx";
-import RequestPage from "./pages/public/RequestPage.tsx";
-import ApprovePage from "./pages/public/ApprovePage.tsx";
-import SocialApprovePage from "./pages/public/SocialApprovePage.tsx";
-import SocialCalendarPage from "./pages/app/SocialCalendarPage.tsx";
-import CampaignsPage from "./pages/app/CampaignsPage.tsx";
-import MediaLibraryPage from "./pages/app/MediaLibraryPage.tsx";
-import SnippetsPage from "./pages/app/SnippetsPage.tsx";
-import SocialPipelinePage from "./pages/app/SocialPipelinePage.tsx";
-import SocialAnalyticsPage from "./pages/app/SocialAnalyticsPage.tsx";
-import SocialStudioPage from "./pages/app/SocialStudioPage.tsx";
-import SocialIntelPage from "./pages/app/SocialIntelPage.tsx";
-import IntegrationsPage from "./pages/app/IntegrationsPage.tsx";
-import SocialInboxPage from "./pages/app/SocialInboxPage.tsx";
-import SocialCadencePage from "./pages/app/SocialCadencePage.tsx";
-import CampaignReportPage from "./pages/app/CampaignReportPage.tsx";
-import CreatorsPage from "./pages/app/CreatorsPage.tsx";
-import BioEditorPage from "./pages/app/BioEditorPage.tsx";
-import BoostsPage from "./pages/app/BoostsPage.tsx";
-import PublicBioPage from "./pages/public/BioPage.tsx";
-import ReportBuilderPage from "./pages/app/ReportBuilderPage.tsx";
-import AnomaliesPage from "./pages/app/AnomaliesPage.tsx";
-import ForecastPage from "./pages/app/ForecastPage.tsx";
-import OKRsPage from "./pages/app/OKRsPage.tsx";
-import NotificationsPage from "./pages/app/NotificationsPage.tsx";
-import AutomationsPage from "./pages/app/AutomationsPage.tsx";
-import ExecutivePage from "./pages/app/ExecutivePage.tsx";
-import DeveloperHubPage from "./pages/app/DeveloperHubPage.tsx";
-import CopilotPage from "./pages/app/CopilotPage.tsx";
-import BenchmarksPage from "./pages/app/BenchmarksPage.tsx";
-import SimulationsPage from "./pages/app/SimulationsPage.tsx";
+
+// Code-splitting: tudo que não é entrypoint vai por lazy import.
+const KanbanPage = lazy(() => import("./pages/app/KanbanPage.tsx"));
+const CalendarPage = lazy(() => import("./pages/app/CalendarPage.tsx"));
+const TaskTypesPage = lazy(() => import("./pages/app/TaskTypesPage.tsx"));
+const FocusPage = lazy(() => import("./pages/app/FocusPage.tsx"));
+const WorkloadPage = lazy(() => import("./pages/app/WorkloadPage.tsx"));
+const DemandsPage = lazy(() => import("./pages/app/DemandsPage.tsx"));
+const MediaPage = lazy(() => import("./pages/app/MediaPage.tsx"));
+const GeniusPage = lazy(() => import("./pages/app/GeniusPage.tsx"));
+const DashboardPage = lazy(() => import("./pages/app/DashboardPage.tsx"));
+const SettingsPage = lazy(() => import("./pages/app/SettingsPage.tsx"));
+const SkillsPage = lazy(() => import("./pages/app/SkillsPage.tsx"));
+const CapacityPage = lazy(() => import("./pages/app/CapacityPage.tsx"));
+const SquadsPage = lazy(() => import("./pages/app/SquadsPage.tsx"));
+const ProjectsPage = lazy(() => import("./pages/app/ProjectsPage.tsx"));
+const ProjectDetailPage = lazy(() => import("./pages/app/ProjectDetailPage.tsx"));
+const ApprovalsPage = lazy(() => import("./pages/app/ApprovalsPage.tsx"));
+const SLAPage = lazy(() => import("./pages/app/SLAPage.tsx"));
+const TemplatesPage = lazy(() => import("./pages/app/TemplatesPage.tsx"));
+const AuditLogPage = lazy(() => import("./pages/app/AuditLogPage.tsx"));
+const RequestPage = lazy(() => import("./pages/public/RequestPage.tsx"));
+const ApprovePage = lazy(() => import("./pages/public/ApprovePage.tsx"));
+const SocialApprovePage = lazy(() => import("./pages/public/SocialApprovePage.tsx"));
+const SocialCalendarPage = lazy(() => import("./pages/app/SocialCalendarPage.tsx"));
+const CampaignsPage = lazy(() => import("./pages/app/CampaignsPage.tsx"));
+const MediaLibraryPage = lazy(() => import("./pages/app/MediaLibraryPage.tsx"));
+const SnippetsPage = lazy(() => import("./pages/app/SnippetsPage.tsx"));
+const SocialPipelinePage = lazy(() => import("./pages/app/SocialPipelinePage.tsx"));
+const SocialAnalyticsPage = lazy(() => import("./pages/app/SocialAnalyticsPage.tsx"));
+const SocialStudioPage = lazy(() => import("./pages/app/SocialStudioPage.tsx"));
+const SocialIntelPage = lazy(() => import("./pages/app/SocialIntelPage.tsx"));
+const IntegrationsPage = lazy(() => import("./pages/app/IntegrationsPage.tsx"));
+const SocialInboxPage = lazy(() => import("./pages/app/SocialInboxPage.tsx"));
+const SocialCadencePage = lazy(() => import("./pages/app/SocialCadencePage.tsx"));
+const CampaignReportPage = lazy(() => import("./pages/app/CampaignReportPage.tsx"));
+const CreatorsPage = lazy(() => import("./pages/app/CreatorsPage.tsx"));
+const BioEditorPage = lazy(() => import("./pages/app/BioEditorPage.tsx"));
+const BoostsPage = lazy(() => import("./pages/app/BoostsPage.tsx"));
+const PublicBioPage = lazy(() => import("./pages/public/BioPage.tsx"));
+const ReportBuilderPage = lazy(() => import("./pages/app/ReportBuilderPage.tsx"));
+const AnomaliesPage = lazy(() => import("./pages/app/AnomaliesPage.tsx"));
+const ForecastPage = lazy(() => import("./pages/app/ForecastPage.tsx"));
+const OKRsPage = lazy(() => import("./pages/app/OKRsPage.tsx"));
+const NotificationsPage = lazy(() => import("./pages/app/NotificationsPage.tsx"));
+const AutomationsPage = lazy(() => import("./pages/app/AutomationsPage.tsx"));
+const ExecutivePage = lazy(() => import("./pages/app/ExecutivePage.tsx"));
+const DeveloperHubPage = lazy(() => import("./pages/app/DeveloperHubPage.tsx"));
+const CopilotPage = lazy(() => import("./pages/app/CopilotPage.tsx"));
+const BenchmarksPage = lazy(() => import("./pages/app/BenchmarksPage.tsx"));
+const SimulationsPage = lazy(() => import("./pages/app/SimulationsPage.tsx"));
+const ShortcutsPage = lazy(() => import("./pages/app/ShortcutsPage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
+
+const PageFallback = () => (
+  <div className="flex h-[60vh] items-center justify-center" role="status" aria-live="polite">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-label="Carregando" />
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -77,6 +86,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <Suspense fallback={<PageFallback />}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -199,6 +209,7 @@ const App = () => (
                 <Route path="simulacoes" element={<SimulationsPage />} />
                 <Route path="skills" element={<SkillsPage />} />
                 <Route path="capacity" element={<CapacityPage />} />
+                <Route path="atalhos" element={<ShortcutsPage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}
@@ -208,6 +219,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
