@@ -15,6 +15,7 @@ import AppHome from "./pages/AppHome.tsx";
 import Placeholder from "./pages/app/Placeholder.tsx";
 import SmartListPage from "./pages/app/SmartListPage.tsx";
 import KanbanPage from "./pages/app/KanbanPage.tsx";
+import CalendarPage from "./pages/app/CalendarPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -98,7 +99,7 @@ const App = () => (
                 />
                 <Route
                   path="calendario"
-                  element={<Placeholder title="Calendário editorial" description="Mês, semana, dia e agenda — drag para reagendar." step={8} />}
+                  element={<CalendarPage />}
                 />
                 <Route
                   path="kanban"

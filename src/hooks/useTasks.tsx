@@ -238,3 +238,68 @@ export function useMoveTaskStatus() {
     onError: (e: Error) => toast.error("Erro ao mover: " + e.message),
   });
 }
+
+/**
+ * Tarefas com due_at dentro de um intervalo (para o calendário).
+ */
+export function useTasksInRange(from: Date | null, to: Date | null) {
+  const { tenantId, loading: wsLoading } = useWorkspace();
+  return useQuery({
+    queryKey: ["tasks", "range", tenantId, from?.toISOString(), to?.toISOString()],
+    enabled: !wsLoading && !!tenantId && !!from && !!to,
+    queryFn: async (): Promise<TaskRow[]> => {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("tenant_id", tenantId!)
+        .eq("archived", false)
+        .not("due_at", "is", null)
+        .gte("due_at", from!.toISOString())
+        .lte("due_at", to!.toISOString())
+        .order("due_at", { ascending: true })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as TaskRow[];
+    },
+  });
+}
+
+/**
+ * Reagendar tarefa (drag no calendário). Preserva o horário original quando
+ * possível e só troca a data.
+ */
+export function useRescheduleTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      taskId,
+      newDate,
+      keepTime = true,
+      currentDueAt,
+    }: {
+      taskId: string;
+      newDate: Date;
+      keepTime?: boolean;
+      currentDueAt?: string | null;
+    }) => {
+      const target = new Date(newDate);
+      if (keepTime && currentDueAt) {
+        const prev = new Date(currentDueAt);
+        target.setHours(prev.getHours(), prev.getMinutes(), 0, 0);
+      } else if (keepTime) {
+        target.setHours(9, 0, 0, 0);
+      }
+      const { error } = await supabase
+        .from("tasks")
+        .update({ due_at: target.toISOString() })
+        .eq("id", taskId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Tarefa reagendada");
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["task"] });
+    },
+    onError: (e: Error) => toast.error("Erro ao reagendar: " + e.message),
+  });
+}
