@@ -26,6 +26,7 @@ import GeniusPage from "./pages/app/GeniusPage.tsx";
 import DashboardPage from "./pages/app/DashboardPage.tsx";
 import SettingsPage from "./pages/app/SettingsPage.tsx";
 import SkillsPage from "./pages/app/SkillsPage.tsx";
+import CapacityPage from "./pages/app/CapacityPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
@@ -135,6 +136,7 @@ const App = () => (
                 <Route path="genio" element={<GeniusPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="skills" element={<SkillsPage />} />
+                <Route path="capacity" element={<CapacityPage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}

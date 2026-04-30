@@ -19,6 +19,7 @@ import {
   ImageIcon,
   LayoutDashboard,
   Award,
+  CalendarRange,
 } from "lucide-react";
 import {
   Sidebar,
@@ -60,6 +61,7 @@ const insights = [
   { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
   { title: "Workload", url: "/app/workload", icon: BarChart3 },
   { title: "Skills", url: "/app/skills", icon: Award },
+  { title: "Capacity", url: "/app/capacity", icon: CalendarRange },
   { title: "Foco", url: "/app/foco", icon: Timer },
   { title: "Gênio Growth", url: "/app/genio", icon: Sparkles },
 ];
@@ -125,7 +127,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 16/16 ✓
+            v1.0 · 18/43
           </p>
         )}
       </SidebarFooter>
