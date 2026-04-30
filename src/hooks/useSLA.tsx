@@ -53,7 +53,7 @@ export function useUpsertSLAPolicy() {
   return useMutation({
     mutationFn: async (payload: Partial<SLAPolicy> & { name: string }) => {
       if (!tenantId) throw new Error("Workspace não pronto");
-      const row = { ...payload, tenant_id: tenantId };
+      const row = { ...payload, tenant_id: tenantId } as never;
       const { data, error } = payload.id
         ? await supabase.from("sla_policies" as never).update(row).eq("id", payload.id).select().single()
         : await supabase.from("sla_policies" as never).insert(row).select().single();
