@@ -445,6 +445,45 @@ export type Database = {
           },
         ]
       }
+      caption_snippets: {
+        Row: {
+          body: string
+          channel: Database["public"]["Enums"]["social_channel"] | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          tags: string[] | null
+          tenant_id: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          body: string
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          tags?: string[] | null
+          tenant_id: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          body?: string
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          tags?: string[] | null
+          tenant_id?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -695,6 +734,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hashtag_groups: {
+        Row: {
+          channel: Database["public"]["Enums"]["social_channel"] | null
+          created_at: string
+          created_by: string | null
+          hashtags: string[]
+          id: string
+          name: string
+          notes: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          created_by?: string | null
+          hashtags?: string[]
+          id?: string
+          name: string
+          notes?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          created_by?: string | null
+          hashtags?: string[]
+          id?: string
+          name?: string
+          notes?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       media_assets: {
         Row: {
           bucket: string
@@ -901,6 +976,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      post_metrics: {
+        Row: {
+          clicks: number | null
+          collected_at: string
+          comments: number | null
+          created_at: string
+          created_by: string | null
+          followers_gained: number | null
+          id: string
+          impressions: number | null
+          likes: number | null
+          notes: string | null
+          reach: number | null
+          saves: number | null
+          shares: number | null
+          task_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          clicks?: number | null
+          collected_at?: string
+          comments?: number | null
+          created_at?: string
+          created_by?: string | null
+          followers_gained?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          notes?: string | null
+          reach?: number | null
+          saves?: number | null
+          shares?: number | null
+          task_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          clicks?: number | null
+          collected_at?: string
+          comments?: number | null
+          created_at?: string
+          created_by?: string | null
+          followers_gained?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          notes?: string | null
+          reach?: number | null
+          saves?: number | null
+          shares?: number | null
+          task_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1396,6 +1528,7 @@ export type Database = {
           id: string
           name: string
           objective: string | null
+          stage_checklists: Json
           start_date: string | null
           status: string
           tenant_id: string
@@ -1411,6 +1544,7 @@ export type Database = {
           id?: string
           name: string
           objective?: string | null
+          stage_checklists?: Json
           start_date?: string | null
           status?: string
           tenant_id: string
@@ -1426,6 +1560,7 @@ export type Database = {
           id?: string
           name?: string
           objective?: string | null
+          stage_checklists?: Json
           start_date?: string | null
           status?: string
           tenant_id?: string
