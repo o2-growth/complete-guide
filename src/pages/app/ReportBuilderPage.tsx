@@ -112,11 +112,11 @@ export default function ReportBuilderPage() {
             }}>
               <Save className="mr-2 h-4 w-4" />Salvar
             </Button>
-            {!isNew && (
+            {form.id ? (
               <Button variant="outline" size="icon" onClick={() => { if (form.id) { del.mutate(form.id); onNew(); } }}>
                 <Trash2 className="h-4 w-4" />
               </Button>
-            )}
+            ) : null}
           </div>
 
           <div className="grid grid-cols-3 gap-3">
