@@ -26,6 +26,9 @@ import {
   History,
   Megaphone,
   Library,
+  Workflow,
+  FileText,
+  PieChart,
 } from "lucide-react";
 import {
   Sidebar,
@@ -64,9 +67,15 @@ const trabalho = [
   { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
   { title: "SLAs", url: "/app/slas", icon: Shield },
   { title: "Mídias (previews)", url: "/app/midias", icon: ImageIcon },
-  { title: "Calendário social", url: "/app/social", icon: CalendarRange },
+];
+
+const social = [
+  { title: "Calendário editorial", url: "/app/social", icon: CalendarRange },
+  { title: "Pipeline de produção", url: "/app/social/pipeline", icon: Workflow },
+  { title: "Analytics", url: "/app/social/analytics", icon: PieChart },
   { title: "Campanhas", url: "/app/campanhas", icon: Megaphone },
   { title: "Biblioteca de mídia", url: "/app/biblioteca", icon: Library },
+  { title: "Legendas & hashtags", url: "/app/snippets", icon: FileText },
 ];
 
 const insights = [
@@ -133,6 +142,7 @@ export function AppSidebar() {
         {renderGroup("Principal", principal)}
         {renderGroup("Visões", visoes)}
         {renderGroup("Trabalho", trabalho)}
+        {renderGroup("Mídias sociais", social)}
         {renderGroup("Insights", insights)}
         {renderGroup("Sistema", sistema)}
       </SidebarContent>
@@ -140,7 +150,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 25/43
+            v1.0 · 26/43
           </p>
         )}
       </SidebarFooter>
