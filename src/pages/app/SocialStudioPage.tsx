@@ -58,9 +58,13 @@ export default function SocialStudioPage() {
 
   const previewContent = {
     kind: "ig_feed" as const,
-    text: caption,
-    accountName: "@suamarca",
-    image: imageUrl ?? undefined,
+    caption,
+    imageUrl: imageUrl ?? null,
+    headline: caption.split("\n")[0]?.slice(0, 80) ?? "",
+    subject: caption.split("\n")[0]?.slice(0, 80) ?? "",
+    authorName: "Sua marca",
+    authorHandle: "@suamarca",
+    brandName: "Sua marca",
   };
 
   return (
