@@ -42,7 +42,7 @@ export function useOnboardingChecklist() {
     // Detect completion via DB
     const [{ count: squadCount }, { count: memberCount }, { count: integCount }, { count: taskCount }, { count: postCount }] = await Promise.all([
       supabase.from("squads").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-      supabase.from("squad_members").select("user_id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+      supabase.from("squad_members").select("user_id", { count: "exact", head: true }),
       supabase.from("social_integrations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
       supabase.from("tasks").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
       supabase.from("tasks").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).not("publish_state", "is", null),
@@ -110,7 +110,7 @@ export function useOnboardingChecklist() {
     if (!user) return;
     const { data: profile } = await supabase.from("profiles").select("preferences").eq("id", user.id).maybeSingle();
     const prefs = (profile?.preferences as Record<string, any> | null) ?? {};
-    await supabase.from("profiles").update({ preferences: { ...prefs, onboarding_v2: next } }).eq("id", user.id);
+    await supabase.from("profiles").update({ preferences: { ...prefs, onboarding_v2: { ...next } } as any }).eq("id", user.id);
   }, [user]);
 
   const dismiss = useCallback(() => persist({ ...state, dismissed: true }), [state, persist]);
