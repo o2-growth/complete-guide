@@ -25,7 +25,7 @@ Executar UM passo por turno. Não pular. Não amontoar.
 
 ## Fase 2 — Ekyte (gestão avançada de equipe)
 17. ✅ Skills Matrix (catálogo + auto-avaliação 1-5 + endossos + matriz visual)
-18. Capacity planning detalhado (horas/semana, férias, alocação)
+18. ✅ Capacity planning detalhado (horas/semana, dias úteis, ausências, projeção 30d)
 19. Página real de Squads (membros, capacity, performance)
 20. Página real de Projetos (hierarquia, múltiplas visões)
 21. Aprovações multi-etapas com workflow visual
