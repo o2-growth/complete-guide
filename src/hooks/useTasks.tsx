@@ -225,9 +225,10 @@ export function useMoveTaskStatus() {
       statusId: string;
       isDone: boolean;
     }) => {
-      const patch: Record<string, unknown> = { status_id: statusId };
-      patch.done_at = isDone ? new Date().toISOString() : null;
-      const { error } = await supabase.from("tasks").update(patch).eq("id", taskId);
+      const { error } = await supabase
+        .from("tasks")
+        .update({ status_id: statusId, done_at: isDone ? new Date().toISOString() : null })
+        .eq("id", taskId);
       if (error) throw error;
     },
     onSuccess: () => {
