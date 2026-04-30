@@ -19,6 +19,9 @@ import CalendarPage from "./pages/app/CalendarPage.tsx";
 import TaskTypesPage from "./pages/app/TaskTypesPage.tsx";
 import FocusPage from "./pages/app/FocusPage.tsx";
 import WorkloadPage from "./pages/app/WorkloadPage.tsx";
+import DemandsPage from "./pages/app/DemandsPage.tsx";
+import RequestPage from "./pages/public/RequestPage.tsx";
+import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -34,6 +37,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/solicitar/:slug" element={<RequestPage />} />
+              <Route path="/aprovar/:token" element={<ApprovePage />} />
               <Route
                 path="/onboarding"
                 element={
@@ -117,10 +122,7 @@ const App = () => (
                   path="squads"
                   element={<Placeholder title="Squads" description="IA & Automação, Marketing e Expansão — membros, papéis e workload." step={11} />}
                 />
-                <Route
-                  path="demandas"
-                  element={<Placeholder title="Portal de demandas" description="Formulários públicos para solicitantes externos sem licença." step={12} />}
-                />
+                <Route path="demandas" element={<DemandsPage />} />
                 <Route path="workload" element={<WorkloadPage />} />
                 <Route
                   path="genio"
