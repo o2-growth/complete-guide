@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Helmet as RawHelmet } from "react-router-dom"; // not used; placeholder removed below
 import { CheckCircle2, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoOxy from "@/assets/logo-oxy.png";
-
-// (removendo import errado de Helmet acima)
-void RawHelmet;
 
 interface FormSchemaField {
   name: string;
