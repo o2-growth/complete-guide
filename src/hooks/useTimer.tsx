@@ -75,8 +75,6 @@ export function useTimerSync() {
             return;
           }
           if (row.ended_at) {
-            setTimer((prev) => (prev?.id === row.id ? null : prev) as never);
-            // simplifica: apenas força refetch
             useTimerStore.setState((s) => (s.timer?.id === row.id ? { timer: null } : s));
           } else {
             setTimer({
