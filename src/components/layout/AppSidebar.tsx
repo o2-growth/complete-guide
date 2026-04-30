@@ -32,6 +32,8 @@ import {
   Wand2,
   Brain,
   Plug,
+  Inbox as InboxIcon,
+  Clock,
 } from "lucide-react";
 import {
   Sidebar,
@@ -74,6 +76,8 @@ const trabalho = [
 
 const social = [
   { title: "Calendário editorial", url: "/app/social", icon: CalendarRange },
+  { title: "Inbox social", url: "/app/social/inbox", icon: InboxIcon },
+  { title: "Cadência", url: "/app/social/cadencia", icon: Clock },
   { title: "Studio criativo", url: "/app/social/studio", icon: Wand2 },
   { title: "Pipeline de produção", url: "/app/social/pipeline", icon: Workflow },
   { title: "Inteligência IA", url: "/app/social/intel", icon: Brain },
@@ -156,7 +160,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 27/43
+            v1.0 · 28/43
           </p>
         )}
       </SidebarFooter>

@@ -1192,6 +1192,45 @@ export type Database = {
         }
         Relationships: []
       }
+      posting_cadence: {
+        Row: {
+          channel: Database["public"]["Enums"]["social_channel"]
+          created_at: string
+          dow: number
+          enabled: boolean
+          hour: number
+          id: string
+          notes: string | null
+          target_posts: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          dow: number
+          enabled?: boolean
+          hour: number
+          id?: string
+          notes?: string | null
+          target_posts?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          dow?: number
+          enabled?: boolean
+          hour?: number
+          id?: string
+          notes?: string | null
+          target_posts?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1790,6 +1829,102 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      social_inbox_items: {
+        Row: {
+          ai_suggested_reply: string | null
+          ai_summary: string | null
+          author_avatar: string | null
+          author_handle: string | null
+          author_name: string | null
+          channel: Database["public"]["Enums"]["social_channel"]
+          created_at: string
+          external_id: string | null
+          external_url: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          integration_id: string | null
+          kind: Database["public"]["Enums"]["inbox_item_kind"]
+          message: string
+          metadata: Json
+          parent_post_external_id: string | null
+          received_at: string
+          reply_text: string | null
+          sentiment: Database["public"]["Enums"]["inbox_sentiment"] | null
+          status: Database["public"]["Enums"]["inbox_item_status"]
+          task_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_suggested_reply?: string | null
+          ai_summary?: string | null
+          author_avatar?: string | null
+          author_handle?: string | null
+          author_name?: string | null
+          channel: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          external_id?: string | null
+          external_url?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          integration_id?: string | null
+          kind?: Database["public"]["Enums"]["inbox_item_kind"]
+          message: string
+          metadata?: Json
+          parent_post_external_id?: string | null
+          received_at?: string
+          reply_text?: string | null
+          sentiment?: Database["public"]["Enums"]["inbox_sentiment"] | null
+          status?: Database["public"]["Enums"]["inbox_item_status"]
+          task_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_suggested_reply?: string | null
+          ai_summary?: string | null
+          author_avatar?: string | null
+          author_handle?: string | null
+          author_name?: string | null
+          channel?: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          external_id?: string | null
+          external_url?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          integration_id?: string | null
+          kind?: Database["public"]["Enums"]["inbox_item_kind"]
+          message?: string
+          metadata?: Json
+          parent_post_external_id?: string | null
+          received_at?: string
+          reply_text?: string | null
+          sentiment?: Database["public"]["Enums"]["inbox_sentiment"] | null
+          status?: Database["public"]["Enums"]["inbox_item_status"]
+          task_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_inbox_items_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "social_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_inbox_items_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_integrations: {
         Row: {
@@ -2644,6 +2779,7 @@ export type Database = {
         Args: { _notes?: string; _task_id: string; _workflow_id: string }
         Returns: string
       }
+      campaign_report: { Args: { _campaign_id: string }; Returns: Json }
       capacity_for_user: {
         Args: {
           _from: string
@@ -2658,6 +2794,10 @@ export type Database = {
         }[]
       }
       check_ai_rate_limit: { Args: { _user_id: string }; Returns: number }
+      convert_inbox_item_to_task: {
+        Args: { _assignee_id?: string; _inbox_id: string; _project_id?: string }
+        Returns: string
+      }
       decide_social_approval: {
         Args: {
           _comment: string
@@ -2756,6 +2896,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      inbox_summary: { Args: { _tenant: string }; Returns: Json }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
       resolve_task_sla: {
         Args: { p_task_id: string }
@@ -2909,6 +3050,15 @@ export type Database = {
         | "cancelled"
       approver_kind: "user" | "tenant_role"
       decision_kind: "approved" | "rejected"
+      inbox_item_kind: "dm" | "comment" | "mention" | "review" | "reply"
+      inbox_item_status:
+        | "new"
+        | "reading"
+        | "replied"
+        | "ignored"
+        | "task_created"
+        | "archived"
+      inbox_sentiment: "positive" | "neutral" | "negative" | "question"
       media_kind: "image" | "video" | "document" | "audio" | "other"
       notification_channel: "in_app" | "email" | "push"
       project_role: "owner" | "editor" | "commenter" | "viewer"
@@ -3082,6 +3232,16 @@ export const Constants = {
       ],
       approver_kind: ["user", "tenant_role"],
       decision_kind: ["approved", "rejected"],
+      inbox_item_kind: ["dm", "comment", "mention", "review", "reply"],
+      inbox_item_status: [
+        "new",
+        "reading",
+        "replied",
+        "ignored",
+        "task_created",
+        "archived",
+      ],
+      inbox_sentiment: ["positive", "neutral", "negative", "question"],
       media_kind: ["image", "video", "document", "audio", "other"],
       notification_channel: ["in_app", "email", "push"],
       project_role: ["owner", "editor", "commenter", "viewer"],
