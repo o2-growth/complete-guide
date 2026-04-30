@@ -123,7 +123,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v0.4 · Passo 4/16
+            v1.0 · 16/16 ✓
           </p>
         )}
       </SidebarFooter>

@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { I18nProvider } from "@/hooks/useI18n";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
 import Index from "./pages/Index.tsx";
@@ -23,6 +24,7 @@ import DemandsPage from "./pages/app/DemandsPage.tsx";
 import MediaPage from "./pages/app/MediaPage.tsx";
 import GeniusPage from "./pages/app/GeniusPage.tsx";
 import DashboardPage from "./pages/app/DashboardPage.tsx";
+import SettingsPage from "./pages/app/SettingsPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
@@ -32,6 +34,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
+      <I18nProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -132,7 +135,7 @@ const App = () => (
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route
                   path="configuracoes"
-                  element={<Placeholder title="Configurações" description="Tipos de tarefa, integrações, equipe, preferências." step={9} />}
+                  element={<SettingsPage />}
                 />
                 <Route path="configuracoes/tipos" element={<TaskTypesPage />} />
               </Route>
@@ -142,6 +145,7 @@ const App = () => (
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
+      </I18nProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
