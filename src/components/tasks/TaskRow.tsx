@@ -29,7 +29,7 @@ const PRIO_LABEL: Record<string, string> = {
   none: "",
 };
 
-export function TaskRow({ task }: { task: TTask }) {
+export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) => void }) {
   const toggle = useToggleTaskDone();
   const remove = useDeleteTask();
   const done = !!task.done_at;
@@ -43,13 +43,21 @@ export function TaskRow({ task }: { task: TTask }) {
       className={cn(
         "group flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30",
         done && "opacity-60",
+        onOpen && "cursor-pointer",
       )}
+      onClick={(e) => {
+        if (!onOpen) return;
+        const target = e.target as HTMLElement;
+        if (target.closest("[data-no-open]")) return;
+        onOpen(task.id);
+      }}
     >
       <Checkbox
         checked={done}
         onCheckedChange={() => toggle.mutate(task)}
         disabled={toggle.isPending}
         className="mt-0.5"
+        data-no-open
       />
 
       <div className="min-w-0 flex-1">
@@ -108,11 +116,12 @@ export function TaskRow({ task }: { task: TTask }) {
             variant="ghost"
             size="icon"
             className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+            data-no-open
           >
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" data-no-open>
           <DropdownMenuItem
             onClick={() => remove.mutate(task.id)}
             className="text-destructive focus:text-destructive"
