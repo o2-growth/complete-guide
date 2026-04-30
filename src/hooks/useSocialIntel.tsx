@@ -53,7 +53,7 @@ export function useUpsertIntegration() {
         scopes: input.scopes ?? [],
         metadata: input.metadata ?? {},
       };
-      const { error } = await supabase.from("social_integrations").insert(payload);
+      const { error } = await supabase.from("social_integrations").insert([payload]);
       if (error) throw error;
     },
     onSuccess: () => {
