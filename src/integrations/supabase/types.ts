@@ -69,6 +69,88 @@ export type Database = {
           },
         ]
       }
+      ad_boosts: {
+        Row: {
+          budget_cents: number
+          campaign_id: string | null
+          channel: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          external_id: string | null
+          id: string
+          notes: string | null
+          objective: string
+          revenue_cents: number
+          spent_cents: number
+          starts_at: string
+          status: string
+          task_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          budget_cents?: number
+          campaign_id?: string | null
+          channel: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          external_id?: string | null
+          id?: string
+          notes?: string | null
+          objective?: string
+          revenue_cents?: number
+          spent_cents?: number
+          starts_at?: string
+          status?: string
+          task_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          budget_cents?: number
+          campaign_id?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          external_id?: string | null
+          id?: string
+          notes?: string | null
+          objective?: string
+          revenue_cents?: number
+          spent_cents?: number
+          starts_at?: string
+          status?: string
+          task_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_boosts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_boosts_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_boosts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_interactions: {
         Row: {
           cost_cents: number | null
@@ -445,6 +527,134 @@ export type Database = {
           },
         ]
       }
+      bio_links: {
+        Row: {
+          active: boolean
+          clicks: number
+          created_at: string
+          ends_at: string | null
+          icon: string | null
+          id: string
+          label: string
+          page_id: string
+          position: number
+          starts_at: string | null
+          tenant_id: string
+          updated_at: string
+          url: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          active?: boolean
+          clicks?: number
+          created_at?: string
+          ends_at?: string | null
+          icon?: string | null
+          id?: string
+          label: string
+          page_id: string
+          position?: number
+          starts_at?: string | null
+          tenant_id: string
+          updated_at?: string
+          url: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          active?: boolean
+          clicks?: number
+          created_at?: string
+          ends_at?: string | null
+          icon?: string | null
+          id?: string
+          label?: string
+          page_id?: string
+          position?: number
+          starts_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+          url?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_links_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "bio_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bio_links_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bio_pages: {
+        Row: {
+          active: boolean
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          slug: string
+          tenant_id: string
+          theme: Json
+          title: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          active?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          slug: string
+          tenant_id: string
+          theme?: Json
+          title: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          active?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          slug?: string
+          tenant_id?: string
+          theme?: Json
+          title?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caption_snippets: {
         Row: {
           body: string
@@ -690,6 +900,159 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_contracts: {
+        Row: {
+          briefing: string | null
+          campaign_id: string | null
+          channels: string[] | null
+          contract_url: string | null
+          created_at: string
+          created_by: string | null
+          creator_id: string
+          currency: string | null
+          exclusivity: boolean | null
+          fee_cents: number | null
+          id: string
+          rights_end: string | null
+          rights_start: string | null
+          scope: string | null
+          signed_at: string | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          briefing?: string | null
+          campaign_id?: string | null
+          channels?: string[] | null
+          contract_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          creator_id: string
+          currency?: string | null
+          exclusivity?: boolean | null
+          fee_cents?: number | null
+          id?: string
+          rights_end?: string | null
+          rights_start?: string | null
+          scope?: string | null
+          signed_at?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          briefing?: string | null
+          campaign_id?: string | null
+          channels?: string[] | null
+          contract_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string
+          currency?: string | null
+          exclusivity?: boolean | null
+          fee_cents?: number | null
+          id?: string
+          rights_end?: string | null
+          rights_start?: string | null
+          scope?: string | null
+          signed_at?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_contracts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_contracts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_contracts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creators: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          engagement_rate: number | null
+          followers_count: number | null
+          full_name: string
+          handle: string | null
+          id: string
+          niche: string | null
+          notes: string | null
+          phone: string | null
+          status: string
+          tags: string[] | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          followers_count?: number | null
+          full_name: string
+          handle?: string | null
+          id?: string
+          niche?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tags?: string[] | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          followers_count?: number | null
+          full_name?: string
+          handle?: string | null
+          id?: string
+          niche?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tags?: string[] | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creators_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demand_forms: {
         Row: {
           active: boolean
@@ -927,6 +1290,92 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      link_clicks: {
+        Row: {
+          bio_link_id: string | null
+          campaign_id: string | null
+          channel: string | null
+          clicked_at: string
+          country: string | null
+          device: string | null
+          id: string
+          referer: string | null
+          task_id: string | null
+          tenant_id: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          bio_link_id?: string | null
+          campaign_id?: string | null
+          channel?: string | null
+          clicked_at?: string
+          country?: string | null
+          device?: string | null
+          id?: string
+          referer?: string | null
+          task_id?: string | null
+          tenant_id: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          bio_link_id?: string | null
+          campaign_id?: string | null
+          channel?: string | null
+          clicked_at?: string
+          country?: string | null
+          device?: string | null
+          id?: string
+          referer?: string | null
+          task_id?: string | null
+          tenant_id?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_clicks_bio_link_id_fkey"
+            columns: ["bio_link_id"]
+            isOneToOne: false
+            referencedRelation: "bio_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_clicks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_clicks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_clicks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       media_assets: {
         Row: {
@@ -2652,6 +3101,96 @@ export type Database = {
         }
         Relationships: []
       }
+      ugc_assets: {
+        Row: {
+          asset_id: string | null
+          caption: string | null
+          created_at: string
+          created_by: string | null
+          creator_id: string | null
+          id: string
+          inbox_item_id: string | null
+          notes: string | null
+          reposted_task_id: string | null
+          rights_ok: boolean | null
+          rights_until: string | null
+          source_url: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          id?: string
+          inbox_item_id?: string | null
+          notes?: string | null
+          reposted_task_id?: string | null
+          rights_ok?: boolean | null
+          rights_until?: string | null
+          source_url?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          id?: string
+          inbox_item_id?: string | null
+          notes?: string | null
+          reposted_task_id?: string | null
+          rights_ok?: boolean | null
+          rights_until?: string | null
+          source_url?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_assets_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_assets_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_assets_inbox_item_id_fkey"
+            columns: ["inbox_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_inbox_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_assets_reposted_task_id_fkey"
+            columns: ["reposted_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_assets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_capacity: {
         Row: {
           created_at: string
@@ -2780,6 +3319,7 @@ export type Database = {
         Returns: string
       }
       campaign_report: { Args: { _campaign_id: string }; Returns: Json }
+      campaign_roas: { Args: { _campaign_id: string }; Returns: Json }
       capacity_for_user: {
         Args: {
           _from: string
@@ -2898,6 +3438,25 @@ export type Database = {
       }
       inbox_summary: { Args: { _tenant: string }; Returns: Json }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
+      recommend_boosts: {
+        Args: { _limit?: number; _tenant: string }
+        Returns: {
+          channel: string
+          engagement: number
+          reach: number
+          score: number
+          task_id: string
+          title: string
+        }[]
+      }
+      repost_ugc: {
+        Args: {
+          _channel: Database["public"]["Enums"]["social_channel"]
+          _project_id: string
+          _ugc_id: string
+        }
+        Returns: string
+      }
       resolve_task_sla: {
         Args: { p_task_id: string }
         Returns: {
