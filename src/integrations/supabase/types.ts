@@ -1184,6 +1184,154 @@ export type Database = {
           },
         ]
       }
+      dim_date: {
+        Row: {
+          d: string
+          day: number
+          dow: number
+          is_weekend: boolean
+          month: number
+          quarter: number
+          week: number
+          year: number
+        }
+        Insert: {
+          d: string
+          day: number
+          dow: number
+          is_weekend: boolean
+          month: number
+          quarter: number
+          week: number
+          year: number
+        }
+        Update: {
+          d?: string
+          day?: number
+          dow?: number
+          is_weekend?: boolean
+          month?: number
+          quarter?: number
+          week?: number
+          year?: number
+        }
+        Relationships: []
+      }
+      fact_posts_daily: {
+        Row: {
+          campaign_id: string | null
+          channel: string | null
+          clicks: number
+          comments: number
+          d: string
+          id: string
+          impressions: number
+          likes: number
+          posts_published: number
+          reach: number
+          refreshed_at: string
+          saves: number
+          shares: number
+          tenant_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          channel?: string | null
+          clicks?: number
+          comments?: number
+          d: string
+          id?: string
+          impressions?: number
+          likes?: number
+          posts_published?: number
+          reach?: number
+          refreshed_at?: string
+          saves?: number
+          shares?: number
+          tenant_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          channel?: string | null
+          clicks?: number
+          comments?: number
+          d?: string
+          id?: string
+          impressions?: number
+          likes?: number
+          posts_published?: number
+          reach?: number
+          refreshed_at?: string
+          saves?: number
+          shares?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fact_posts_daily_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fact_tasks_daily: {
+        Row: {
+          assignee_id: string | null
+          created_count: number
+          d: string
+          done_count: number
+          estimate_minutes: number
+          id: string
+          overdue_count: number
+          project_id: string | null
+          refreshed_at: string
+          spent_minutes: number
+          squad_id: string | null
+          tenant_id: string
+          type_id: string | null
+        }
+        Insert: {
+          assignee_id?: string | null
+          created_count?: number
+          d: string
+          done_count?: number
+          estimate_minutes?: number
+          id?: string
+          overdue_count?: number
+          project_id?: string | null
+          refreshed_at?: string
+          spent_minutes?: number
+          squad_id?: string | null
+          tenant_id: string
+          type_id?: string | null
+        }
+        Update: {
+          assignee_id?: string | null
+          created_count?: number
+          d?: string
+          done_count?: number
+          estimate_minutes?: number
+          id?: string
+          overdue_count?: number
+          project_id?: string | null
+          refreshed_at?: string
+          spent_minutes?: number
+          squad_id?: string | null
+          tenant_id?: string
+          type_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fact_tasks_daily_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       habit_checkins: {
         Row: {
           checkin_date: string
@@ -1441,6 +1589,71 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "social_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metric_anomalies: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          delta_pct: number
+          detected_at: string
+          dimension_key: string | null
+          dimension_value: string | null
+          expected: number
+          explanation: string | null
+          id: string
+          metric: string
+          observed: number
+          severity: string
+          source: string
+          status: string
+          suggested_action: string | null
+          tenant_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          delta_pct: number
+          detected_at?: string
+          dimension_key?: string | null
+          dimension_value?: string | null
+          expected: number
+          explanation?: string | null
+          id?: string
+          metric: string
+          observed: number
+          severity: string
+          source: string
+          status?: string
+          suggested_action?: string | null
+          tenant_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          delta_pct?: number
+          detected_at?: string
+          dimension_key?: string | null
+          dimension_value?: string | null
+          expected?: number
+          explanation?: string | null
+          id?: string
+          metric?: string
+          observed?: number
+          severity?: string
+          source?: string
+          status?: string
+          suggested_action?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metric_anomalies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -1962,6 +2175,57 @@ export type Database = {
           },
         ]
       }
+      report_schedules: {
+        Row: {
+          active: boolean
+          cadence: string
+          created_at: string
+          id: string
+          last_run_at: string | null
+          next_run_at: string | null
+          recipients: string[]
+          report_id: string
+          tenant_id: string
+        }
+        Insert: {
+          active?: boolean
+          cadence: string
+          created_at?: string
+          id?: string
+          last_run_at?: string | null
+          next_run_at?: string | null
+          recipients?: string[]
+          report_id: string
+          tenant_id: string
+        }
+        Update: {
+          active?: boolean
+          cadence?: string
+          created_at?: string
+          id?: string
+          last_run_at?: string | null
+          next_run_at?: string | null
+          recipients?: string[]
+          report_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_schedules_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "saved_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_schedules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_filters: {
         Row: {
           created_at: string
@@ -1999,6 +2263,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "saved_filters_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_reports: {
+        Row: {
+          chart_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          dimensions: Json
+          filters: Json
+          id: string
+          is_favorite: boolean
+          metrics: Json
+          name: string
+          source: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          chart_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          dimensions?: Json
+          filters?: Json
+          id?: string
+          is_favorite?: boolean
+          metrics?: Json
+          name: string
+          source: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          chart_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          dimensions?: Json
+          filters?: Json
+          id?: string
+          is_favorite?: boolean
+          metrics?: Json
+          name?: string
+          source?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_reports_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -3369,6 +3689,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      detect_anomalies: { Args: { _tenant: string }; Returns: number }
       endorse_user_skill: {
         Args: { _user_skill_id: string }
         Returns: {
@@ -3449,6 +3770,7 @@ export type Database = {
           title: string
         }[]
       }
+      refresh_warehouse: { Args: { _tenant: string }; Returns: Json }
       repost_ugc: {
         Args: {
           _channel: Database["public"]["Enums"]["social_channel"]
@@ -3481,6 +3803,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      run_report: { Args: { _report_id: string }; Returns: Json }
       save_project_as_template: {
         Args: { p_description?: string; p_name: string; p_project_id: string }
         Returns: string
