@@ -51,9 +51,9 @@ export function useUpsertIntegration() {
         account_name: input.account_name,
         status: input.status ?? "mock",
         scopes: input.scopes ?? [],
-        metadata: input.metadata ?? {},
+        metadata: (input.metadata ?? {}) as never,
       };
-      const { error } = await supabase.from("social_integrations").insert([payload]);
+      const { error } = await supabase.from("social_integrations").insert(payload as never);
       if (error) throw error;
     },
     onSuccess: () => {
