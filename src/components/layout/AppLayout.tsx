@@ -4,9 +4,11 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Topbar } from "./Topbar";
 import { CommandPalette } from "./CommandPalette";
+import { useTimerSync } from "@/hooks/useTimer";
 
 export default function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
+  useTimerSync();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
