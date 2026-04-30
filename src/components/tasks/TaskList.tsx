@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Loader2, Inbox } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { TaskRow } from "./TaskRow";
+import { TaskDetailSheet } from "./TaskDetailSheet";
 import { useTasks, SmartList } from "@/hooks/useTasks";
 
 interface TaskListProps {
@@ -11,6 +13,7 @@ interface TaskListProps {
 
 export function TaskList({ list, emptyTitle = "Nada por aqui", emptyDescription = "Quando houver tarefas, elas aparecem aqui." }: TaskListProps) {
   const { data, isLoading, error } = useTasks(list);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -43,10 +46,13 @@ export function TaskList({ list, emptyTitle = "Nada por aqui", emptyDescription 
   }
 
   return (
-    <div className="space-y-2">
-      {data.map((task) => (
-        <TaskRow key={task.id} task={task} />
-      ))}
-    </div>
+    <>
+      <div className="space-y-2">
+        {data.map((task) => (
+          <TaskRow key={task.id} task={task} onOpen={setOpenId} />
+        ))}
+      </div>
+      <TaskDetailSheet taskId={openId} onOpenChange={(o) => !o && setOpenId(null)} />
+    </>
   );
 }
