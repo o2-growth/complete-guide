@@ -54,6 +54,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
+import { PreviewEditor } from "@/components/previews/PreviewEditor";
 
 const PRIORITIES = [
   { value: "none", label: "Nenhuma" },
@@ -270,6 +271,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <TabsTrigger value="details">Descrição</TabsTrigger>
             <TabsTrigger value="checklist">Checklist</TabsTrigger>
             <TabsTrigger value="subtasks">Subtarefas</TabsTrigger>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="attachments">Anexos</TabsTrigger>
             <TabsTrigger value="comments">Comentários</TabsTrigger>
           </TabsList>
@@ -292,6 +294,15 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
 
           <TabsContent value="subtasks" className="mt-4">
             <SubtasksPanel task={task} />
+          </TabsContent>
+
+          <TabsContent value="preview" className="mt-4">
+            <PreviewEditor
+              customFields={task.custom_fields ?? null}
+              onSave={(merged) =>
+                update.mutate({ id: task.id, patch: { custom_fields: merged } as never })
+              }
+            />
           </TabsContent>
 
           <TabsContent value="attachments" className="mt-4">
