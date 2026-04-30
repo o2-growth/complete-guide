@@ -28,6 +28,8 @@ import SettingsPage from "./pages/app/SettingsPage.tsx";
 import SkillsPage from "./pages/app/SkillsPage.tsx";
 import CapacityPage from "./pages/app/CapacityPage.tsx";
 import SquadsPage from "./pages/app/SquadsPage.tsx";
+import ProjectsPage from "./pages/app/ProjectsPage.tsx";
+import ProjectDetailPage from "./pages/app/ProjectDetailPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
@@ -123,10 +125,8 @@ const App = () => (
                   element={<KanbanPage />}
                 />
                 <Route path="foco" element={<FocusPage />} />
-                <Route
-                  path="projetos"
-                  element={<Placeholder title="Projetos" description="Hierarquia Squad → Projeto → Tarefas, múltiplas visões." step={7} />}
-                />
+                <Route path="projetos" element={<ProjectsPage />} />
+                <Route path="projetos/:id" element={<ProjectDetailPage />} />
                 <Route path="squads" element={<SquadsPage />} />
                 <Route path="demandas" element={<DemandsPage />} />
                 <Route path="workload" element={<WorkloadPage />} />
