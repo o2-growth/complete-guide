@@ -24,6 +24,7 @@ export interface TaskRow {
   done_at: string | null;
   created_at: string;
   updated_at: string;
+  custom_fields?: Record<string, unknown> | null;
 }
 
 export type SmartList = "inbox" | "today" | "next7" | "overdue" | "assigned";
