@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   UserCheck,
   Tag,
+  Timer,
 } from "lucide-react";
 import {
   Sidebar,
@@ -53,6 +54,7 @@ const trabalho = [
 
 const insights = [
   { title: "Workload", url: "/app/workload", icon: BarChart3 },
+  { title: "Foco", url: "/app/foco", icon: Timer },
   { title: "Gênio Growth", url: "/app/genio", icon: Sparkles },
 ];
 

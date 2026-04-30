@@ -15,7 +15,7 @@ Executar UM passo por turno. Não pular. Não amontoar.
 7. ✅ Kanban view com dnd-kit + auto-assign por status — Passo atual concluído
 8. ✅ Calendário (mês/semana/dia/agenda) com drag para reagendar — Passo atual concluído
 9. ✅ Tipos de tarefa (seed dos 9) + UI /settings/task-types
-10. Time tracking (timer global Zustand + Realtime sync) + Pomodoro
+10. ✅ Time tracking (timer global Zustand + Realtime sync) + Pomodoro
 11. Workload heatmap + matriz de alocação + drag para realocar
 12. Formulários públicos /solicitar/:slug + /aprovar/:token + Edge process-demand
 13. Templates de preview (ig_feed/story/reel/linkedin/email) + Grid IG 3×3

@@ -17,6 +17,7 @@ import SmartListPage from "./pages/app/SmartListPage.tsx";
 import KanbanPage from "./pages/app/KanbanPage.tsx";
 import CalendarPage from "./pages/app/CalendarPage.tsx";
 import TaskTypesPage from "./pages/app/TaskTypesPage.tsx";
+import FocusPage from "./pages/app/FocusPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -106,6 +107,7 @@ const App = () => (
                   path="kanban"
                   element={<KanbanPage />}
                 />
+                <Route path="foco" element={<FocusPage />} />
                 <Route
                   path="projetos"
                   element={<Placeholder title="Projetos" description="Hierarquia Squad → Projeto → Tarefas, múltiplas visões." step={7} />}
