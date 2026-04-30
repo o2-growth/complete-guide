@@ -27,6 +27,7 @@ import DashboardPage from "./pages/app/DashboardPage.tsx";
 import SettingsPage from "./pages/app/SettingsPage.tsx";
 import SkillsPage from "./pages/app/SkillsPage.tsx";
 import CapacityPage from "./pages/app/CapacityPage.tsx";
+import SquadsPage from "./pages/app/SquadsPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
@@ -126,10 +127,7 @@ const App = () => (
                   path="projetos"
                   element={<Placeholder title="Projetos" description="Hierarquia Squad → Projeto → Tarefas, múltiplas visões." step={7} />}
                 />
-                <Route
-                  path="squads"
-                  element={<Placeholder title="Squads" description="IA & Automação, Marketing e Expansão — membros, papéis e workload." step={11} />}
-                />
+                <Route path="squads" element={<SquadsPage />} />
                 <Route path="demandas" element={<DemandsPage />} />
                 <Route path="workload" element={<WorkloadPage />} />
                 <Route path="midias" element={<MediaPage />} />
