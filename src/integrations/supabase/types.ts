@@ -1525,6 +1525,87 @@ export type Database = {
           },
         ]
       }
+      time_off: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          end_date: string
+          id: string
+          kind: Database["public"]["Enums"]["time_off_kind"]
+          reason: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["time_off_status"]
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          end_date: string
+          id?: string
+          kind?: Database["public"]["Enums"]["time_off_kind"]
+          reason?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["time_off_status"]
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          end_date?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["time_off_kind"]
+          reason?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["time_off_status"]
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_capacity: {
+        Row: {
+          created_at: string
+          daily_hours: number
+          hours_per_week: number
+          id: string
+          notes: string | null
+          tenant_id: string
+          updated_at: string
+          user_id: string
+          workdays: number[]
+        }
+        Insert: {
+          created_at?: string
+          daily_hours?: number
+          hours_per_week?: number
+          id?: string
+          notes?: string | null
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+          workdays?: number[]
+        }
+        Update: {
+          created_at?: string
+          daily_hours?: number
+          hours_per_week?: number
+          id?: string
+          notes?: string | null
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+          workdays?: number[]
+        }
+        Relationships: []
+      }
       user_skills: {
         Row: {
           created_at: string
@@ -1595,6 +1676,19 @@ export type Database = {
       }
     }
     Functions: {
+      capacity_for_user: {
+        Args: {
+          _from: string
+          _tenant_id: string
+          _to: string
+          _user_id: string
+        }
+        Returns: {
+          available_hours: number
+          off_days: number
+          workdays_total: number
+        }[]
+      }
       check_ai_rate_limit: { Args: { _user_id: string }; Returns: number }
       endorse_user_skill: {
         Args: { _user_skill_id: string }
@@ -1764,6 +1858,8 @@ export type Database = {
       squad_role: "lead" | "specialist"
       task_priority: "none" | "low" | "medium" | "high" | "urgent"
       tenant_role: "admin" | "manager" | "specialist" | "requester"
+      time_off_kind: "vacation" | "sick" | "holiday" | "personal" | "other"
+      time_off_status: "pending" | "approved" | "rejected" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1907,6 +2003,8 @@ export const Constants = {
       squad_role: ["lead", "specialist"],
       task_priority: ["none", "low", "medium", "high", "urgent"],
       tenant_role: ["admin", "manager", "specialist", "requester"],
+      time_off_kind: ["vacation", "sick", "holiday", "personal", "other"],
+      time_off_status: ["pending", "approved", "rejected", "cancelled"],
     },
   },
 } as const
