@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   Award,
   CalendarRange,
+  GitBranch,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,6 +55,7 @@ const trabalho = [
   { title: "Projetos", url: "/app/projetos", icon: FolderKanban },
   { title: "Squads", url: "/app/squads", icon: Users },
   { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
+  { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
   { title: "Mídias", url: "/app/midias", icon: ImageIcon },
 ];
 
@@ -127,7 +129,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 20/43
+            v1.0 · 21/43
           </p>
         )}
       </SidebarFooter>
