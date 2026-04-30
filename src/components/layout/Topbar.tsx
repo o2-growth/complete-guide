@@ -17,6 +17,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { TimerIndicator } from "@/components/timer/TimerIndicator";
+import { useUnreadCount } from "@/hooks/useNotifications";
+import { Badge } from "@/components/ui/badge";
 
 interface TopbarProps {
   onOpenCommand: () => void;
@@ -27,6 +29,7 @@ export function Topbar({ onOpenCommand }: TopbarProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>("");
+  const unread = useUnreadCount();
 
   useEffect(() => {
     if (!user) return;
@@ -70,8 +73,19 @@ export function Topbar({ onOpenCommand }: TopbarProps) {
 
       <div className="ml-auto flex items-center gap-1">
         <TimerIndicator />
-        <Button variant="ghost" size="icon" aria-label="Notificações">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Notificações"
+          onClick={() => navigate("/app/notificacoes")}
+          className="relative"
+        >
           <Bell className="h-4 w-4" />
+          {unread > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full px-1 text-[10px]" variant="destructive">
+              {unread > 9 ? "9+" : unread}
+            </Badge>
+          )}
         </Button>
         <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Alternar tema">
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

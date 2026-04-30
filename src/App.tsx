@@ -57,6 +57,9 @@ import ReportBuilderPage from "./pages/app/ReportBuilderPage.tsx";
 import AnomaliesPage from "./pages/app/AnomaliesPage.tsx";
 import ForecastPage from "./pages/app/ForecastPage.tsx";
 import OKRsPage from "./pages/app/OKRsPage.tsx";
+import NotificationsPage from "./pages/app/NotificationsPage.tsx";
+import AutomationsPage from "./pages/app/AutomationsPage.tsx";
+import ExecutivePage from "./pages/app/ExecutivePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -183,6 +186,9 @@ const App = () => (
                 <Route path="anomalias" element={<AnomaliesPage />} />
                 <Route path="forecast" element={<ForecastPage />} />
                 <Route path="okrs" element={<OKRsPage />} />
+                <Route path="notificacoes" element={<NotificationsPage />} />
+                <Route path="automacoes" element={<AutomationsPage />} />
+                <Route path="exec" element={<ExecutivePage />} />
                 <Route path="skills" element={<SkillsPage />} />
                 <Route path="capacity" element={<CapacityPage />} />
                 <Route
