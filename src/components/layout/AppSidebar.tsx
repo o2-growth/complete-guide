@@ -14,6 +14,7 @@ import {
   CalendarClock,
   AlertTriangle,
   UserCheck,
+  Tag,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,7 +56,10 @@ const insights = [
   { title: "Gênio Growth", url: "/app/genio", icon: Sparkles },
 ];
 
-const sistema = [{ title: "Configurações", url: "/app/configuracoes", icon: Settings }];
+const sistema = [
+  { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
+  { title: "Configurações", url: "/app/configuracoes", icon: Settings, end: true as const },
+];
 
 export function AppSidebar() {
   const { state } = useSidebar();

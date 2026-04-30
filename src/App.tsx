@@ -16,6 +16,7 @@ import Placeholder from "./pages/app/Placeholder.tsx";
 import SmartListPage from "./pages/app/SmartListPage.tsx";
 import KanbanPage from "./pages/app/KanbanPage.tsx";
 import CalendarPage from "./pages/app/CalendarPage.tsx";
+import TaskTypesPage from "./pages/app/TaskTypesPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -129,6 +130,7 @@ const App = () => (
                   path="configuracoes"
                   element={<Placeholder title="Configurações" description="Tipos de tarefa, integrações, equipe, preferências." step={9} />}
                 />
+                <Route path="configuracoes/tipos" element={<TaskTypesPage />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
