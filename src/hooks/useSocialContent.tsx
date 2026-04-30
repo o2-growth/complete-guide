@@ -268,14 +268,31 @@ export function useDeleteMetric() {
 }
 
 /* -------- Variações de legenda via Lovable AI -------- */
-export async function generateCaptionVariations(prompt: string, channel: SocialChannel | null): Promise<string[]> {
-  const { data, error } = await supabase.functions.invoke("ai-generate-copy", {
-    body: { prompt, channel: channel ?? "instagram", variations: 3 },
-  });
-  if (error) throw error;
-  // tenta múltiplos shapes
-  if (Array.isArray(data?.variations)) return data.variations;
-  if (typeof data?.text === "string") return data.text.split(/\n---+\n/).map((s: string) => s.trim()).filter(Boolean);
-  if (typeof data === "string") return [data];
-  return [];
+const CHANNEL_TO_PLATFORM: Record<string, string> = {
+  instagram: "ig_feed",
+  linkedin: "linkedin",
+  email: "email",
+  tiktok: "ig_reel",
+  facebook: "ig_feed",
+  youtube: "ig_reel",
+  twitter: "linkedin",
+  other: "ig_feed",
+};
+
+export async function generateCaptionVariations(
+  brief: string,
+  channel: SocialChannel | null,
+  tone: string = "profissional",
+  count: number = 3,
+): Promise<string[]> {
+  const platform = CHANNEL_TO_PLATFORM[channel ?? "instagram"] ?? "ig_feed";
+  const calls = Array.from({ length: count }, (_, i) =>
+    supabase.functions.invoke("ai-generate-copy", {
+      body: { brief: `${brief}\n\n(Variação #${i + 1} — explore um ângulo diferente)`, platform, tone },
+    }),
+  );
+  const results = await Promise.all(calls);
+  return results
+    .map((r) => (r.error ? "" : (r.data as { text?: string } | null)?.text ?? ""))
+    .filter((t) => t.trim().length > 0);
 }
