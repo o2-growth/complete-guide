@@ -157,7 +157,7 @@ export function useBioPages() {
       const { data, error } = await supabase.from("bio_pages").select("*")
         .eq("tenant_id", tenantId!).order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as BioPage[];
+      return (data ?? []) as unknown as BioPage[];
     },
   });
 }
