@@ -18,7 +18,7 @@ Executar UM passo por turno. Não pular. Não amontoar.
 10. ✅ Time tracking (timer global Zustand + Realtime sync) + Pomodoro
 11. ✅ Workload heatmap + matriz de alocação + drag para realocar
 12. ✅ Formulários públicos /solicitar/:slug + /aprovar/:token + Edge process-demand
-13. Templates de preview (ig_feed/story/reel/linkedin/email) + Grid IG 3×3
+13. ✅ Templates de preview (ig_feed/story/reel/linkedin/email) + Grid IG 3×3
 14. IA Gênio Growth (Edge Functions + chat streaming + ações inline)
 15. Dashboard (recharts) + relatórios PDF/Excel
 16. Polish, PWA, push notifications, acessibilidade, i18n base

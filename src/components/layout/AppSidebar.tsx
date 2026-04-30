@@ -16,6 +16,7 @@ import {
   UserCheck,
   Tag,
   Timer,
+  ImageIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -50,6 +51,7 @@ const trabalho = [
   { title: "Projetos", url: "/app/projetos", icon: FolderKanban },
   { title: "Squads", url: "/app/squads", icon: Users },
   { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
+  { title: "Mídias", url: "/app/midias", icon: ImageIcon },
 ];
 
 const insights = [
