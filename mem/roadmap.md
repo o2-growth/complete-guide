@@ -11,8 +11,8 @@ Executar UM passo por turno. Não pular. Não amontoar.
 3. ✅ Auth (/login, /onboarding) + useAuth + ProtectedRoute
 4. ✅ Layout shell: Sidebar + Topbar + CommandPalette + dark mode
 5. ✅ Inbox + Smart Lists + Quick Add NLP pt-BR (chrono-node)
-6. ✅ Detalhe de tarefa em Sheet: TipTap, comentários, anexos, checklist, subtarefas — Passo atual concluído
-7. Kanban view com dnd-kit + auto-assign por status
+6. ✅ Detalhe de tarefa em Sheet: TipTap, comentários, anexos, checklist, subtarefas
+7. ✅ Kanban view com dnd-kit + auto-assign por status — Passo atual concluído
 8. Calendário (mês/semana/dia/agenda) com drag para reagendar
 9. Tipos de tarefa (seed dos 9) + UI /settings/task-types
 10. Time tracking (timer global Zustand + Realtime sync) + Pomodoro
