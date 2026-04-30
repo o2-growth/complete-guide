@@ -1521,6 +1521,99 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      start_pomodoro: {
+        Args: {
+          _ambient?: string
+          _break_minutes?: number
+          _planned_minutes?: number
+          _task_id?: string
+        }
+        Returns: {
+          ambient: string | null
+          break_minutes: number
+          completed: boolean
+          created_at: string
+          ended_at: string | null
+          id: string
+          planned_minutes: number
+          started_at: string
+          task_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pomodoros"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      start_timer: {
+        Args: { _note?: string; _task_id: string }
+        Returns: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          minutes: number | null
+          note: string | null
+          source: string | null
+          started_at: string
+          task_id: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "time_entries"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      stop_pomodoro: {
+        Args: { _completed?: boolean }
+        Returns: {
+          ambient: string | null
+          break_minutes: number
+          completed: boolean
+          created_at: string
+          ended_at: string | null
+          id: string
+          planned_minutes: number
+          started_at: string
+          task_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pomodoros"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      stop_timer: {
+        Args: never
+        Returns: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          minutes: number | null
+          note: string | null
+          source: string | null
+          started_at: string
+          task_id: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "time_entries"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       user_role_in_tenant: {
         Args: { _tenant_id: string }
         Returns: Database["public"]["Enums"]["tenant_role"]
