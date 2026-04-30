@@ -33,4 +33,7 @@ Executar UM passo por turno. Não pular. Não amontoar.
 23. ✅ Templates de projeto recorrentes (tabela project_templates + RPCs save/apply, página /app/templates, clone com 1 clique)
 24. ✅ Audit log navegável (página /app/audit com filtros por tipo/pessoa/projeto, agrupamento por dia, busca textual)
 
+## Fase 3 — Mídias sociais
+25. ✅ Pacote completo de mídias sociais — campanhas (social_campaigns), biblioteca de assets com bucket público (media_assets + storage), vínculo task↔asset (task_assets), campos sociais nas tasks (canal/estado/agendamento/legenda/campanha), aprovação pública por token (social_approval_requests + RPCs anon get/decide), páginas /app/social (calendário editorial mês), /app/campanhas (KPIs por campanha), /app/biblioteca (upload/busca/tags) e página pública /aprovar-midia/:token. Próximo (v25.1): integrar SocialMediaPanel ao TaskDetailSheet.
+
 Fases agrupadas: 1-15 = Fase 1 (núcleo TickTick), 16-24 = Fase 2 (Ekyte), 25-31 = Fase 3 (mídias), 32-36 = Fase 4 (relatórios+IA), 37-43 = Fase 5 (polish).

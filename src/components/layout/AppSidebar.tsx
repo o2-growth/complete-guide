@@ -24,6 +24,8 @@ import {
   Shield,
   FileStack,
   History,
+  Megaphone,
+  Library,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,7 +63,10 @@ const trabalho = [
   { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
   { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
   { title: "SLAs", url: "/app/slas", icon: Shield },
-  { title: "Mídias", url: "/app/midias", icon: ImageIcon },
+  { title: "Mídias (previews)", url: "/app/midias", icon: ImageIcon },
+  { title: "Calendário social", url: "/app/social", icon: CalendarRange },
+  { title: "Campanhas", url: "/app/campanhas", icon: Megaphone },
+  { title: "Biblioteca de mídia", url: "/app/biblioteca", icon: Library },
 ];
 
 const insights = [
@@ -135,7 +140,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 24/43
+            v1.0 · 25/43
           </p>
         )}
       </SidebarFooter>
