@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { TimerIndicator } from "@/components/timer/TimerIndicator";
 
 interface TopbarProps {
   onOpenCommand: () => void;
@@ -68,6 +69,7 @@ export function Topbar({ onOpenCommand }: TopbarProps) {
       </button>
 
       <div className="ml-auto flex items-center gap-1">
+        <TimerIndicator />
         <Button variant="ghost" size="icon" aria-label="Notificações">
           <Bell className="h-4 w-4" />
         </Button>

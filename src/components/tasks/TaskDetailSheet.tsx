@@ -53,6 +53,7 @@ import {
 } from "@/hooks/useTaskDetail";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 
 const PRIORITIES = [
   { value: "none", label: "Nenhuma" },
@@ -174,6 +175,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
               done && "line-through text-muted-foreground",
             )}
           />
+          <TaskTimerButton taskId={task.id} />
         </div>
       </SheetHeader>
 

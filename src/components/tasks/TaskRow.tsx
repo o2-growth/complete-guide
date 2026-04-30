@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TaskRow as TTask, useDeleteTask, useToggleTaskDone } from "@/hooks/useTasks";
 import { cn } from "@/lib/utils";
+import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "text-[hsl(var(--prio-urgent))]",
@@ -130,6 +131,10 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <div className="opacity-0 transition-opacity group-hover:opacity-100">
+        <TaskTimerButton taskId={task.id} size="icon" />
+      </div>
     </div>
   );
 }
