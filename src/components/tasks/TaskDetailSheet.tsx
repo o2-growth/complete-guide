@@ -412,7 +412,11 @@ function SubtasksPanel({ task }: { task: NonNullable<ReturnType<typeof useTask>[
               <Checkbox
                 checked={!!s.done_at}
                 onCheckedChange={() =>
-                  toggle.mutate({ ...(s as never), spent_minutes: 0, archived: false } as never)
+                  toggle.mutate({
+                    id: s.id,
+                    done_at: s.done_at,
+                    status_id: s.status_id,
+                  } as never)
                 }
               />
               {s.code && (
