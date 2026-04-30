@@ -44,6 +44,9 @@ import {
   Crown,
   Bell,
   Code2,
+  Bot,
+  Gauge,
+  FlaskConical,
 } from "lucide-react";
 import {
   Sidebar,
@@ -103,6 +106,9 @@ const social = [
 const insights = [
   { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
   { title: "Executive", url: "/app/exec", icon: Crown },
+  { title: "Copilot IA", url: "/app/copilot", icon: Bot },
+  { title: "Benchmarks", url: "/app/benchmarks", icon: Gauge },
+  { title: "Simulações", url: "/app/simulacoes", icon: FlaskConical },
   { title: "Report Builder", url: "/app/reports", icon: FileBarChart },
   { title: "Forecast IA", url: "/app/forecast", icon: TrendingUp },
   { title: "Goals & OKRs", url: "/app/okrs", icon: Target },
@@ -181,7 +187,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 33/43
+            v1.0 · 34/43
           </p>
         )}
       </SidebarFooter>
