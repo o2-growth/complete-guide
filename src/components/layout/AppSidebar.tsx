@@ -23,6 +23,7 @@ import {
   GitBranch,
   Shield,
   FileStack,
+  History,
 } from "lucide-react";
 import {
   Sidebar,
@@ -74,6 +75,7 @@ const insights = [
 
 const sistema = [
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
+  { title: "Audit log", url: "/app/audit", icon: History },
   { title: "Configurações", url: "/app/configuracoes", icon: Settings, end: true as const },
 ];
 
@@ -133,7 +135,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 23/43
+            v1.0 · 24/43
           </p>
         )}
       </SidebarFooter>
