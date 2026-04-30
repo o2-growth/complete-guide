@@ -40,6 +40,9 @@ import SocialApprovePage from "./pages/public/SocialApprovePage.tsx";
 import SocialCalendarPage from "./pages/app/SocialCalendarPage.tsx";
 import CampaignsPage from "./pages/app/CampaignsPage.tsx";
 import MediaLibraryPage from "./pages/app/MediaLibraryPage.tsx";
+import SnippetsPage from "./pages/app/SnippetsPage.tsx";
+import SocialPipelinePage from "./pages/app/SocialPipelinePage.tsx";
+import SocialAnalyticsPage from "./pages/app/SocialAnalyticsPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -147,6 +150,9 @@ const App = () => (
                 <Route path="social" element={<SocialCalendarPage />} />
                 <Route path="campanhas" element={<CampaignsPage />} />
                 <Route path="biblioteca" element={<MediaLibraryPage />} />
+                <Route path="snippets" element={<SnippetsPage />} />
+                <Route path="social/pipeline" element={<SocialPipelinePage />} />
+                <Route path="social/analytics" element={<SocialAnalyticsPage />} />
                 <Route path="genio" element={<GeniusPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="skills" element={<SkillsPage />} />

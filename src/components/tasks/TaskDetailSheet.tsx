@@ -57,6 +57,9 @@ import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { PreviewEditor } from "@/components/previews/PreviewEditor";
 import { TaskAIPanel } from "@/components/ai/TaskAIPanel";
 import { TaskApprovalsPanel } from "@/components/approvals/TaskApprovalsPanel";
+import { SocialMediaPanel } from "@/components/social/SocialMediaPanel";
+import { TaskSocialContentPanel } from "@/components/social/TaskSocialContentPanel";
+import { TaskMetricsPanel } from "@/components/social/TaskMetricsPanel";
 import { SLABadge } from "@/components/sla/SLABadge";
 
 const PRIORITIES = [
@@ -280,6 +283,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <TabsTrigger value="comments">Comentários</TabsTrigger>
             <TabsTrigger value="ai">IA</TabsTrigger>
             <TabsTrigger value="approvals">Aprovações</TabsTrigger>
+            <TabsTrigger value="social">Social</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="mt-4">
@@ -325,6 +329,24 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
 
           <TabsContent value="approvals" className="mt-4">
             <TaskApprovalsPanel taskId={task.id} />
+          </TabsContent>
+
+          <TabsContent value="social" className="mt-4 space-y-4">
+            <SocialMediaPanel
+              taskId={task.id}
+              channel={(task as { social_channel?: string | null }).social_channel as never ?? null}
+              state={(task as { publish_state?: string | null }).publish_state as never ?? null}
+              caption={(task as { social_caption?: string | null }).social_caption ?? null}
+              campaignId={(task as { campaign_id?: string | null }).campaign_id ?? null}
+              scheduledAt={(task as { scheduled_at?: string | null }).scheduled_at ?? null}
+            />
+            <TaskSocialContentPanel
+              taskId={task.id}
+              channel={(task as { social_channel?: string | null }).social_channel as never ?? null}
+              caption={(task as { social_caption?: string | null }).social_caption ?? ""}
+              onCaptionChange={() => { /* refetch via query invalidation no save */ }}
+            />
+            <TaskMetricsPanel taskId={task.id} />
           </TabsContent>
         </Tabs>
       </div>
