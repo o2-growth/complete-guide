@@ -23,19 +23,26 @@ export default function ReportBuilderPage() {
   const refresh = useRefreshWarehouse();
   const [selected, setSelected] = useState<SavedReport | null>(null);
 
-  const draft = selected ?? {
-    id: undefined as string | undefined,
+  type Form = {
+    id?: string;
+    name: string;
+    source: ReportSource;
+    metrics: string[];
+    dimensions: string[];
+    filters: Record<string, string>;
+    chart_type: ChartType;
+    is_favorite: boolean;
+  };
+  const draft: Form = selected ? { ...selected } : {
     name: "Novo relatório",
-    source: "tasks" as ReportSource,
-    metrics: ["done_count"] as string[],
-    dimensions: ["d"] as string[],
-    filters: {} as Record<string, string>,
-    chart_type: "bar" as ChartType,
+    source: "tasks",
+    metrics: ["done_count"],
+    dimensions: ["d"],
+    filters: {},
+    chart_type: "bar",
     is_favorite: false,
   };
-
-  const [form, setForm] = useState(draft);
-  const isNew = !form.id;
+  const [form, setForm] = useState<Form>(draft);
 
   // sync when selecting
   const onSelect = (r: SavedReport) => {
