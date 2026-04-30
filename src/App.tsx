@@ -53,6 +53,8 @@ import CreatorsPage from "./pages/app/CreatorsPage.tsx";
 import BioEditorPage from "./pages/app/BioEditorPage.tsx";
 import BoostsPage from "./pages/app/BoostsPage.tsx";
 import PublicBioPage from "./pages/public/BioPage.tsx";
+import ReportBuilderPage from "./pages/app/ReportBuilderPage.tsx";
+import AnomaliesPage from "./pages/app/AnomaliesPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -175,6 +177,8 @@ const App = () => (
                 <Route path="configuracoes/integracoes" element={<IntegrationsPage />} />
                 <Route path="genio" element={<GeniusPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="reports" element={<ReportBuilderPage />} />
+                <Route path="anomalias" element={<AnomaliesPage />} />
                 <Route path="skills" element={<SkillsPage />} />
                 <Route path="capacity" element={<CapacityPage />} />
                 <Route
