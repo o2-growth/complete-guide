@@ -41,6 +41,8 @@ import {
   AlertOctagon,
   TrendingUp,
   Target,
+  Crown,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -99,6 +101,7 @@ const social = [
 
 const insights = [
   { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
+  { title: "Executive", url: "/app/exec", icon: Crown },
   { title: "Report Builder", url: "/app/reports", icon: FileBarChart },
   { title: "Forecast IA", url: "/app/forecast", icon: TrendingUp },
   { title: "Goals & OKRs", url: "/app/okrs", icon: Target },
@@ -111,6 +114,8 @@ const insights = [
 ];
 
 const sistema = [
+  { title: "Notificações", url: "/app/notificacoes", icon: Bell },
+  { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
   { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
   { title: "Audit log", url: "/app/audit", icon: History },
@@ -174,7 +179,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 31/43
+            v1.0 · 32/43
           </p>
         )}
       </SidebarFooter>
