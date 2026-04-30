@@ -378,6 +378,7 @@ export type Database = {
       }
       demand_submissions: {
         Row: {
+          approval_token: string
           created_at: string
           form_id: string
           id: string
@@ -390,6 +391,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_token?: string
           created_at?: string
           form_id: string
           id?: string
@@ -402,6 +404,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_token?: string
           created_at?: string
           form_id?: string
           id?: string
@@ -1507,6 +1510,22 @@ export type Database = {
     }
     Functions: {
       ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
+      get_demand_submission_by_token: {
+        Args: { _token: string }
+        Returns: {
+          created_at: string
+          form_description: string
+          form_id: string
+          form_title: string
+          id: string
+          payload: Json
+          requester_email: string
+          requester_name: string
+          status: string
+          task_id: string
+          tenant_id: string
+        }[]
+      }
       has_tenant_role: {
         Args: {
           _role: Database["public"]["Enums"]["tenant_role"]
