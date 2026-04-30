@@ -127,7 +127,9 @@ export function useReassignTask() {
       newDate?: Date | null;
       currentDueAt?: string | null;
     }) => {
-      const patch: Record<string, unknown> = { assignee_id: assigneeId };
+      const patch: { assignee_id: string | null; due_at?: string } = {
+        assignee_id: assigneeId,
+      };
       if (newDate) {
         const target = new Date(newDate);
         if (currentDueAt) {
