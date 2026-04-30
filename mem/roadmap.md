@@ -6,12 +6,12 @@ type: feature
 
 Executar UM passo por turno. Não pular. Não amontoar.
 
-1. Setup tema O2 (cores, tokens Tailwind, types DB, cliente Supabase) — Passo atual
-2. Migration 001_init.sql — schema completo §4 (extensões, ~25 tabelas, triggers, RLS, mv_workload, buckets)
-3. Auth (/login, /onboarding) + useAuth + ProtectedRoute (email+senha + Google + magic link)
-4. Layout shell: Sidebar + Topbar + CommandPalette (cmdk) + dark mode
-5. Inbox + Smart Lists (Hoje, Próximos 7, Atrasadas, Atribuídas a mim) + Quick Add NLP pt-BR (chrono-node)
-6. Detalhe de tarefa em Sheet/painel: TipTap, comentários, anexos, checklist, subtarefas
+1. ✅ Setup tema O2 (cores, tokens Tailwind, types DB, cliente Supabase)
+2. ✅ Migration 001_init.sql — schema completo §4
+3. ✅ Auth (/login, /onboarding) + useAuth + ProtectedRoute
+4. ✅ Layout shell: Sidebar + Topbar + CommandPalette + dark mode
+5. ✅ Inbox + Smart Lists + Quick Add NLP pt-BR (chrono-node)
+6. ✅ Detalhe de tarefa em Sheet: TipTap, comentários, anexos, checklist, subtarefas — Passo atual concluído
 7. Kanban view com dnd-kit + auto-assign por status
 8. Calendário (mês/semana/dia/agenda) com drag para reagendar
 9. Tipos de tarefa (seed dos 9) + UI /settings/task-types
