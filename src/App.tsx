@@ -36,6 +36,10 @@ import TemplatesPage from "./pages/app/TemplatesPage.tsx";
 import AuditLogPage from "./pages/app/AuditLogPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
+import SocialApprovePage from "./pages/public/SocialApprovePage.tsx";
+import SocialCalendarPage from "./pages/app/SocialCalendarPage.tsx";
+import CampaignsPage from "./pages/app/CampaignsPage.tsx";
+import MediaLibraryPage from "./pages/app/MediaLibraryPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -54,6 +58,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/solicitar/:slug" element={<RequestPage />} />
               <Route path="/aprovar/:token" element={<ApprovePage />} />
+              <Route path="/aprovar-midia/:token" element={<SocialApprovePage />} />
               <Route
                 path="/onboarding"
                 element={
@@ -139,6 +144,9 @@ const App = () => (
                 <Route path="demandas" element={<DemandsPage />} />
                 <Route path="workload" element={<WorkloadPage />} />
                 <Route path="midias" element={<MediaPage />} />
+                <Route path="social" element={<SocialCalendarPage />} />
+                <Route path="campanhas" element={<CampaignsPage />} />
+                <Route path="biblioteca" element={<MediaLibraryPage />} />
                 <Route path="genio" element={<GeniusPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="skills" element={<SkillsPage />} />
