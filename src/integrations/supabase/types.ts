@@ -926,6 +926,45 @@ export type Database = {
           },
         ]
       }
+      skills: {
+        Row: {
+          category: string
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       squad_members: {
         Row: {
           capacity_hours_week: number | null
@@ -1486,6 +1525,53 @@ export type Database = {
           },
         ]
       }
+      user_skills: {
+        Row: {
+          created_at: string
+          endorsements_count: number
+          id: string
+          level: number
+          notes: string | null
+          skill_id: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          created_at?: string
+          endorsements_count?: number
+          id?: string
+          level?: number
+          notes?: string | null
+          skill_id: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          created_at?: string
+          endorsements_count?: number
+          id?: string
+          level?: number
+          notes?: string | null
+          skill_id?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       mv_workload_by_user: {
@@ -1510,6 +1596,27 @@ export type Database = {
     }
     Functions: {
       check_ai_rate_limit: { Args: { _user_id: string }; Returns: number }
+      endorse_user_skill: {
+        Args: { _user_skill_id: string }
+        Returns: {
+          created_at: string
+          endorsements_count: number
+          id: string
+          level: number
+          notes: string | null
+          skill_id: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+          years_experience: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_skills"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
       get_demand_submission_by_token: {
         Args: { _token: string }
@@ -1535,6 +1642,7 @@ export type Database = {
         Returns: boolean
       }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
+      seed_default_skills: { Args: { p_tenant_id: string }; Returns: undefined }
       seed_default_task_types: {
         Args: { p_tenant_id: string }
         Returns: undefined
