@@ -1780,6 +1780,85 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          email_digest: string
+          in_app_enabled: boolean
+          quiet_hours_end: number | null
+          quiet_hours_start: number | null
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email_digest?: string
+          in_app_enabled?: boolean
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email_digest?: string
+          in_app_enabled?: boolean
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_rules: {
+        Row: {
+          channels: Database["public"]["Enums"]["notification_channel"][]
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          tenant_id: string
+          threshold: Json
+          user_id: string | null
+        }
+        Insert: {
+          channels?: Database["public"]["Enums"]["notification_channel"][]
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          tenant_id: string
+          threshold?: Json
+          user_id?: string | null
+        }
+        Update: {
+          channels?: Database["public"]["Enums"]["notification_channel"][]
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind?: Database["public"]["Enums"]["notification_kind"]
+          tenant_id?: string
+          threshold?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -3848,6 +3927,7 @@ export type Database = {
         }
       }
       ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
+      exec_kpis: { Args: { _tenant: string }; Returns: Json }
       forecast_metric: {
         Args: {
           _days_ahead?: number
@@ -3910,6 +3990,7 @@ export type Database = {
       inbox_summary: { Args: { _tenant: string }; Returns: Json }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
       kr_progress: { Args: { _tenant: string }; Returns: number }
+      mark_notifications_read: { Args: { _ids?: string[] }; Returns: number }
       recommend_boosts: {
         Args: { _limit?: number; _tenant: string }
         Returns: {
@@ -3959,6 +4040,7 @@ export type Database = {
         Args: { p_description?: string; p_name: string; p_project_id: string }
         Returns: string
       }
+      scan_notifications: { Args: { _tenant: string }; Returns: number }
       seed_default_skills: { Args: { p_tenant_id: string }; Returns: undefined }
       seed_default_task_types: {
         Args: { p_tenant_id: string }
@@ -4094,6 +4176,15 @@ export type Database = {
       inbox_sentiment: "positive" | "neutral" | "negative" | "question"
       media_kind: "image" | "video" | "document" | "audio" | "other"
       notification_channel: "in_app" | "email" | "push"
+      notification_kind:
+        | "kr_at_risk"
+        | "anomaly_critical"
+        | "sla_breach_soon"
+        | "deadline_near"
+        | "task_assigned"
+        | "approval_pending"
+        | "forecast_drop"
+        | "manual"
       project_role: "owner" | "editor" | "commenter" | "viewer"
       publish_state:
         | "idea"
@@ -4277,6 +4368,16 @@ export const Constants = {
       inbox_sentiment: ["positive", "neutral", "negative", "question"],
       media_kind: ["image", "video", "document", "audio", "other"],
       notification_channel: ["in_app", "email", "push"],
+      notification_kind: [
+        "kr_at_risk",
+        "anomaly_critical",
+        "sla_breach_soon",
+        "deadline_near",
+        "task_assigned",
+        "approval_pending",
+        "forecast_drop",
+        "manual",
+      ],
       project_role: ["owner", "editor", "commenter", "viewer"],
       publish_state: [
         "idea",
