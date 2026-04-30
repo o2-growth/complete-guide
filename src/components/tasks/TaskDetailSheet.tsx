@@ -57,6 +57,7 @@ import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { PreviewEditor } from "@/components/previews/PreviewEditor";
 import { TaskAIPanel } from "@/components/ai/TaskAIPanel";
 import { TaskApprovalsPanel } from "@/components/approvals/TaskApprovalsPanel";
+import { SLABadge } from "@/components/sla/SLABadge";
 
 const PRIORITIES = [
   { value: "none", label: "Nenhuma" },
@@ -152,6 +153,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
               {task.code}
             </Badge>
           )}
+          <SLABadge task={task as never} />
           <span className="text-xs text-muted-foreground">
             criada {formatDistanceToNow(new Date(task.created_at), { addSuffix: true, locale: ptBR })}
           </span>

@@ -1149,6 +1149,62 @@ export type Database = {
         }
         Relationships: []
       }
+      sla_policies: {
+        Row: {
+          active: boolean
+          business_hours_only: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          priority: Database["public"]["Enums"]["task_priority"] | null
+          resolution_hours: number
+          response_hours: number
+          tenant_id: string
+          type_id: string | null
+          updated_at: string
+          warning_threshold_pct: number
+        }
+        Insert: {
+          active?: boolean
+          business_hours_only?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          resolution_hours?: number
+          response_hours?: number
+          tenant_id: string
+          type_id?: string | null
+          updated_at?: string
+          warning_threshold_pct?: number
+        }
+        Update: {
+          active?: boolean
+          business_hours_only?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          resolution_hours?: number
+          response_hours?: number
+          tenant_id?: string
+          type_id?: string | null
+          updated_at?: string
+          warning_threshold_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sla_policies_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "task_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       squad_members: {
         Row: {
           capacity_hours_week: number | null
@@ -1932,6 +1988,30 @@ export type Database = {
         Returns: boolean
       }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
+      resolve_task_sla: {
+        Args: { p_task_id: string }
+        Returns: {
+          active: boolean
+          business_hours_only: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          priority: Database["public"]["Enums"]["task_priority"] | null
+          resolution_hours: number
+          response_hours: number
+          tenant_id: string
+          type_id: string | null
+          updated_at: string
+          warning_threshold_pct: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sla_policies"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       seed_default_skills: { Args: { p_tenant_id: string }; Returns: undefined }
       seed_default_task_types: {
         Args: { p_tenant_id: string }

@@ -13,6 +13,7 @@ import {
 import { TaskRow as TTask, useDeleteTask, useToggleTaskDone } from "@/hooks/useTasks";
 import { cn } from "@/lib/utils";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
+import { SLABadge } from "@/components/sla/SLABadge";
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "text-[hsl(var(--prio-urgent))]",
@@ -79,6 +80,7 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
               {task.code}
             </Badge>
           )}
+          <SLABadge task={task as never} compact />
         </div>
 
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
