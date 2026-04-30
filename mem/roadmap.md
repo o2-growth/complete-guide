@@ -23,4 +23,14 @@ Executar UM passo por turno. Não pular. Não amontoar.
 15. ✅ Dashboard (recharts) + relatórios PDF/Excel
 16. ✅ Polish: manifest instalável (PWA-lite), i18n pt-BR/en-US, skip-link a11y, página de Configurações
 
+## Fase 2 — Ekyte (gestão avançada de equipe)
+17. ✅ Skills Matrix (catálogo + auto-avaliação 1-5 + endossos + matriz visual)
+18. Capacity planning detalhado (horas/semana, férias, alocação)
+19. Página real de Squads (membros, capacity, performance)
+20. Página real de Projetos (hierarquia, múltiplas visões)
+21. Aprovações multi-etapas com workflow visual
+22. SLAs + alertas automáticos por tipo de tarefa
+23. Templates de projeto recorrentes (clone com 1 clique)
+24. Audit log navegável
+
 Fases agrupadas: 1-15 = Fase 1 (núcleo TickTick), 16-24 = Fase 2 (Ekyte), 25-31 = Fase 3 (mídias), 32-36 = Fase 4 (relatórios+IA), 37-43 = Fase 5 (polish).
