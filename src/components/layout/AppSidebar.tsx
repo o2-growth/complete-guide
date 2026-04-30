@@ -17,6 +17,7 @@ import {
   Tag,
   Timer,
   ImageIcon,
+  LayoutDashboard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +56,7 @@ const trabalho = [
 ];
 
 const insights = [
+  { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
   { title: "Workload", url: "/app/workload", icon: BarChart3 },
   { title: "Foco", url: "/app/foco", icon: Timer },
   { title: "Gênio Growth", url: "/app/genio", icon: Sparkles },

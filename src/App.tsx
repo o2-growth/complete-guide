@@ -22,6 +22,7 @@ import WorkloadPage from "./pages/app/WorkloadPage.tsx";
 import DemandsPage from "./pages/app/DemandsPage.tsx";
 import MediaPage from "./pages/app/MediaPage.tsx";
 import GeniusPage from "./pages/app/GeniusPage.tsx";
+import DashboardPage from "./pages/app/DashboardPage.tsx";
 import RequestPage from "./pages/public/RequestPage.tsx";
 import ApprovePage from "./pages/public/ApprovePage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
@@ -128,6 +129,7 @@ const App = () => (
                 <Route path="workload" element={<WorkloadPage />} />
                 <Route path="midias" element={<MediaPage />} />
                 <Route path="genio" element={<GeniusPage />} />
+                <Route path="dashboard" element={<DashboardPage />} />
                 <Route
                   path="configuracoes"
                   element={<Placeholder title="Configurações" description="Tipos de tarefa, integrações, equipe, preferências." step={9} />}

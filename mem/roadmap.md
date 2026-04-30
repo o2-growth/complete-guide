@@ -20,7 +20,7 @@ Executar UM passo por turno. Não pular. Não amontoar.
 12. ✅ Formulários públicos /solicitar/:slug + /aprovar/:token + Edge process-demand
 13. ✅ Templates de preview (ig_feed/story/reel/linkedin/email) + Grid IG 3×3
 14. ✅ IA Gênio Growth (Edge Functions + chat streaming + ações inline)
-15. Dashboard (recharts) + relatórios PDF/Excel
+15. ✅ Dashboard (recharts) + relatórios PDF/Excel
 16. Polish, PWA, push notifications, acessibilidade, i18n base
 
 Fases agrupadas: 1-15 = Fase 1 (núcleo TickTick), 16-24 = Fase 2 (Ekyte), 25-31 = Fase 3 (mídias), 32-36 = Fase 4 (relatórios+IA), 37-43 = Fase 5 (polish).
