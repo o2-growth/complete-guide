@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Play, Square, Timer as TimerIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTimerStore, elapsedSeconds, formatHMS, formatMSS } from "@/stores/timerStore";
-import { useStopTimer, useStopPomodoro } from "@/hooks/useTimer";
+import { useStartTimer, useStopTimer, useStopPomodoro } from "@/hooks/useTimer";
 import { cn } from "@/lib/utils";
 
 /**
@@ -95,15 +95,9 @@ export function TimerIndicator() {
  */
 export function TaskTimerButton({ taskId, size = "sm" }: { taskId: string; size?: "sm" | "icon" }) {
   const timer = useTimerStore((s) => s.timer);
-  const start = (useStopTimer as never) as never; // not used, keep TS happy
-  void start;
   const stop = useStopTimer();
-  const isActive = timer?.task_id === taskId;
-
-  // We need start mutation
-  // (importado abaixo para não duplicar chamadas)
-  const { useStartTimer } = require("@/hooks/useTimer") as typeof import("@/hooks/useTimer");
   const startTimer = useStartTimer();
+  const isActive = timer?.task_id === taskId;
 
   const onClick = (e: React.MouseEvent) => {
     e.stopPropagation();
