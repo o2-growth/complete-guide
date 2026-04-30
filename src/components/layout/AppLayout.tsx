@@ -6,10 +6,13 @@ import { Topbar } from "./Topbar";
 import { CommandPalette } from "./CommandPalette";
 import { useTimerSync } from "@/hooks/useTimer";
 import { useI18n } from "@/hooks/useI18n";
+import { useGlobalShortcuts } from "@/hooks/useGlobalShortcuts";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 
 export default function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   useTimerSync();
+  useGlobalShortcuts();
   const { t } = useI18n();
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export default function AppLayout() {
         </div>
       </div>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <OnboardingChecklist />
     </SidebarProvider>
   );
 }

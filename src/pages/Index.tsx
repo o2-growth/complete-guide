@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import logoOxy from "@/assets/logo-oxy.png";
 import heroBg from "@/assets/hero-bg.jpg";
+import SEO from "@/components/SEO";
 
 const squads = [
   {
@@ -60,6 +61,21 @@ const setupSteps = [
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Oxy Growth OS — sistema operacional do time de Growth"
+        description="TickTick + Ekyte para times de Growth: tarefas, calendário editorial, workload, IA Gênio e relatórios — tudo num só lugar."
+        canonical="https://oxy.o2inc.com/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Oxy Growth OS",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "BRL" },
+          publisher: { "@type": "Organization", name: "O2 Inc." },
+          description: "Sistema operacional do time de Growth da O2 — produtividade, mídias sociais, IA e relatórios.",
+        }}
+      />
       {/* HERO */}
       <header className="relative overflow-hidden">
         <div
