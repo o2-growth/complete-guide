@@ -42,7 +42,7 @@ export default function IntegrationsPage() {
 
   const handleConnect = async () => {
     if (!name) return toast.error("Informe o nome da conta");
-    const scopes = PROVIDERS.find((p) => p.id === provider)?.scopes ?? [];
+    const scopes = [...(PROVIDERS.find((p) => p.id === provider)?.scopes ?? [])];
     await upsert.mutateAsync({ provider, account_name: name, account_id: accountId || undefined, scopes, status: "mock" });
     setOpen(false); setName(""); setAccountId("");
   };
