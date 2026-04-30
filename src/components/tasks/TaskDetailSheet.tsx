@@ -55,6 +55,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { PreviewEditor } from "@/components/previews/PreviewEditor";
+import { TaskAIPanel } from "@/components/ai/TaskAIPanel";
 
 const PRIORITIES = [
   { value: "none", label: "Nenhuma" },
@@ -274,6 +275,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="attachments">Anexos</TabsTrigger>
             <TabsTrigger value="comments">Comentários</TabsTrigger>
+            <TabsTrigger value="ai">IA</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="mt-4">
@@ -311,6 +313,10 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
 
           <TabsContent value="comments" className="mt-4">
             <CommentsPanel taskId={task.id} />
+          </TabsContent>
+
+          <TabsContent value="ai" className="mt-4">
+            <TaskAIPanel task={task} />
           </TabsContent>
         </Tabs>
       </div>
