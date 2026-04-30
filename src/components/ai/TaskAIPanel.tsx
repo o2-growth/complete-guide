@@ -78,12 +78,12 @@ export function TaskAIPanel({ task }: Props) {
     if (!categorized) return;
     const { data: types } = await supabase.from("task_types").select("id, slug").eq("tenant_id", task.tenant_id);
     const matched = types?.find((t) => t.slug === categorized.type_slug);
-    const patch: Record<string, unknown> = {
-      priority: categorized.priority,
+    const patch = {
+      priority: categorized.priority as TaskRow["priority"],
       estimate_minutes: categorized.estimate_minutes,
+      ...(matched ? { type_id: matched.id } : {}),
     };
-    if (matched) patch.type_id = matched.id;
-    const { error } = await supabase.from("tasks").update(patch).eq("id", task.id);
+    const { error } = await supabase.from("tasks").update(patch as never).eq("id", task.id);
     if (error) return toast.error(error.message);
     toast.success("Aplicado");
     qc.invalidateQueries({ queryKey: ["task", task.id] });
