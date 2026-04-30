@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Megaphone, Plus, Trash2, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Megaphone, Plus, Trash2, Calendar as CalendarIcon, Loader2, BarChart3 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card } from "@/components/ui/card";
@@ -153,9 +154,16 @@ function CampaignCard({ c, kpi, onDelete }: { c: SocialCampaign; kpi?: { total: 
           <div className="h-3 w-3 rounded-full" style={{ background: c.color ?? "#0EA5E9" }} />
           <h3 className="font-semibold leading-tight">{c.name}</h3>
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onDelete}>
-          <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-        </Button>
+        <div className="flex gap-1">
+          <Button asChild variant="ghost" size="icon" className="h-7 w-7" title="Relatório">
+            <Link to={`/app/campanhas/${c.id}`}>
+              <BarChart3 className="h-3.5 w-3.5 text-primary" />
+            </Link>
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onDelete}>
+            <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+          </Button>
+        </div>
       </div>
       {c.objective && <p className="text-xs text-muted-foreground">🎯 {c.objective}</p>}
       {c.description && <p className="line-clamp-2 text-xs text-muted-foreground">{c.description}</p>}
