@@ -190,7 +190,7 @@ export function usePostMetrics(filters?: { from?: string; to?: string; campaignI
     queryFn: async () => {
       let q = supabase
         .from("post_metrics")
-        .select("*, tasks!inner(id, title, social_channel, campaign_id, published_at, scheduled_at)")
+        .select("*")
         .eq("tenant_id", tenantId!)
         .order("collected_at", { ascending: false })
         .limit(1000);
@@ -198,10 +198,19 @@ export function usePostMetrics(filters?: { from?: string; to?: string; campaignI
       if (filters?.to) q = q.lte("collected_at", filters.to);
       const { data, error } = await q;
       if (error) throw error;
-      // filtros adicionais via task
-      let rows = (data ?? []) as Array<PostMetric & { tasks: { id: string; title: string; social_channel: SocialChannel | null; campaign_id: string | null; published_at: string | null; scheduled_at: string | null } }>;
-      if (filters?.campaignId) rows = rows.filter((r) => r.tasks.campaign_id === filters.campaignId);
-      if (filters?.channel) rows = rows.filter((r) => r.tasks.social_channel === filters.channel);
+      const metrics = (data ?? []) as PostMetric[];
+      const taskIds = Array.from(new Set(metrics.map((m) => m.task_id)));
+      let tasksMap = new Map<string, { id: string; title: string; social_channel: SocialChannel | null; campaign_id: string | null; published_at: string | null; scheduled_at: string | null }>();
+      if (taskIds.length > 0) {
+        const { data: tasksData } = await supabase
+          .from("tasks")
+          .select("id, title, social_channel, campaign_id, published_at, scheduled_at")
+          .in("id", taskIds);
+        for (const t of tasksData ?? []) tasksMap.set(t.id, t as never);
+      }
+      let rows = metrics.map((m) => ({ ...m, task: tasksMap.get(m.task_id) ?? null }));
+      if (filters?.campaignId) rows = rows.filter((r) => r.task?.campaign_id === filters.campaignId);
+      if (filters?.channel) rows = rows.filter((r) => r.task?.social_channel === filters.channel);
       return rows;
     },
   });
