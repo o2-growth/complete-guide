@@ -180,3 +180,60 @@ export function useDeleteTask() {
     onError: (err: Error) => toast.error("Erro: " + err.message),
   });
 }
+
+/**
+ * Tarefas para o Kanban: todas ativas do tenant (até 500), agrupadas por status_id.
+ * Filtro opcional por projeto.
+ */
+export function useKanbanTasks(projectId?: string | null) {
+  const { tenantId, loading: wsLoading } = useWorkspace();
+
+  return useQuery({
+    queryKey: ["tasks", "kanban", tenantId, projectId ?? "all"],
+    enabled: !wsLoading && !!tenantId,
+    queryFn: async (): Promise<TaskRow[]> => {
+      let q = supabase
+        .from("tasks")
+        .select("*")
+        .eq("tenant_id", tenantId!)
+        .eq("archived", false)
+        .order("priority", { ascending: false })
+        .order("due_at", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (projectId) q = q.eq("project_id", projectId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as TaskRow[];
+    },
+  });
+}
+
+/**
+ * Move uma tarefa para outro status. O trigger tg_auto_assign cuida do auto-assign.
+ * Atualiza done_at quando o status destino é "done".
+ */
+export function useMoveTaskStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      taskId,
+      statusId,
+      isDone,
+    }: {
+      taskId: string;
+      statusId: string;
+      isDone: boolean;
+    }) => {
+      const patch: Record<string, unknown> = { status_id: statusId };
+      patch.done_at = isDone ? new Date().toISOString() : null;
+      const { error } = await supabase.from("tasks").update(patch).eq("id", taskId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["task"] });
+    },
+    onError: (e: Error) => toast.error("Erro ao mover: " + e.message),
+  });
+}
