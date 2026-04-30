@@ -49,6 +49,10 @@ import IntegrationsPage from "./pages/app/IntegrationsPage.tsx";
 import SocialInboxPage from "./pages/app/SocialInboxPage.tsx";
 import SocialCadencePage from "./pages/app/SocialCadencePage.tsx";
 import CampaignReportPage from "./pages/app/CampaignReportPage.tsx";
+import CreatorsPage from "./pages/app/CreatorsPage.tsx";
+import BioEditorPage from "./pages/app/BioEditorPage.tsx";
+import BoostsPage from "./pages/app/BoostsPage.tsx";
+import PublicBioPage from "./pages/public/BioPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -68,6 +72,7 @@ const App = () => (
               <Route path="/solicitar/:slug" element={<RequestPage />} />
               <Route path="/aprovar/:token" element={<ApprovePage />} />
               <Route path="/aprovar-midia/:token" element={<SocialApprovePage />} />
+              <Route path="/bio/:slug" element={<PublicBioPage />} />
               <Route
                 path="/onboarding"
                 element={
@@ -164,6 +169,9 @@ const App = () => (
                 <Route path="social/intel" element={<SocialIntelPage />} />
                 <Route path="social/inbox" element={<SocialInboxPage />} />
                 <Route path="social/cadencia" element={<SocialCadencePage />} />
+                <Route path="social/creators" element={<CreatorsPage />} />
+                <Route path="social/bio" element={<BioEditorPage />} />
+                <Route path="social/boosts" element={<BoostsPage />} />
                 <Route path="configuracoes/integracoes" element={<IntegrationsPage />} />
                 <Route path="genio" element={<GeniusPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
