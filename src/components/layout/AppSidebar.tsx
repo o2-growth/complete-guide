@@ -34,6 +34,9 @@ import {
   Plug,
   Inbox as InboxIcon,
   Clock,
+  Link2,
+  Rocket,
+  UserPlus,
 } from "lucide-react";
 import {
   Sidebar,
@@ -83,6 +86,9 @@ const social = [
   { title: "Inteligência IA", url: "/app/social/intel", icon: Brain },
   { title: "Analytics", url: "/app/social/analytics", icon: PieChart },
   { title: "Campanhas", url: "/app/campanhas", icon: Megaphone },
+  { title: "Boost manager", url: "/app/social/boosts", icon: Rocket },
+  { title: "Creators & UGC", url: "/app/social/creators", icon: UserPlus },
+  { title: "Link-in-bio", url: "/app/social/bio", icon: Link2 },
   { title: "Biblioteca de mídia", url: "/app/biblioteca", icon: Library },
   { title: "Legendas & hashtags", url: "/app/snippets", icon: FileText },
 ];
@@ -160,7 +166,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 28/43
+            v1.0 · 29/43
           </p>
         )}
       </SidebarFooter>
