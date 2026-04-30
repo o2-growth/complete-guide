@@ -39,6 +39,8 @@ import {
   UserPlus,
   FileBarChart,
   AlertOctagon,
+  TrendingUp,
+  Target,
 } from "lucide-react";
 import {
   Sidebar,
@@ -98,6 +100,8 @@ const social = [
 const insights = [
   { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
   { title: "Report Builder", url: "/app/reports", icon: FileBarChart },
+  { title: "Forecast IA", url: "/app/forecast", icon: TrendingUp },
+  { title: "Goals & OKRs", url: "/app/okrs", icon: Target },
   { title: "Anomalias IA", url: "/app/anomalias", icon: AlertOctagon },
   { title: "Workload", url: "/app/workload", icon: BarChart3 },
   { title: "Skills", url: "/app/skills", icon: Award },
@@ -170,7 +174,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 30/43
+            v1.0 · 31/43
           </p>
         )}
       </SidebarFooter>

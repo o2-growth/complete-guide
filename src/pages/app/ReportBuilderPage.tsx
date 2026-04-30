@@ -1,17 +1,17 @@
 import { useMemo, useState } from "react";
-import { Plus, Save, Trash2, Star, RefreshCw, FileBarChart, Play } from "lucide-react";
+import { Plus, Save, Trash2, Star, RefreshCw, FileBarChart, Play, Mail, Send } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   useSavedReports, useUpsertReport, useDeleteReport, useRunReport,
   useRefreshWarehouse, TASK_METRICS, TASK_DIMENSIONS, POST_METRICS, POST_DIMENSIONS,
   type ReportSource, type ChartType, type SavedReport,
 } from "@/hooks/useWarehouse";
+import { useReportSchedules, useUpsertSchedule, useDeleteSchedule, useRunSchedulesNow } from "@/hooks/useReportSchedules";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 const COLORS = ["#0EA5E9", "#FCD34D", "#10B981", "#F97316", "#8B5CF6", "#EC4899", "#06B6D4", "#EF4444"];
@@ -248,8 +248,71 @@ export default function ReportBuilderPage() {
               </div>
             )}
           </div>
+
+          {form.id && <SchedulesBlock reportId={form.id} />}
         </Card>
       </div>
+    </div>
+  );
+}
+
+function SchedulesBlock({ reportId }: { reportId: string }) {
+  const { data: schedules = [] } = useReportSchedules(reportId);
+  const upsert = useUpsertSchedule();
+  const del = useDeleteSchedule();
+  const runNow = useRunSchedulesNow();
+  const [cadence, setCadence] = useState<"daily" | "weekly" | "monthly">("weekly");
+  const [emails, setEmails] = useState("");
+
+  return (
+    <div className="border-t pt-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold flex items-center gap-2"><Mail className="h-4 w-4" />Envio agendado por email</h3>
+        <Button size="sm" variant="outline" onClick={() => runNow.mutate()} disabled={runNow.isPending}>
+          <Send className="mr-2 h-3.5 w-3.5" />Processar fila agora
+        </Button>
+      </div>
+      <div className="grid grid-cols-12 gap-2 items-end">
+        <div className="col-span-3">
+          <Label className="text-xs">Cadência</Label>
+          <Select value={cadence} onValueChange={(v) => setCadence(v as "daily" | "weekly" | "monthly")}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="daily">Diária (8h)</SelectItem>
+              <SelectItem value="weekly">Semanal (seg 8h)</SelectItem>
+              <SelectItem value="monthly">Mensal (dia 1, 8h)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="col-span-7">
+          <Label className="text-xs">Destinatários (separados por vírgula)</Label>
+          <Input value={emails} onChange={(e) => setEmails(e.target.value)} placeholder="time@empresa.com, ceo@empresa.com" />
+        </div>
+        <Button className="col-span-2" onClick={() => {
+          const list = emails.split(",").map((s) => s.trim()).filter(Boolean);
+          if (list.length === 0) return;
+          upsert.mutate({ report_id: reportId, cadence, recipients: list });
+          setEmails("");
+        }}>
+          <Plus className="mr-2 h-3.5 w-3.5" />Agendar
+        </Button>
+      </div>
+      {schedules.length > 0 && (
+        <div className="space-y-1">
+          {schedules.map((s) => (
+            <div key={s.id} className="flex items-center gap-2 text-sm rounded-md border px-2 py-1.5">
+              <Badge variant="outline">{s.cadence}</Badge>
+              <span className="flex-1 truncate text-xs">{s.recipients.join(", ")}</span>
+              <span className="text-[10px] text-muted-foreground">
+                próximo: {s.next_run_at ? new Date(s.next_run_at).toLocaleString("pt-BR") : "—"}
+              </span>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => del.mutate(s.id)}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
