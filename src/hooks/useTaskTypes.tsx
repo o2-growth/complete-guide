@@ -45,8 +45,8 @@ export function useUpsertTaskType() {
       const row = {
         ...payload,
         tenant_id: tenantId,
-        checklist: payload.checklist ?? [],
-        workflow: payload.workflow ?? {},
+        checklist: (payload.checklist ?? []) as unknown as never,
+        workflow: (payload.workflow ?? {}) as unknown as never,
       };
       const { data, error } = payload.id
         ? await supabase.from("task_types").update(row).eq("id", payload.id).select().single()
