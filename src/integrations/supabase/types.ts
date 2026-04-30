@@ -695,6 +695,74 @@ export type Database = {
         }
         Relationships: []
       }
+      media_assets: {
+        Row: {
+          bucket: string
+          campaign_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          height: number | null
+          id: string
+          kind: Database["public"]["Enums"]["media_kind"]
+          mime_type: string | null
+          name: string
+          notes: string | null
+          path: string
+          size_bytes: number | null
+          tags: string[] | null
+          tenant_id: string
+          updated_at: string
+          uploaded_by: string | null
+          width: number | null
+        }
+        Insert: {
+          bucket?: string
+          campaign_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          height?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["media_kind"]
+          mime_type?: string | null
+          name: string
+          notes?: string | null
+          path: string
+          size_bytes?: number | null
+          tags?: string[] | null
+          tenant_id: string
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Update: {
+          bucket?: string
+          campaign_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          height?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["media_kind"]
+          mime_type?: string | null
+          name?: string
+          notes?: string | null
+          path?: string
+          size_bytes?: number | null
+          tags?: string[] | null
+          tenant_id?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1255,6 +1323,116 @@ export type Database = {
           },
         ]
       }
+      social_approval_requests: {
+        Row: {
+          client_email: string | null
+          client_name: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by_name: string | null
+          decision_comment: string | null
+          expires_at: string | null
+          id: string
+          message: string | null
+          status: Database["public"]["Enums"]["social_approval_status"]
+          task_id: string
+          tenant_id: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by_name?: string | null
+          decision_comment?: string | null
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["social_approval_status"]
+          task_id: string
+          tenant_id: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by_name?: string | null
+          decision_comment?: string | null
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["social_approval_status"]
+          task_id?: string
+          tenant_id?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_approval_requests_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_campaigns: {
+        Row: {
+          channels: Database["public"]["Enums"]["social_channel"][]
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          objective: string | null
+          start_date: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          channels?: Database["public"]["Enums"]["social_channel"][]
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          objective?: string | null
+          start_date?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          channels?: Database["public"]["Enums"]["social_channel"][]
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          objective?: string | null
+          start_date?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       squad_members: {
         Row: {
           capacity_hours_week: number | null
@@ -1365,6 +1543,42 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_assets: {
+        Row: {
+          asset_id: string
+          created_at: string
+          position: number
+          task_id: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          position?: number
+          task_id: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          position?: number
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_assets_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_assets_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
@@ -1562,6 +1776,7 @@ export type Database = {
         Row: {
           archived: boolean
           assignee_id: string | null
+          campaign_id: string | null
           checklist: Json | null
           code: string | null
           created_at: string
@@ -1577,7 +1792,13 @@ export type Database = {
           position: number
           priority: Database["public"]["Enums"]["task_priority"]
           project_id: string
+          publish_state: Database["public"]["Enums"]["publish_state"] | null
+          published_at: string | null
+          published_url: string | null
           reporter_id: string | null
+          scheduled_at: string | null
+          social_caption: string | null
+          social_channel: Database["public"]["Enums"]["social_channel"] | null
           spent_minutes: number
           start_at: string | null
           status_id: string | null
@@ -1589,6 +1810,7 @@ export type Database = {
         Insert: {
           archived?: boolean
           assignee_id?: string | null
+          campaign_id?: string | null
           checklist?: Json | null
           code?: string | null
           created_at?: string
@@ -1604,7 +1826,13 @@ export type Database = {
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id: string
+          publish_state?: Database["public"]["Enums"]["publish_state"] | null
+          published_at?: string | null
+          published_url?: string | null
           reporter_id?: string | null
+          scheduled_at?: string | null
+          social_caption?: string | null
+          social_channel?: Database["public"]["Enums"]["social_channel"] | null
           spent_minutes?: number
           start_at?: string | null
           status_id?: string | null
@@ -1616,6 +1844,7 @@ export type Database = {
         Update: {
           archived?: boolean
           assignee_id?: string | null
+          campaign_id?: string | null
           checklist?: Json | null
           code?: string | null
           created_at?: string
@@ -1631,7 +1860,13 @@ export type Database = {
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string
+          publish_state?: Database["public"]["Enums"]["publish_state"] | null
+          published_at?: string | null
+          published_url?: string | null
           reporter_id?: string | null
+          scheduled_at?: string | null
+          social_caption?: string | null
+          social_channel?: Database["public"]["Enums"]["social_channel"] | null
           spent_minutes?: number
           start_at?: string | null
           status_id?: string | null
@@ -1641,6 +1876,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_parent_task_id_fkey"
             columns: ["parent_task_id"]
@@ -2001,6 +2243,37 @@ export type Database = {
         }[]
       }
       check_ai_rate_limit: { Args: { _user_id: string }; Returns: number }
+      decide_social_approval: {
+        Args: {
+          _comment: string
+          _decision: Database["public"]["Enums"]["social_approval_status"]
+          _name: string
+          _token: string
+        }
+        Returns: {
+          client_email: string | null
+          client_name: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by_name: string | null
+          decision_comment: string | null
+          expires_at: string | null
+          id: string
+          message: string | null
+          status: Database["public"]["Enums"]["social_approval_status"]
+          task_id: string
+          tenant_id: string
+          token: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "social_approval_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       endorse_user_skill: {
         Args: { _user_skill_id: string }
         Returns: {
@@ -2037,6 +2310,28 @@ export type Database = {
           status: string
           task_id: string
           tenant_id: string
+        }[]
+      }
+      get_social_approval_by_token: {
+        Args: { _token: string }
+        Returns: {
+          asset_buckets: string[]
+          asset_kinds: Database["public"]["Enums"]["media_kind"][]
+          asset_paths: string[]
+          client_email: string
+          client_name: string
+          decided_at: string
+          decision_comment: string
+          expires_at: string
+          id: string
+          message: string
+          status: Database["public"]["Enums"]["social_approval_status"]
+          task_caption: string
+          task_channel: Database["public"]["Enums"]["social_channel"]
+          task_id: string
+          task_publish_state: Database["public"]["Enums"]["publish_state"]
+          task_scheduled_at: string
+          task_title: string
         }[]
       }
       has_tenant_role: {
@@ -2199,8 +2494,27 @@ export type Database = {
         | "cancelled"
       approver_kind: "user" | "tenant_role"
       decision_kind: "approved" | "rejected"
+      media_kind: "image" | "video" | "document" | "audio" | "other"
       notification_channel: "in_app" | "email" | "push"
       project_role: "owner" | "editor" | "commenter" | "viewer"
+      publish_state:
+        | "idea"
+        | "drafting"
+        | "review"
+        | "approved"
+        | "scheduled"
+        | "published"
+        | "archived"
+      social_approval_status: "pending" | "approved" | "rejected" | "expired"
+      social_channel:
+        | "instagram"
+        | "linkedin"
+        | "tiktok"
+        | "facebook"
+        | "youtube"
+        | "twitter"
+        | "email"
+        | "other"
       squad_kind: "ia" | "marketing" | "expansao" | "custom"
       squad_role: "lead" | "specialist"
       task_priority: "none" | "low" | "medium" | "high" | "urgent"
@@ -2353,8 +2667,29 @@ export const Constants = {
       ],
       approver_kind: ["user", "tenant_role"],
       decision_kind: ["approved", "rejected"],
+      media_kind: ["image", "video", "document", "audio", "other"],
       notification_channel: ["in_app", "email", "push"],
       project_role: ["owner", "editor", "commenter", "viewer"],
+      publish_state: [
+        "idea",
+        "drafting",
+        "review",
+        "approved",
+        "scheduled",
+        "published",
+        "archived",
+      ],
+      social_approval_status: ["pending", "approved", "rejected", "expired"],
+      social_channel: [
+        "instagram",
+        "linkedin",
+        "tiktok",
+        "facebook",
+        "youtube",
+        "twitter",
+        "email",
+        "other",
+      ],
       squad_kind: ["ia", "marketing", "expansao", "custom"],
       squad_role: ["lead", "specialist"],
       task_priority: ["none", "low", "medium", "high", "urgent"],
