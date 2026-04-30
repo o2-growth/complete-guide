@@ -911,6 +911,56 @@ export type Database = {
           },
         ]
       }
+      project_templates: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          payload: Json
+          suggested_squad_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          payload?: Json
+          suggested_squad_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          payload?: Json
+          suggested_squad_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_templates_suggested_squad_id_fkey"
+            columns: ["suggested_squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           archived: boolean
@@ -1916,6 +1966,15 @@ export type Database = {
       }
     }
     Functions: {
+      apply_project_template: {
+        Args: {
+          p_key: string
+          p_name: string
+          p_squad_id?: string
+          p_template_id: string
+        }
+        Returns: string
+      }
       approval_decide: {
         Args: {
           _comment?: string
@@ -2011,6 +2070,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      save_project_as_template: {
+        Args: { p_description?: string; p_name: string; p_project_id: string }
+        Returns: string
       }
       seed_default_skills: { Args: { p_tenant_id: string }; Returns: undefined }
       seed_default_task_types: {
