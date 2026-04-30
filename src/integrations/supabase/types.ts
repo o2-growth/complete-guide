@@ -532,6 +532,164 @@ export type Database = {
           },
         ]
       }
+      competitor_posts: {
+        Row: {
+          caption: string | null
+          comments: number | null
+          competitor_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          likes: number | null
+          notes: string | null
+          posted_at: string | null
+          shares: number | null
+          tenant_id: string
+          thumbnail_url: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          caption?: string | null
+          comments?: number | null
+          competitor_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          likes?: number | null
+          notes?: string | null
+          posted_at?: string | null
+          shares?: number | null
+          tenant_id: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          caption?: string | null
+          comments?: number | null
+          competitor_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          likes?: number | null
+          notes?: string | null
+          posted_at?: string | null
+          shares?: number | null
+          tenant_id?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_posts_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "competitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitors: {
+        Row: {
+          channel: Database["public"]["Enums"]["social_channel"]
+          created_at: string
+          created_by: string | null
+          followers: number | null
+          handle: string | null
+          id: string
+          name: string
+          notes: string | null
+          tenant_id: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          created_by?: string | null
+          followers?: number | null
+          handle?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          tenant_id: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          created_by?: string | null
+          followers?: number | null
+          handle?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          tenant_id?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      content_briefs: {
+        Row: {
+          angles: Json
+          audience: string | null
+          campaign_id: string | null
+          channels: Database["public"]["Enums"]["social_channel"][]
+          created_at: string
+          created_by: string | null
+          generated_by_ai: boolean
+          hooks: Json
+          id: string
+          notes: string | null
+          objective: string | null
+          tenant_id: string
+          title: string
+          tone: string | null
+          updated_at: string
+          used_count: number
+        }
+        Insert: {
+          angles?: Json
+          audience?: string | null
+          campaign_id?: string | null
+          channels?: Database["public"]["Enums"]["social_channel"][]
+          created_at?: string
+          created_by?: string | null
+          generated_by_ai?: boolean
+          hooks?: Json
+          id?: string
+          notes?: string | null
+          objective?: string | null
+          tenant_id: string
+          title: string
+          tone?: string | null
+          updated_at?: string
+          used_count?: number
+        }
+        Update: {
+          angles?: Json
+          audience?: string | null
+          campaign_id?: string | null
+          channels?: Database["public"]["Enums"]["social_channel"][]
+          created_at?: string
+          created_by?: string | null
+          generated_by_ai?: boolean
+          hooks?: Json
+          id?: string
+          notes?: string | null
+          objective?: string | null
+          tenant_id?: string
+          title?: string
+          tone?: string | null
+          updated_at?: string
+          used_count?: number
+        }
+        Relationships: []
+      }
       demand_forms: {
         Row: {
           active: boolean
@@ -1360,6 +1518,71 @@ export type Database = {
           },
         ]
       }
+      scheduled_publishes: {
+        Row: {
+          attempts: number
+          channel: Database["public"]["Enums"]["social_channel"]
+          created_at: string
+          created_by: string | null
+          error: string | null
+          external_id: string | null
+          external_url: string | null
+          id: string
+          integration_id: string | null
+          last_attempt_at: string | null
+          response: Json | null
+          scheduled_at: string
+          status: string
+          task_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          channel: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          id?: string
+          integration_id?: string | null
+          last_attempt_at?: string | null
+          response?: Json | null
+          scheduled_at: string
+          status?: string
+          task_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          channel?: Database["public"]["Enums"]["social_channel"]
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          id?: string
+          integration_id?: string | null
+          last_attempt_at?: string | null
+          response?: Json | null
+          scheduled_at?: string
+          status?: string
+          task_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_publishes_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "social_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skills: {
         Row: {
           category: string
@@ -1562,6 +1785,63 @@ export type Database = {
           objective?: string | null
           stage_checklists?: Json
           start_date?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_integrations: {
+        Row: {
+          access_token: string | null
+          account_avatar: string | null
+          account_id: string | null
+          account_name: string | null
+          connected_by: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_error: string | null
+          metadata: Json
+          provider: string
+          refresh_token: string | null
+          scopes: string[] | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_avatar?: string | null
+          account_id?: string | null
+          account_name?: string | null
+          connected_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_error?: string | null
+          metadata?: Json
+          provider: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          account_avatar?: string | null
+          account_id?: string | null
+          account_name?: string | null
+          connected_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_error?: string | null
+          metadata?: Json
+          provider?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
           status?: string
           tenant_id?: string
           updated_at?: string
