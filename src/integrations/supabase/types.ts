@@ -1509,6 +1509,7 @@ export type Database = {
       }
     }
     Functions: {
+      check_ai_rate_limit: { Args: { _user_id: string }; Returns: number }
       ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
       get_demand_submission_by_token: {
         Args: { _token: string }
