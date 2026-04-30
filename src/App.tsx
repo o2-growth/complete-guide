@@ -18,6 +18,7 @@ import KanbanPage from "./pages/app/KanbanPage.tsx";
 import CalendarPage from "./pages/app/CalendarPage.tsx";
 import TaskTypesPage from "./pages/app/TaskTypesPage.tsx";
 import FocusPage from "./pages/app/FocusPage.tsx";
+import WorkloadPage from "./pages/app/WorkloadPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -120,10 +121,7 @@ const App = () => (
                   path="demandas"
                   element={<Placeholder title="Portal de demandas" description="Formulários públicos para solicitantes externos sem licença." step={12} />}
                 />
-                <Route
-                  path="workload"
-                  element={<Placeholder title="Workload" description="Heatmap semanal de carga por pessoa, com drag para realocar." step={11} />}
-                />
+                <Route path="workload" element={<WorkloadPage />} />
                 <Route
                   path="genio"
                   element={<Placeholder title="Gênio Growth" description="Assistente de IA: copy, classificação, busca semântica e resumos." step={14} />}
