@@ -81,7 +81,7 @@ export function useCreateWorkflow() {
   const qc = useQueryClient();
   const { tenantId } = useWorkspace();
   return useMutation({
-    mutationFn: async (input: { name: string; description?: string; steps: Array<Omit<ApprovalStep, "id" | "workflow_id" | "tenant_id">> }) => {
+    mutationFn: async (input: { name: string; description?: string; steps: Array<Omit<ApprovalStep, "id" | "workflow_id" | "tenant_id" | "position">> }) => {
       if (!tenantId) throw new Error("Sem workspace");
       const { data: wf, error } = await supabase.from("approval_workflows")
         .insert([{ tenant_id: tenantId, name: input.name, description: input.description ?? null }])
