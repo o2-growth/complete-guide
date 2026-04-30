@@ -29,6 +29,9 @@ import {
   Workflow,
   FileText,
   PieChart,
+  Wand2,
+  Brain,
+  Plug,
 } from "lucide-react";
 import {
   Sidebar,
@@ -71,7 +74,9 @@ const trabalho = [
 
 const social = [
   { title: "Calendário editorial", url: "/app/social", icon: CalendarRange },
+  { title: "Studio criativo", url: "/app/social/studio", icon: Wand2 },
   { title: "Pipeline de produção", url: "/app/social/pipeline", icon: Workflow },
+  { title: "Inteligência IA", url: "/app/social/intel", icon: Brain },
   { title: "Analytics", url: "/app/social/analytics", icon: PieChart },
   { title: "Campanhas", url: "/app/campanhas", icon: Megaphone },
   { title: "Biblioteca de mídia", url: "/app/biblioteca", icon: Library },
@@ -89,6 +94,7 @@ const insights = [
 
 const sistema = [
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
+  { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
   { title: "Audit log", url: "/app/audit", icon: History },
   { title: "Configurações", url: "/app/configuracoes", icon: Settings, end: true as const },
 ];
@@ -150,7 +156,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 26/43
+            v1.0 · 27/43
           </p>
         )}
       </SidebarFooter>
