@@ -87,7 +87,7 @@ export function useUpdateInboxItem() {
       if (input.status) { patch.status = input.status; patch.handled_by = user?.id ?? null; patch.handled_at = new Date().toISOString(); }
       if (input.reply_text !== undefined) patch.reply_text = input.reply_text;
       if (input.sentiment) patch.sentiment = input.sentiment;
-      const { error } = await supabase.from("social_inbox_items").update(patch).eq("id", input.id);
+      const { error } = await supabase.from("social_inbox_items").update(patch as never).eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: () => {
