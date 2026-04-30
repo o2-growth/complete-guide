@@ -27,7 +27,7 @@ Executar UM passo por turno. Não pular. Não amontoar.
 17. ✅ Skills Matrix (catálogo + auto-avaliação 1-5 + endossos + matriz visual)
 18. ✅ Capacity planning detalhado (horas/semana, dias úteis, ausências, projeção 30d)
 19. ✅ Página real de Squads (criação, membros com papel/capacity, KPIs: capacity total, abertas, concluídas 30d, atrasadas)
-20. Página real de Projetos (hierarquia, múltiplas visões)
+20. ✅ Página real de Projetos (criação, lista agrupada por squad, busca, arquivar; detalhe com Lista + Kanban + progresso)
 21. Aprovações multi-etapas com workflow visual
 22. SLAs + alertas automáticos por tipo de tarefa
 23. Templates de projeto recorrentes (clone com 1 clique)
