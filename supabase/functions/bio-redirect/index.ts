@@ -62,12 +62,9 @@ Deno.serve(async (req) => {
       utm_content: link.utm_content,
       referer, user_agent: ua, country, device,
     });
-    await supabase.rpc("noop").catch(() => {}); // ignore se não existir
-    await supabase.from("bio_links").update({ clicks: 0 }).eq("id", link.id).then(async () => {
-      // increment via separate query (Postgrest não tem incremento atômico no client; usamos update simples baseado no valor)
-      const { data: cur } = await supabase.from("bio_links").select("clicks").eq("id", link.id).maybeSingle();
-      if (cur) await supabase.from("bio_links").update({ clicks: (cur.clicks ?? 0) + 1 }).eq("id", link.id);
-    });
+    // incrementa contador (read+write — sem race crítica em link-in-bio)
+    const { data: cur } = await supabase.from("bio_links").select("clicks").eq("id", link.id).maybeSingle();
+    await supabase.from("bio_links").update({ clicks: (cur?.clicks ?? 0) + 1 }).eq("id", link.id);
 
     return new Response(null, {
       status: 302,
