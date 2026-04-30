@@ -1332,6 +1332,56 @@ export type Database = {
           },
         ]
       }
+      goals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          owner_id: string | null
+          period_end: string
+          period_start: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          owner_id?: string | null
+          period_end: string
+          period_start: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          owner_id?: string | null
+          period_end?: string
+          period_start?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       habit_checkins: {
         Row: {
           checkin_date: string
@@ -1438,6 +1488,78 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      key_results: {
+        Row: {
+          baseline: number
+          created_at: string
+          current_value: number
+          dimension_key: string | null
+          dimension_value: string | null
+          direction: string
+          goal_id: string
+          id: string
+          manual_value: number | null
+          metric: string
+          source: string
+          target: number
+          tenant_id: string
+          title: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          baseline?: number
+          created_at?: string
+          current_value?: number
+          dimension_key?: string | null
+          dimension_value?: string | null
+          direction?: string
+          goal_id: string
+          id?: string
+          manual_value?: number | null
+          metric: string
+          source: string
+          target: number
+          tenant_id: string
+          title: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          baseline?: number
+          created_at?: string
+          current_value?: number
+          dimension_key?: string | null
+          dimension_value?: string | null
+          direction?: string
+          goal_id?: string
+          id?: string
+          manual_value?: number | null
+          metric?: string
+          source?: string
+          target?: number
+          tenant_id?: string
+          title?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_results_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "key_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       link_clicks: {
         Row: {
@@ -3654,6 +3776,10 @@ export type Database = {
         }[]
       }
       check_ai_rate_limit: { Args: { _user_id: string }; Returns: number }
+      compute_next_run: {
+        Args: { _cadence: string; _from?: string }
+        Returns: string
+      }
       convert_inbox_item_to_task: {
         Args: { _assignee_id?: string; _inbox_id: string; _project_id?: string }
         Returns: string
@@ -3690,6 +3816,16 @@ export type Database = {
         }
       }
       detect_anomalies: { Args: { _tenant: string }; Returns: number }
+      due_schedules: {
+        Args: never
+        Returns: {
+          cadence: string
+          id: string
+          recipients: string[]
+          report_id: string
+          tenant_id: string
+        }[]
+      }
       endorse_user_skill: {
         Args: { _user_skill_id: string }
         Returns: {
@@ -3712,6 +3848,20 @@ export type Database = {
         }
       }
       ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
+      forecast_metric: {
+        Args: {
+          _days_ahead?: number
+          _days_back?: number
+          _metric: string
+          _source: string
+          _tenant: string
+        }
+        Returns: {
+          d: string
+          kind: string
+          value: number
+        }[]
+      }
       get_demand_submission_by_token: {
         Args: { _token: string }
         Returns: {
@@ -3759,6 +3909,7 @@ export type Database = {
       }
       inbox_summary: { Args: { _tenant: string }; Returns: Json }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
+      kr_progress: { Args: { _tenant: string }; Returns: number }
       recommend_boosts: {
         Args: { _limit?: number; _tenant: string }
         Returns: {
