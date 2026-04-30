@@ -14,6 +14,7 @@ import Onboarding from "./pages/Onboarding.tsx";
 import AppHome from "./pages/AppHome.tsx";
 import Placeholder from "./pages/app/Placeholder.tsx";
 import SmartListPage from "./pages/app/SmartListPage.tsx";
+import KanbanPage from "./pages/app/KanbanPage.tsx";
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -101,7 +102,7 @@ const App = () => (
                 />
                 <Route
                   path="kanban"
-                  element={<Placeholder title="Kanban" description="Quadro com auto-assign por status e drag-drop." step={7} />}
+                  element={<KanbanPage />}
                 />
                 <Route
                   path="projetos"
