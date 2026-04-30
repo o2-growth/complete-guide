@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import {
   useGoals, useUpsertGoal, useDeleteGoal,
   useKeyResults, useUpsertKR, useDeleteKR, useRecalcKRs, krProgressPct,
+  type Goal,
 } from "@/hooks/useOKRs";
 import { TASK_METRICS, POST_METRICS } from "@/hooks/useWarehouse";
 
@@ -21,7 +22,7 @@ function statusColor(s: string) {
   return "bg-primary/10 text-primary border-primary/30";
 }
 
-function GoalRow({ goal, expanded, onToggle, onDelete }: { goal: ReturnType<typeof useGoals>["data"] extends (infer T)[] | undefined ? T : never; expanded: boolean; onToggle: () => void; onDelete: () => void }) {
+function GoalRow({ goal, expanded, onToggle, onDelete }: { goal: Goal; expanded: boolean; onToggle: () => void; onDelete: () => void }) {
   const { data: krs = [] } = useKeyResults(expanded ? goal.id : null);
   const upsertKR = useUpsertKR();
   const delKR = useDeleteKR();
