@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Play, Square, Coffee, Timer as TimerIcon, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +38,14 @@ export default function FocusPage() {
   const { tenantId } = useWorkspace();
   const [taskId, setTaskId] = useState<string>("none");
   const [preset, setPreset] = useState<number>(25);
+
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Foco — Pomodoro & Cronômetro | Oxy Growth OS";
+    return () => {
+      document.title = prev;
+    };
+  }, []);
 
   const startPomo = useStartPomodoro();
   const stopPomo = useStopPomodoro();
@@ -162,16 +169,7 @@ export default function FocusPage() {
   };
 
   return (
-    <>
-      <Helmet>
-        <title>Foco — Pomodoro & Cronômetro | Oxy Growth OS</title>
-        <meta
-          name="description"
-          content="Sessões de foco com Pomodoro e cronômetro contínuo, sincronizados em tempo real entre dispositivos."
-        />
-      </Helmet>
-
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
+    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
         <header className="mb-6">
           <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
             <TimerIcon className="h-3.5 w-3.5" /> Modo foco
@@ -317,8 +315,7 @@ export default function FocusPage() {
             }
           />
         </section>
-      </div>
-    </>
+    </div>
   );
 }
 
