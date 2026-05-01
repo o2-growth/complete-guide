@@ -89,15 +89,15 @@ export function useSaveRule() {
         name: rule.name,
         description: rule.description ?? null,
         trigger_event: rule.trigger_event,
-        conditions: rule.conditions ?? [],
-        actions: rule.actions ?? [],
+        conditions: (rule.conditions ?? []) as unknown as never,
+        actions: (rule.actions ?? []) as unknown as never,
         active: rule.active ?? true,
       };
       if (rule.id) {
-        const { error } = await supabase.from("automation_rules").update(payload).eq("id", rule.id);
+        const { error } = await supabase.from("automation_rules").update(payload as never).eq("id", rule.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("automation_rules").insert(payload);
+        const { error } = await supabase.from("automation_rules").insert(payload as never);
         if (error) throw error;
       }
     },
