@@ -8,9 +8,13 @@ import { useTimerSync } from "@/hooks/useTimer";
 import { useI18n } from "@/hooks/useI18n";
 import { useGlobalShortcuts } from "@/hooks/useGlobalShortcuts";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { BrandingProvider } from "@/hooks/useBranding";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { QuickAdd } from "@/components/tasks/QuickAdd";
 
 export default function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   useTimerSync();
   useGlobalShortcuts();
   const { t } = useI18n();
@@ -27,6 +31,7 @@ export default function AppLayout() {
   }, []);
 
   return (
+    <BrandingProvider>
     <SidebarProvider>
       <a
         href="#main-content"
@@ -41,10 +46,13 @@ export default function AppLayout() {
           <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
             <Outlet />
           </main>
+          <MobileBottomNav onQuickAdd={() => setQuickAddOpen(true)} />
         </div>
       </div>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <OnboardingChecklist />
+      <QuickAdd open={quickAddOpen} onOpenChange={setQuickAddOpen} />
     </SidebarProvider>
+    </BrandingProvider>
   );
 }
