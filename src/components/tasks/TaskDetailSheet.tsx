@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { PresenceAvatars } from "@/components/presence/PresenceAvatars";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -160,6 +161,9 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
           <span className="text-xs text-muted-foreground">
             criada {formatDistanceToNow(new Date(task.created_at), { addSuffix: true, locale: ptBR })}
           </span>
+          <div className="ml-auto">
+            <PresenceAvatars room={`task:${task.id}`} />
+          </div>
         </div>
         <SheetTitle className="sr-only">{task.title}</SheetTitle>
         <div className="mt-2 flex items-start gap-3">
