@@ -120,7 +120,7 @@ export function useCreateSavedView() {
           tenant_id: tenantId,
           name: input.name,
           source: input.source,
-          filters: input.filters,
+          filters: input.filters as never,
           icon: input.icon,
           color: input.color,
           pinned: input.pinned ?? true,
