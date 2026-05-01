@@ -12,6 +12,9 @@ import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist
 import { BrandingProvider } from "@/hooks/useBranding";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { useNavigate } from "react-router-dom";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/feedback/PullToRefreshIndicator";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -20,6 +23,10 @@ export default function AppLayout() {
   useTrackingInit();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const { pull, refreshing } = usePullToRefresh(async () => {
+    await qc.invalidateQueries();
+  });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -53,6 +60,7 @@ export default function AppLayout() {
       </div>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <OnboardingChecklist />
+      <PullToRefreshIndicator pull={pull} refreshing={refreshing} />
     </SidebarProvider>
     </BrandingProvider>
   );
