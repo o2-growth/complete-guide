@@ -52,6 +52,8 @@ import {
   Search,
   Database,
   Pin,
+  Building2,
+  Zap,
 } from "lucide-react";
 import {
   Sidebar,
@@ -130,6 +132,9 @@ const insights = [
 const sistema = [
   { title: "Notificações", url: "/app/notificacoes", icon: Bell },
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
+  { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
+  { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
+  { title: "Plano & billing", url: "/app/configuracoes/plano", icon: Crown },
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
   { title: "Busca global", url: "/app/buscar", icon: Search },
   { title: "Dados (import/export)", url: "/app/configuracoes/dados", icon: Database },
@@ -232,7 +237,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 37/43
+            v1.0 · 38/43
           </p>
         )}
       </SidebarFooter>
