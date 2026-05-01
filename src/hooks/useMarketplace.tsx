@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useTenant } from "@/hooks/useTenant";
+import { useTenant } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 
 export function useMarketplaceTemplates(category?: string) {
@@ -21,7 +21,7 @@ export function useMarketplaceTemplates(category?: string) {
 }
 
 export function useInstallTemplate() {
-  const { tenantId } = useTenant();
+  const { tenantId } = useWorkspace();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (templateId: string) => {
@@ -43,7 +43,7 @@ export function useInstallTemplate() {
 }
 
 export function useMyMarketplaceInstalls() {
-  const { tenantId } = useTenant();
+  const { tenantId } = useWorkspace();
   return useQuery({
     queryKey: ["marketplace_installs", tenantId],
     enabled: !!tenantId,

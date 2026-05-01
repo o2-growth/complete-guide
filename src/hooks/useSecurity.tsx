@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useTenant } from "@/hooks/useTenant";
+import { useTenant } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 
 export function useSecurityAudit(limit = 50) {
-  const { tenantId } = useTenant();
+  const { tenantId } = useWorkspace();
   return useQuery({
     queryKey: ["security_audit", tenantId, limit],
     enabled: !!tenantId,
@@ -22,7 +22,7 @@ export function useSecurityAudit(limit = 50) {
 }
 
 export function useLogSecurityEvent() {
-  const { tenantId } = useTenant();
+  const { tenantId } = useWorkspace();
   return useMutation({
     mutationFn: async (input: { event: string; severity?: string; metadata?: Record<string, unknown> }) => {
       const { data: user } = await supabase.auth.getUser();
