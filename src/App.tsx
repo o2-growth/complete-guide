@@ -78,6 +78,9 @@ const AcceptInvitePage = lazy(() => import("./pages/public/AcceptInvitePage.tsx"
 const AdminErrorsPage = lazy(() => import("./pages/app/AdminErrorsPage.tsx"));
 const AdminHealthPage = lazy(() => import("./pages/app/AdminHealthPage.tsx"));
 const LanguagePage = lazy(() => import("./pages/app/LanguagePage.tsx"));
+const SecurityPage = lazy(() => import("./pages/app/SecurityPage.tsx"));
+const PrivacyPage = lazy(() => import("./pages/app/PrivacyPage.tsx"));
+const MarketplacePage = lazy(() => import("./pages/app/MarketplacePage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -232,6 +235,9 @@ const App = () => (
                 <Route path="admin/erros" element={<AdminErrorsPage />} />
                 <Route path="admin/saude" element={<AdminHealthPage />} />
                 <Route path="configuracoes/idioma" element={<LanguagePage />} />
+                <Route path="seguranca" element={<SecurityPage />} />
+                <Route path="configuracoes/privacidade" element={<PrivacyPage />} />
+                <Route path="marketplace" element={<MarketplacePage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}

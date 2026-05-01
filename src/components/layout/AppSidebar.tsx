@@ -57,6 +57,9 @@ import {
   Activity,
   Bug,
   Languages,
+  Lock,
+  ShieldAlert,
+  Store,
 } from "lucide-react";
 import {
   Sidebar,
@@ -138,9 +141,12 @@ const sistema = [
   { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
   { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
   { title: "Plano & billing", url: "/app/configuracoes/plano", icon: Crown },
+  { title: "Marketplace", url: "/app/marketplace", icon: Store },
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
   { title: "Busca global", url: "/app/buscar", icon: Search },
   { title: "Dados (import/export)", url: "/app/configuracoes/dados", icon: Database },
+  { title: "Segurança (2FA)", url: "/app/seguranca", icon: Lock },
+  { title: "Privacidade (LGPD)", url: "/app/configuracoes/privacidade", icon: ShieldAlert },
   { title: "Saúde do sistema", url: "/app/admin/saude", icon: Activity },
   { title: "Erros (admin)", url: "/app/admin/erros", icon: Bug },
   { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
@@ -243,7 +249,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 39/43
+            v1.0 · 40/43
           </p>
         )}
       </SidebarFooter>
