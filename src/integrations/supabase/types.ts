@@ -1391,6 +1391,59 @@ export type Database = {
         }
         Relationships: []
       }
+      export_jobs: {
+        Row: {
+          created_at: string
+          download_url: string | null
+          error_message: string | null
+          expires_at: string | null
+          finished_at: string | null
+          format: string
+          id: string
+          scope: Json
+          size_bytes: number | null
+          status: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_url?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          format: string
+          id?: string
+          scope?: Json
+          size_bytes?: number | null
+          status?: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          format?: string
+          id?: string
+          scope?: Json
+          size_bytes?: number | null
+          status?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fact_posts_daily: {
         Row: {
           campaign_id: string | null
@@ -1662,6 +1715,75 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      import_jobs: {
+        Row: {
+          created_at: string
+          created_count: number
+          error_count: number
+          errors: Json
+          filename: string | null
+          finished_at: string | null
+          id: string
+          mapping: Json
+          project_id: string | null
+          raw_sample: Json | null
+          source: string
+          status: string
+          target: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_count?: number
+          error_count?: number
+          errors?: Json
+          filename?: string | null
+          finished_at?: string | null
+          id?: string
+          mapping?: Json
+          project_id?: string | null
+          raw_sample?: Json | null
+          source: string
+          status?: string
+          target: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_count?: number
+          error_count?: number
+          errors?: Json
+          filename?: string | null
+          finished_at?: string | null
+          id?: string
+          mapping?: Json
+          project_id?: string | null
+          raw_sample?: Json | null
+          source?: string
+          status?: string
+          target?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       industry_benchmarks: {
         Row: {
@@ -2817,6 +2939,59 @@ export type Database = {
           },
         ]
       }
+      saved_views: {
+        Row: {
+          color: string | null
+          created_at: string
+          filters: Json
+          icon: string | null
+          id: string
+          name: string
+          pinned: boolean
+          position: number
+          source: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          filters?: Json
+          icon?: string | null
+          id?: string
+          name: string
+          pinned?: boolean
+          position?: number
+          source: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          filters?: Json
+          icon?: string | null
+          id?: string
+          name?: string
+          pinned?: boolean
+          position?: number
+          source?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_views_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_publishes: {
         Row: {
           attempts: number
@@ -2878,6 +3053,41 @@ export type Database = {
             columns: ["integration_id"]
             isOneToOne: false
             referencedRelation: "social_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_history: {
+        Row: {
+          created_at: string
+          id: string
+          query: string
+          result_count: number
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query: string
+          result_count?: number
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query?: string
+          result_count?: number
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -4425,6 +4635,17 @@ export type Database = {
           task_title: string
         }[]
       }
+      global_search: {
+        Args: { _limit?: number; _q: string; _tenant: string }
+        Returns: {
+          id: string
+          kind: string
+          rank: number
+          subtitle: string
+          title: string
+          url: string
+        }[]
+      }
       has_tenant_role: {
         Args: {
           _role: Database["public"]["Enums"]["tenant_role"]
@@ -4646,6 +4867,7 @@ export type Database = {
         | "approval_pending"
         | "forecast_drop"
         | "manual"
+        | "mention"
       project_role: "owner" | "editor" | "commenter" | "viewer"
       publish_state:
         | "idea"
@@ -4838,6 +5060,7 @@ export const Constants = {
         "approval_pending",
         "forecast_drop",
         "manual",
+        "mention",
       ],
       project_role: ["owner", "editor", "commenter", "viewer"],
       publish_state: [
