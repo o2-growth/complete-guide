@@ -61,6 +61,8 @@ import {
   ShieldAlert,
   Store,
   Compass,
+  HelpCircle,
+  Trophy,
 } from "lucide-react";
 import {
   Sidebar,
@@ -140,6 +142,9 @@ const insights = [
 const sistema = [
   { title: "Notificações", url: "/app/notificacoes", icon: Bell },
   { title: "Comece aqui", url: "/app/comecar", icon: Compass },
+  { title: "Central de Ajuda", url: "/app/ajuda", icon: HelpCircle },
+  { title: "Conquistas & XP", url: "/app/conquistas", icon: Trophy },
+  { title: "Enterprise", url: "/app/enterprise", icon: Building2 },
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
   { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
