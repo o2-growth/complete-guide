@@ -261,6 +261,54 @@ export type Database = {
           },
         ]
       }
+      api_usage_events: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          id: number
+          method: string
+          resource: string
+          status_code: number | null
+          tenant_id: string | null
+          token_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: never
+          method: string
+          resource: string
+          status_code?: number | null
+          tenant_id?: string | null
+          token_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: never
+          method?: string
+          resource?: string
+          status_code?: number | null
+          tenant_id?: string | null
+          token_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_usage_events_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "api_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_decisions: {
         Row: {
           comment: string | null
@@ -2261,6 +2309,107 @@ export type Database = {
           },
         ]
       }
+      marketplace_installs: {
+        Row: {
+          id: string
+          installed_at: string
+          installed_by: string | null
+          template_id: string
+          tenant_id: string
+        }
+        Insert: {
+          id?: string
+          installed_at?: string
+          installed_by?: string | null
+          template_id: string
+          tenant_id: string
+        }
+        Update: {
+          id?: string
+          installed_at?: string
+          installed_by?: string | null
+          template_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_installs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_installs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_templates: {
+        Row: {
+          author_user_id: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          install_count: number
+          is_official: boolean
+          is_public: boolean
+          name: string
+          payload: Json
+          rating_avg: number
+          rating_count: number
+          source_tenant_id: string | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          install_count?: number
+          is_official?: boolean
+          is_public?: boolean
+          name: string
+          payload: Json
+          rating_avg?: number
+          rating_count?: number
+          source_tenant_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          install_count?: number
+          is_official?: boolean
+          is_public?: boolean
+          name?: string
+          payload?: Json
+          rating_avg?: number
+          rating_count?: number
+          source_tenant_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_templates_source_tenant_id_fkey"
+            columns: ["source_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_assets: {
         Row: {
           bucket: string
@@ -2779,6 +2928,78 @@ export type Database = {
           target_posts?: number
           tenant_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      privacy_consents: {
+        Row: {
+          granted: boolean
+          granted_at: string
+          id: string
+          ip: string | null
+          kind: string
+          revoked_at: string | null
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          granted?: boolean
+          granted_at?: string
+          id?: string
+          ip?: string | null
+          kind: string
+          revoked_at?: string | null
+          user_agent?: string | null
+          user_id: string
+          version?: string
+        }
+        Update: {
+          granted?: boolean
+          granted_at?: string
+          id?: string
+          ip?: string | null
+          kind?: string
+          revoked_at?: string | null
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      privacy_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          notes: string | null
+          payload: Json | null
+          result_url: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          notes?: string | null
+          payload?: Json | null
+          result_url?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          payload?: Json | null
+          result_url?: string | null
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -3405,6 +3626,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "search_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_audit: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip: string | null
+          metadata: Json
+          severity: string
+          tenant_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          severity?: string
+          tenant_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          severity?: string
+          tenant_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_audit_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -4758,6 +5023,7 @@ export type Database = {
           created_at: string
           created_by: string
           events: string[]
+          filter_jsonpath: string | null
           id: string
           last_delivery_at: string | null
           last_status: number | null
@@ -4771,6 +5037,7 @@ export type Database = {
           created_at?: string
           created_by: string
           events?: string[]
+          filter_jsonpath?: string | null
           id?: string
           last_delivery_at?: string | null
           last_status?: number | null
@@ -4784,6 +5051,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           events?: string[]
+          filter_jsonpath?: string | null
           id?: string
           last_delivery_at?: string | null
           last_status?: number | null
@@ -4950,6 +5218,7 @@ export type Database = {
       }
       ensure_user_workspace: { Args: { _user_id: string }; Returns: string }
       exec_kpis: { Args: { _tenant: string }; Returns: Json }
+      export_my_personal_data: { Args: never; Returns: Json }
       forecast_metric: {
         Args: {
           _days_ahead?: number
@@ -5034,6 +5303,10 @@ export type Database = {
       }
       health_snapshot: { Args: { _tenant: string }; Returns: Json }
       inbox_summary: { Args: { _tenant: string }; Returns: Json }
+      install_marketplace_template: {
+        Args: { _template_id: string; _tenant_id: string }
+        Returns: string
+      }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
       kr_progress: { Args: { _tenant: string }; Returns: number }
       mark_notifications_read: { Args: { _ids?: string[] }; Returns: number }
@@ -5061,6 +5334,10 @@ export type Database = {
         }[]
       }
       refresh_warehouse: { Args: { _tenant: string }; Returns: Json }
+      replay_webhook_delivery: {
+        Args: { _delivery_id: string }
+        Returns: string
+      }
       repost_ugc: {
         Args: {
           _channel: Database["public"]["Enums"]["social_channel"]
