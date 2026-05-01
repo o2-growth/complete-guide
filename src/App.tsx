@@ -70,6 +70,10 @@ const ShortcutsPage = lazy(() => import("./pages/app/ShortcutsPage.tsx"));
 const AppearancePage = lazy(() => import("./pages/app/AppearancePage.tsx"));
 const SearchPage = lazy(() => import("./pages/app/SearchPage.tsx"));
 const DataPage = lazy(() => import("./pages/app/DataPage.tsx"));
+const AutomationRulesPage = lazy(() => import("./pages/app/AutomationRulesPage.tsx"));
+const WorkspacesPage = lazy(() => import("./pages/app/WorkspacesPage.tsx"));
+const PlanPage = lazy(() => import("./pages/app/PlanPage.tsx"));
+const AcceptInvitePage = lazy(() => import("./pages/public/AcceptInvitePage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -97,6 +101,7 @@ const App = () => (
               <Route path="/aprovar/:token" element={<ApprovePage />} />
               <Route path="/aprovar-midia/:token" element={<SocialApprovePage />} />
               <Route path="/bio/:slug" element={<PublicBioPage />} />
+              <Route path="/aceitar-convite/:token" element={<AcceptInvitePage />} />
               <Route
                 path="/onboarding"
                 element={
@@ -216,6 +221,9 @@ const App = () => (
                 <Route path="configuracoes/aparencia" element={<AppearancePage />} />
                 <Route path="buscar" element={<SearchPage />} />
                 <Route path="configuracoes/dados" element={<DataPage />} />
+                <Route path="automacoes/regras" element={<AutomationRulesPage />} />
+                <Route path="workspaces" element={<WorkspacesPage />} />
+                <Route path="configuracoes/plano" element={<PlanPage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}
