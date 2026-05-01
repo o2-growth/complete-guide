@@ -48,6 +48,7 @@ import {
   Gauge,
   FlaskConical,
   Keyboard,
+  Palette,
 } from "lucide-react";
 import {
   Sidebar,
@@ -127,6 +128,7 @@ const sistema = [
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
   { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
+  { title: "Aparência", url: "/app/configuracoes/aparencia", icon: Palette },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
   { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
   { title: "Audit log", url: "/app/audit", icon: History },
