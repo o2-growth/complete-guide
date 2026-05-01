@@ -14,6 +14,7 @@ import { TaskRow as TTask, useDeleteTask, useToggleTaskDone } from "@/hooks/useT
 import { cn } from "@/lib/utils";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { SLABadge } from "@/components/sla/SLABadge";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 
@@ -38,9 +39,9 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
   const remove = useDeleteTask();
   const done = !!task.done_at;
   const fire = useConfetti();
-  const handleToggle = (e?: React.MouseEvent | unknown) => {
+  const handleToggle = (e?: ReactMouseEvent | unknown) => {
     if (!done) {
-      const ev = e as React.MouseEvent | undefined;
+      const ev = e as ReactMouseEvent | undefined;
       const x = ev?.clientX;
       const y = ev?.clientY;
       fire(x, y, 40);
