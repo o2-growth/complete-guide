@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Loader2, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { TaskRow } from "./TaskRow";
 import { TaskDetailSheet } from "./TaskDetailSheet";
 import { useTasks, SmartList } from "@/hooks/useTasks";
+import { EmptyState } from "@/components/EmptyState";
+import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
 
 interface TaskListProps {
   list: SmartList;
@@ -16,11 +18,7 @@ export function TaskList({ list, emptyTitle = "Nada por aqui", emptyDescription 
   const [openId, setOpenId] = useState<string | null>(null);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin" />
-      </div>
-    );
+    return <ListSkeleton rows={6} />;
   }
 
   if (error) {
@@ -32,22 +30,12 @@ export function TaskList({ list, emptyTitle = "Nada por aqui", emptyDescription 
   }
 
   if (!data || data.length === 0) {
-    return (
-      <Card className="flex flex-col items-center gap-3 border-dashed p-10 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-          <Inbox className="h-6 w-6" />
-        </div>
-        <div>
-          <p className="text-sm font-medium">{emptyTitle}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{emptyDescription}</p>
-        </div>
-      </Card>
-    );
+    return <EmptyState icon={Inbox} title={emptyTitle} description={emptyDescription} />;
   }
 
   return (
     <>
-      <div className="space-y-2">
+      <div className="space-y-2 animate-fade-in">
         {data.map((task) => (
           <TaskRow key={task.id} task={task} onOpen={setOpenId} />
         ))}
