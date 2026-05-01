@@ -20,6 +20,7 @@ import { TimerIndicator } from "@/components/timer/TimerIndicator";
 import { useUnreadCount } from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
+import { OnlineIndicator } from "@/components/layout/OnlineIndicator";
 
 interface TopbarProps {
   onOpenCommand: () => void;
@@ -75,6 +76,7 @@ export function Topbar({ onOpenCommand }: TopbarProps) {
       </button>
 
       <div className="ml-auto flex items-center gap-1">
+        <OnlineIndicator />
         <TimerIndicator />
         <Button
           variant="ghost"

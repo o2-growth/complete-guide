@@ -7,6 +7,7 @@ import { CommandPalette } from "./CommandPalette";
 import { useTimerSync } from "@/hooks/useTimer";
 import { useI18n } from "@/hooks/useI18n";
 import { useGlobalShortcuts } from "@/hooks/useGlobalShortcuts";
+import { useTrackingInit } from "@/hooks/useTrackingInit";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { BrandingProvider } from "@/hooks/useBranding";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -16,6 +17,7 @@ export default function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   useTimerSync();
   useGlobalShortcuts();
+  useTrackingInit();
   const { t } = useI18n();
   const navigate = useNavigate();
 
