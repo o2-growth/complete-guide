@@ -49,6 +49,9 @@ import {
   FlaskConical,
   Keyboard,
   Palette,
+  Search,
+  Database,
+  Pin,
 } from "lucide-react";
 import {
   Sidebar,
@@ -65,6 +68,7 @@ import {
 } from "@/components/ui/sidebar";
 import logoOxy from "@/assets/logo-oxy.png";
 import { useBranding } from "@/hooks/useBranding";
+import { useSavedViews } from "@/hooks/useGlobalSearchAdvanced";
 
 const principal = [
   { title: "Inbox", url: "/app", icon: Inbox, end: true as const },
@@ -127,6 +131,8 @@ const sistema = [
   { title: "Notificações", url: "/app/notificacoes", icon: Bell },
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
+  { title: "Busca global", url: "/app/buscar", icon: Search },
+  { title: "Dados (import/export)", url: "/app/configuracoes/dados", icon: Database },
   { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
   { title: "Aparência", url: "/app/configuracoes/aparencia", icon: Palette },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
@@ -140,6 +146,8 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
   const branding = useBranding();
+  const { data: savedViews = [] } = useSavedViews();
+  const pinnedViews = savedViews.filter((v) => v.pinned);
 
   const isActive = (url: string, end?: boolean) =>
     end ? pathname === url : pathname === url || pathname.startsWith(url + "/");
@@ -190,6 +198,31 @@ export function AppSidebar() {
       <SidebarContent>
         {renderGroup("Principal", principal)}
         {renderGroup("Visões", visoes)}
+        {pinnedViews.length > 0 && (
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Saved Views</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {pinnedViews.map((v) => {
+                  const url = `/app/buscar?view=${v.id}`;
+                  return (
+                    <SidebarMenuItem key={v.id}>
+                      <SidebarMenuButton asChild tooltip={v.name}>
+                        <NavLink to={url}>
+                          <Pin
+                            className="h-4 w-4"
+                            style={v.color ? { color: v.color } : undefined}
+                          />
+                          <span className="truncate">{v.name}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {renderGroup("Trabalho", trabalho)}
         {renderGroup("Mídias sociais", social)}
         {renderGroup("Insights", insights)}
@@ -199,7 +232,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 36/43
+            v1.0 · 37/43
           </p>
         )}
       </SidebarFooter>
