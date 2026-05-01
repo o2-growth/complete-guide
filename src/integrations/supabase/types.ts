@@ -5385,6 +5385,7 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: undefined
       }
+      seed_sample_data: { Args: { _persona?: string }; Returns: string }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       start_pomodoro: {
