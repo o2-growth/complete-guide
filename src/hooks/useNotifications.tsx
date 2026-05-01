@@ -53,8 +53,8 @@ export function useNotifications() {
       .channel("notifications-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () => {
         qc.invalidateQueries({ queryKey: ["notifications"] });
-      })
-      .subscribe();
+      });
+    ch.subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
