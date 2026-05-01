@@ -86,6 +86,9 @@ const ExternalIntegrationsPage = lazy(() => import("./pages/app/ExternalIntegrat
 const AiCopilotProactivePage = lazy(() => import("./pages/app/AiCopilotProactivePage.tsx"));
 const PricingPage = lazy(() => import("./pages/public/PricingPage.tsx"));
 const CheckoutPage = lazy(() => import("./pages/public/CheckoutPage.tsx"));
+const HelpCenterPage = lazy(() => import("./pages/app/HelpCenterPage.tsx"));
+const AchievementsPage = lazy(() => import("./pages/app/AchievementsPage.tsx"));
+const EnterprisePage = lazy(() => import("./pages/app/EnterprisePage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -248,6 +251,9 @@ const App = () => (
                 <Route path="comecar" element={<StartHerePage />} />
                 <Route path="configuracoes/integracoes-externas" element={<ExternalIntegrationsPage />} />
                 <Route path="ia-proativa" element={<AiCopilotProactivePage />} />
+                <Route path="ajuda" element={<HelpCenterPage />} />
+                <Route path="conquistas" element={<AchievementsPage />} />
+                <Route path="enterprise" element={<EnterprisePage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}
