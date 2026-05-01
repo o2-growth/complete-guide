@@ -48,6 +48,7 @@ import {
   Gauge,
   FlaskConical,
   Keyboard,
+  Palette,
 } from "lucide-react";
 import {
   Sidebar,
@@ -63,6 +64,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import logoOxy from "@/assets/logo-oxy.png";
+import { useBranding } from "@/hooks/useBranding";
 
 const principal = [
   { title: "Inbox", url: "/app", icon: Inbox, end: true as const },
@@ -126,6 +128,7 @@ const sistema = [
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
   { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
+  { title: "Aparência", url: "/app/configuracoes/aparencia", icon: Palette },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
   { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
   { title: "Audit log", url: "/app/audit", icon: History },
@@ -136,6 +139,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
+  const branding = useBranding();
 
   const isActive = (url: string, end?: boolean) =>
     end ? pathname === url : pathname === url || pathname.startsWith(url + "/");
@@ -167,10 +171,16 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2.5 px-2 py-1.5">
-          <img src={logoOxy} alt="Oxy" className="h-7 w-7 shrink-0" />
+          <img
+            src={branding.logoUrl || logoOxy}
+            alt={branding.workspaceName || "Oxy"}
+            className="h-7 w-7 shrink-0 rounded object-contain"
+          />
           {!collapsed && (
             <div className="flex flex-col leading-tight overflow-hidden">
-              <span className="text-sm font-bold tracking-tight truncate">Oxy Growth OS</span>
+              <span className="text-sm font-bold tracking-tight truncate">
+                {branding.workspaceName || "Oxy Growth OS"}
+              </span>
               <span className="text-[10px] text-sidebar-foreground/60 truncate">por O2 Inc.</span>
             </div>
           )}
@@ -189,7 +199,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 35/43
+            v1.0 · 36/43
           </p>
         )}
       </SidebarFooter>

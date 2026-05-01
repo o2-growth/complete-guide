@@ -67,6 +67,7 @@ const CopilotPage = lazy(() => import("./pages/app/CopilotPage.tsx"));
 const BenchmarksPage = lazy(() => import("./pages/app/BenchmarksPage.tsx"));
 const SimulationsPage = lazy(() => import("./pages/app/SimulationsPage.tsx"));
 const ShortcutsPage = lazy(() => import("./pages/app/ShortcutsPage.tsx"));
+const AppearancePage = lazy(() => import("./pages/app/AppearancePage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -210,6 +211,7 @@ const App = () => (
                 <Route path="skills" element={<SkillsPage />} />
                 <Route path="capacity" element={<CapacityPage />} />
                 <Route path="atalhos" element={<ShortcutsPage />} />
+                <Route path="configuracoes/aparencia" element={<AppearancePage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}

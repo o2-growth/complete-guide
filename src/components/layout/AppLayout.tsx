@@ -8,12 +8,16 @@ import { useTimerSync } from "@/hooks/useTimer";
 import { useI18n } from "@/hooks/useI18n";
 import { useGlobalShortcuts } from "@/hooks/useGlobalShortcuts";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { BrandingProvider } from "@/hooks/useBranding";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { useNavigate } from "react-router-dom";
 
 export default function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   useTimerSync();
   useGlobalShortcuts();
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -27,6 +31,7 @@ export default function AppLayout() {
   }, []);
 
   return (
+    <BrandingProvider>
     <SidebarProvider>
       <a
         href="#main-content"
@@ -41,10 +46,12 @@ export default function AppLayout() {
           <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
             <Outlet />
           </main>
+          <MobileBottomNav onQuickAdd={() => navigate("/app")} />
         </div>
       </div>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <OnboardingChecklist />
     </SidebarProvider>
+    </BrandingProvider>
   );
 }
