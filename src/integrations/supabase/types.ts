@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          description: string
+          icon: string | null
+          id: string
+          name: string
+          rarity: string
+          threshold_kind: string | null
+          threshold_value: number | null
+          xp_reward: number
+        }
+        Insert: {
+          category?: string
+          code: string
+          created_at?: string
+          description: string
+          icon?: string | null
+          id?: string
+          name: string
+          rarity?: string
+          threshold_kind?: string | null
+          threshold_value?: number | null
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          description?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          rarity?: string
+          threshold_kind?: string | null
+          threshold_value?: number | null
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       activities: {
         Row: {
           actor_id: string | null
@@ -1042,6 +1084,36 @@ export type Database = {
         }
         Relationships: []
       }
+      changelog_entries: {
+        Row: {
+          body_md: string
+          created_at: string
+          id: string
+          kind: string
+          released_at: string
+          title: string
+          version: string
+        }
+        Insert: {
+          body_md: string
+          created_at?: string
+          id?: string
+          kind?: string
+          released_at?: string
+          title: string
+          version: string
+        }
+        Update: {
+          body_md?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          released_at?: string
+          title?: string
+          version?: string
+        }
+        Relationships: []
+      }
       chat_integrations: {
         Row: {
           active: boolean
@@ -1334,6 +1406,53 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      compliance_exports: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          date_from: string | null
+          date_to: string | null
+          file_url: string | null
+          id: string
+          kind: string
+          requested_by: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          file_url?: string | null
+          id?: string
+          kind: string
+          requested_by: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          file_url?: string | null
+          id?: string
+          kind?: string
+          requested_by?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_exports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_briefs: {
         Row: {
@@ -2273,6 +2392,130 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      help_articles: {
+        Row: {
+          body_md: string
+          category_id: string | null
+          created_at: string
+          helpful_count: number
+          id: string
+          not_helpful_count: number
+          published: boolean
+          slug: string
+          tags: string[]
+          title: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          body_md: string
+          category_id?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          not_helpful_count?: number
+          published?: boolean
+          slug: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          body_md?: string
+          category_id?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          not_helpful_count?: number
+          published?: boolean
+          slug?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "help_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      help_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          position: number
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          position?: number
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          position?: number
+          slug?: string
+        }
+        Relationships: []
+      }
+      impersonation_sessions: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          reason: string
+          started_at: string
+          target_user_id: string
+          tenant_id: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          reason: string
+          started_at?: string
+          target_user_id: string
+          tenant_id: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          reason?: string
+          started_at?: string
+          target_user_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impersonation_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       import_jobs: {
         Row: {
@@ -4516,6 +4759,50 @@ export type Database = {
           },
         ]
       }
+      sso_configurations: {
+        Row: {
+          active: boolean
+          created_at: string
+          domains: string[]
+          entity_id: string | null
+          id: string
+          metadata_url: string | null
+          provider: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          domains?: string[]
+          entity_id?: string | null
+          id?: string
+          metadata_url?: string | null
+          provider: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          domains?: string[]
+          entity_id?: string | null
+          id?: string
+          metadata_url?: string | null
+          provider?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_configurations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_trials: {
         Row: {
           converted_at: string | null
@@ -4553,6 +4840,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_status: {
+        Row: {
+          id: string
+          message: string | null
+          service: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          message?: string | null
+          service: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          message?: string | null
+          service?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tags: {
         Row: {
@@ -5046,40 +5357,52 @@ export type Database = {
           accent_color: string | null
           created_at: string
           created_by: string | null
+          custom_domain: string | null
+          data_residency: string
           id: string
           industry: string
           logo_url: string | null
           name: string
           primary_color: string | null
           settings: Json
+          sla_tier: string
           slug: string
           updated_at: string
+          white_label: boolean
         }
         Insert: {
           accent_color?: string | null
           created_at?: string
           created_by?: string | null
+          custom_domain?: string | null
+          data_residency?: string
           id?: string
           industry?: string
           logo_url?: string | null
           name: string
           primary_color?: string | null
           settings?: Json
+          sla_tier?: string
           slug: string
           updated_at?: string
+          white_label?: boolean
         }
         Update: {
           accent_color?: string | null
           created_at?: string
           created_by?: string | null
+          custom_domain?: string | null
+          data_residency?: string
           id?: string
           industry?: string
           logo_url?: string | null
           name?: string
           primary_color?: string | null
           settings?: Json
+          sla_tier?: string
           slug?: string
           updated_at?: string
+          white_label?: boolean
         }
         Relationships: []
       }
@@ -5275,6 +5598,45 @@ export type Database = {
           },
         ]
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          tenant_id: string | null
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          tenant_id?: string | null
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          tenant_id?: string | null
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_achievements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_capacity: {
         Row: {
           created_at: string
@@ -5354,6 +5716,50 @@ export type Database = {
             columns: ["skill_id"]
             isOneToOne: false
             referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_xp: {
+        Row: {
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          level: number
+          longest_streak: number
+          tenant_id: string
+          updated_at: string
+          user_id: string
+          xp_total: number
+        }
+        Insert: {
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+          xp_total?: number
+        }
+        Update: {
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+          xp_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_xp_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -5509,6 +5915,47 @@ export type Database = {
           },
         ]
       }
+      xp_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          ref_id: string | null
+          ref_kind: string | null
+          tenant_id: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          ref_id?: string | null
+          ref_kind?: string | null
+          tenant_id: string
+          user_id: string
+          xp: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          ref_id?: string | null
+          ref_kind?: string | null
+          tenant_id?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       mv_workload_by_user: {
@@ -5555,6 +6002,16 @@ export type Database = {
         Args: { _notes?: string; _task_id: string; _workflow_id: string }
         Returns: string
       }
+      award_xp: {
+        Args: {
+          _kind: string
+          _ref_id?: string
+          _ref_kind?: string
+          _tenant: string
+          _xp: number
+        }
+        Returns: Json
+      }
       benchmark_compare: { Args: { _tenant: string }; Returns: Json }
       campaign_report: { Args: { _campaign_id: string }; Returns: Json }
       campaign_roas: { Args: { _campaign_id: string }; Returns: Json }
@@ -5571,6 +6028,7 @@ export type Database = {
           workdays_total: number
         }[]
       }
+      check_achievements: { Args: { _tenant: string }; Returns: number }
       check_ai_rate_limit: { Args: { _user_id: string }; Returns: number }
       compute_next_run: {
         Args: { _cadence: string; _from?: string }
@@ -5841,6 +6299,22 @@ export type Database = {
       seed_sample_data: { Args: { _persona?: string }; Returns: string }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      squad_leaderboard: {
+        Args: { _tenant: string }
+        Returns: {
+          achievements_count: number
+          avatar_url: string
+          current_streak: number
+          display_name: string
+          level: number
+          user_id: string
+          xp_total: number
+        }[]
+      }
+      start_impersonation: {
+        Args: { _reason: string; _target_user: string; _tenant: string }
+        Returns: string
+      }
       start_pomodoro: {
         Args: {
           _ambient?: string
