@@ -36,7 +36,7 @@ export function QuickAdd() {
   };
 
   return (
-    <div className="space-y-2">
+    <div data-tour="quickadd" className="space-y-2">
       <div className="flex items-center gap-2 rounded-lg border bg-card p-1.5 shadow-soft transition-shadow focus-within:shadow-elevated">
         <Plus className="ml-2 h-4 w-4 text-muted-foreground" />
         <Input
