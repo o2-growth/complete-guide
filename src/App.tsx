@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { I18nProvider } from "@/hooks/useI18n";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/Auth.tsx";
@@ -74,6 +75,9 @@ const AutomationRulesPage = lazy(() => import("./pages/app/AutomationRulesPage.t
 const WorkspacesPage = lazy(() => import("./pages/app/WorkspacesPage.tsx"));
 const PlanPage = lazy(() => import("./pages/app/PlanPage.tsx"));
 const AcceptInvitePage = lazy(() => import("./pages/public/AcceptInvitePage.tsx"));
+const AdminErrorsPage = lazy(() => import("./pages/app/AdminErrorsPage.tsx"));
+const AdminHealthPage = lazy(() => import("./pages/app/AdminHealthPage.tsx"));
+const LanguagePage = lazy(() => import("./pages/app/LanguagePage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -86,6 +90,7 @@ const PageFallback = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+   <ErrorBoundary>
     <ThemeProvider>
       <I18nProvider>
       <TooltipProvider>
@@ -224,6 +229,9 @@ const App = () => (
                 <Route path="automacoes/regras" element={<AutomationRulesPage />} />
                 <Route path="workspaces" element={<WorkspacesPage />} />
                 <Route path="configuracoes/plano" element={<PlanPage />} />
+                <Route path="admin/erros" element={<AdminErrorsPage />} />
+                <Route path="admin/saude" element={<AdminHealthPage />} />
+                <Route path="configuracoes/idioma" element={<LanguagePage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}
@@ -239,6 +247,7 @@ const App = () => (
       </TooltipProvider>
       </I18nProvider>
     </ThemeProvider>
+   </ErrorBoundary>
   </QueryClientProvider>
 );
 

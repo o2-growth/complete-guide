@@ -1,5 +1,5 @@
 // Oxy Growth OS — Service Worker (offline + push)
-const CACHE = 'oxy-cache-v1';
+const CACHE = 'oxy-cache-v2';
 const ASSETS = ['/', '/app', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -19,18 +19,31 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   // Never cache API / supabase / OAuth
   if (url.pathname.startsWith('/~oauth') || url.hostname.includes('supabase')) return;
+
+  // Network-first for HTML navigation (always try fresh, fallback offline)
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).catch(() => caches.match('/') ));
+    e.respondWith(
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put('/', copy)).catch(() => {});
+        return res;
+      }).catch(() => caches.match('/'))
+    );
     return;
   }
+
+  // Stale-while-revalidate for assets
   e.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req).then((res) => {
-      if (res.ok && url.origin === self.location.origin) {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy));
-      }
-      return res;
-    }).catch(() => cached))
+    caches.match(req).then((cached) => {
+      const fetchPromise = fetch(req).then((res) => {
+        if (res && res.ok && url.origin === self.location.origin) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return res;
+      }).catch(() => cached);
+      return cached || fetchPromise;
+    })
   );
 });
 

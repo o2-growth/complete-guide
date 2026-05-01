@@ -54,6 +54,9 @@ import {
   Pin,
   Building2,
   Zap,
+  Activity,
+  Bug,
+  Languages,
 } from "lucide-react";
 import {
   Sidebar,
@@ -138,8 +141,11 @@ const sistema = [
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
   { title: "Busca global", url: "/app/buscar", icon: Search },
   { title: "Dados (import/export)", url: "/app/configuracoes/dados", icon: Database },
+  { title: "Saúde do sistema", url: "/app/admin/saude", icon: Activity },
+  { title: "Erros (admin)", url: "/app/admin/erros", icon: Bug },
   { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
   { title: "Aparência", url: "/app/configuracoes/aparencia", icon: Palette },
+  { title: "Idioma", url: "/app/configuracoes/idioma", icon: Languages },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
   { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
   { title: "Audit log", url: "/app/audit", icon: History },
@@ -237,7 +243,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 38/43
+            v1.0 · 39/43
           </p>
         )}
       </SidebarFooter>

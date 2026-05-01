@@ -1578,6 +1578,56 @@ export type Database = {
         }
         Relationships: []
       }
+      error_events: {
+        Row: {
+          context: Json | null
+          created_at: string
+          id: string
+          level: string
+          message: string
+          source: string
+          stack: string | null
+          tenant_id: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          id?: string
+          level?: string
+          message: string
+          source?: string
+          stack?: string | null
+          tenant_id?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          id?: string
+          level?: string
+          message?: string
+          source?: string
+          stack?: string | null
+          tenant_id?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "error_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       export_jobs: {
         Row: {
           created_at: string
@@ -2544,6 +2594,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      perf_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metric: string
+          rating: string | null
+          route: string
+          tenant_id: string | null
+          user_id: string | null
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric: string
+          rating?: string | null
+          route: string
+          tenant_id?: string | null
+          user_id?: string | null
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric?: string
+          rating?: string | null
+          route?: string
+          tenant_id?: string | null
+          user_id?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perf_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pomodoros: {
         Row: {
@@ -4941,6 +5032,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      health_snapshot: { Args: { _tenant: string }; Returns: Json }
       inbox_summary: { Args: { _tenant: string }; Returns: Json }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
       kr_progress: { Args: { _tenant: string }; Returns: number }

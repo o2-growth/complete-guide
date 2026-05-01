@@ -2,11 +2,12 @@
  * i18n base — pt-BR (default) e en-US.
  * Base leve para evoluir sem dependências externas.
  */
-export type Locale = "pt-BR" | "en-US";
+export type Locale = "pt-BR" | "en-US" | "es-ES";
 
 export const LOCALES: { code: Locale; label: string; flag: string }[] = [
   { code: "pt-BR", label: "Português (Brasil)", flag: "🇧🇷" },
   { code: "en-US", label: "English (US)", flag: "🇺🇸" },
+  { code: "es-ES", label: "Español", flag: "🇪🇸" },
 ];
 
 type Dict = Record<string, string>;
@@ -18,6 +19,9 @@ export const translations: Record<Locale, Dict> = {
     "common.loading": "Carregando…",
     "common.search": "Buscar",
     "common.skip_to_content": "Pular para o conteúdo",
+    "common.offline": "Offline",
+    "common.online": "Online",
+    "common.retry": "Tentar de novo",
     "settings.title": "Configurações",
     "settings.description": "Preferências da sua conta e do workspace.",
     "settings.appearance": "Aparência",
@@ -43,6 +47,9 @@ export const translations: Record<Locale, Dict> = {
     "common.loading": "Loading…",
     "common.search": "Search",
     "common.skip_to_content": "Skip to content",
+    "common.offline": "Offline",
+    "common.online": "Online",
+    "common.retry": "Retry",
     "settings.title": "Settings",
     "settings.description": "Preferences for your account and workspace.",
     "settings.appearance": "Appearance",
@@ -61,6 +68,34 @@ export const translations: Record<Locale, Dict> = {
     "settings.signed_in_as": "Signed in as",
     "nav.inbox": "Inbox",
     "nav.today": "Today",
+  },
+  "es-ES": {
+    "common.save": "Guardar",
+    "common.cancel": "Cancelar",
+    "common.loading": "Cargando…",
+    "common.search": "Buscar",
+    "common.skip_to_content": "Saltar al contenido",
+    "common.offline": "Sin conexión",
+    "common.online": "Conectado",
+    "common.retry": "Reintentar",
+    "settings.title": "Configuración",
+    "settings.description": "Preferencias de tu cuenta y workspace.",
+    "settings.appearance": "Apariencia",
+    "settings.theme": "Tema",
+    "settings.theme.light": "Claro",
+    "settings.theme.dark": "Oscuro",
+    "settings.language": "Idioma",
+    "settings.language.help": "Define el idioma de la interfaz.",
+    "settings.install": "Instalar como app",
+    "settings.install.help":
+      "Añade Oxy Growth OS a tu pantalla de inicio para acceso rápido.",
+    "settings.install.button": "Instalar ahora",
+    "settings.install.unavailable":
+      "Usa el menú del navegador (Compartir → Añadir a pantalla de inicio en iOS).",
+    "settings.account": "Cuenta",
+    "settings.signed_in_as": "Conectado como",
+    "nav.inbox": "Bandeja",
+    "nav.today": "Hoy",
   },
 };
 
