@@ -161,8 +161,25 @@ export function useToggleTaskDone() {
         })
         .eq("id", task.id);
       if (error) throw error;
+      return { task, wasDone: isDone };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+    onSuccess: ({ task, wasDone }) => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      if (!wasDone) {
+        toast.success("Tarefa concluída ✓", {
+          action: {
+            label: "Desfazer",
+            onClick: async () => {
+              await supabase
+                .from("tasks")
+                .update({ done_at: null, status_id: task.status_id })
+                .eq("id", task.id);
+              qc.invalidateQueries({ queryKey: ["tasks"] });
+            },
+          },
+        });
+      }
+    },
     onError: (err: Error) => toast.error("Erro: " + err.message),
   });
 }
@@ -173,10 +190,19 @@ export function useDeleteTask() {
     mutationFn: async (taskId: string) => {
       const { error } = await supabase.from("tasks").update({ archived: true }).eq("id", taskId);
       if (error) throw error;
+      return taskId;
     },
-    onSuccess: () => {
-      toast.success("Tarefa arquivada");
+    onSuccess: (taskId) => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Tarefa arquivada", {
+        action: {
+          label: "Desfazer",
+          onClick: async () => {
+            await supabase.from("tasks").update({ archived: false }).eq("id", taskId);
+            qc.invalidateQueries({ queryKey: ["tasks"] });
+          },
+        },
+      });
     },
     onError: (err: Error) => toast.error("Erro: " + err.message),
   });
