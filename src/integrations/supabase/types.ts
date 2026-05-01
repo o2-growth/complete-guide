@@ -577,6 +577,155 @@ export type Database = {
           },
         ]
       }
+      automation_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          payload: Json
+          processed_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      automation_rules: {
+        Row: {
+          actions: Json
+          active: boolean
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          last_run_at: string | null
+          name: string
+          run_count: number
+          tenant_id: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          active?: boolean
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_run_at?: string | null
+          name: string
+          run_count?: number
+          tenant_id: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          active?: boolean
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_run_at?: string | null
+          name?: string
+          run_count?: number
+          tenant_id?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      automation_runs: {
+        Row: {
+          actions_executed: number
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json
+          rule_id: string
+          status: string
+          tenant_id: string
+          trigger_event: string
+        }
+        Insert: {
+          actions_executed?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          rule_id: string
+          status?: string
+          tenant_id: string
+          trigger_event: string
+        }
+        Update: {
+          actions_executed?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          rule_id?: string
+          status?: string
+          tenant_id?: string
+          trigger_event?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_runs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_plans: {
+        Row: {
+          features: Json
+          id: string
+          max_members: number | null
+          max_projects: number | null
+          name: string
+          position: number
+          price_monthly: number
+        }
+        Insert: {
+          features?: Json
+          id: string
+          max_members?: number | null
+          max_projects?: number | null
+          name: string
+          position?: number
+          price_monthly?: number
+        }
+        Update: {
+          features?: Json
+          id?: string
+          max_members?: number | null
+          max_projects?: number | null
+          name?: string
+          position?: number
+          price_monthly?: number
+        }
+        Relationships: []
+      }
       bio_links: {
         Row: {
           active: boolean
@@ -794,11 +943,45 @@ export type Database = {
           },
         ]
       }
+      comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          emoji: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          emoji: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author_id: string
           body: string
           created_at: string
+          deleted_at: string | null
+          edited_at: string | null
           id: string
           mentions: string[] | null
           parent_id: string | null
@@ -809,6 +992,8 @@ export type Database = {
           author_id: string
           body: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
           mentions?: string[] | null
           parent_id?: string | null
@@ -819,6 +1004,8 @@ export type Database = {
           author_id?: string
           body?: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
           mentions?: string[] | null
           parent_id?: string | null
@@ -1821,6 +2008,48 @@ export type Database = {
           p75?: number
           source?: string | null
           unit?: string
+        }
+        Relationships: []
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["tenant_role"]
+          status: string
+          tenant_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["tenant_role"]
+          status?: string
+          tenant_id: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["tenant_role"]
+          status?: string
+          tenant_id?: string
+          token?: string
         }
         Relationships: []
       }
@@ -3979,6 +4208,44 @@ export type Database = {
           },
         ]
       }
+      tenant_billing: {
+        Row: {
+          current_period_end: string | null
+          external_customer_id: string | null
+          plan_id: string
+          status: string
+          tenant_id: string
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          current_period_end?: string | null
+          external_customer_id?: string | null
+          plan_id?: string
+          status?: string
+          tenant_id: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          current_period_end?: string | null
+          external_customer_id?: string | null
+          plan_id?: string
+          status?: string
+          tenant_id?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_billing_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_members: {
         Row: {
           created_at: string
@@ -4467,6 +4734,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invitation: { Args: { _token: string }; Returns: string }
       apply_project_template: {
         Args: {
           p_key: string
@@ -4514,6 +4782,10 @@ export type Database = {
         Returns: string
       }
       copilot_context: { Args: { _tenant: string }; Returns: Json }
+      create_workspace: {
+        Args: { _name: string; _slug?: string }
+        Returns: string
+      }
       decide_social_approval: {
         Args: {
           _comment: string
@@ -4577,6 +4849,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      enqueue_automation_event: {
+        Args: { _event: string; _payload: Json; _tenant: string }
+        Returns: string
+      }
       enqueue_webhook: {
         Args: { _event: string; _payload: Json; _tenant: string }
         Returns: number
@@ -4611,6 +4887,18 @@ export type Database = {
           status: string
           task_id: string
           tenant_id: string
+        }[]
+      }
+      get_invitation_by_token: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          expires_at: string
+          id: string
+          role: Database["public"]["Enums"]["tenant_role"]
+          status: string
+          tenant_id: string
+          tenant_name: string
         }[]
       }
       get_social_approval_by_token: {
@@ -4822,6 +5110,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      toggle_comment_reaction: {
+        Args: { _comment_id: string; _emoji: string }
+        Returns: boolean
       }
       user_role_in_tenant: {
         Args: { _tenant_id: string }
