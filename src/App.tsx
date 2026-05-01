@@ -82,6 +82,10 @@ const SecurityPage = lazy(() => import("./pages/app/SecurityPage.tsx"));
 const PrivacyPage = lazy(() => import("./pages/app/PrivacyPage.tsx"));
 const MarketplacePage = lazy(() => import("./pages/app/MarketplacePage.tsx"));
 const StartHerePage = lazy(() => import("./pages/app/StartHerePage.tsx"));
+const ExternalIntegrationsPage = lazy(() => import("./pages/app/ExternalIntegrationsPage.tsx"));
+const AiCopilotProactivePage = lazy(() => import("./pages/app/AiCopilotProactivePage.tsx"));
+const PricingPage = lazy(() => import("./pages/public/PricingPage.tsx"));
+const CheckoutPage = lazy(() => import("./pages/public/CheckoutPage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -111,6 +115,8 @@ const App = () => (
               <Route path="/aprovar-midia/:token" element={<SocialApprovePage />} />
               <Route path="/bio/:slug" element={<PublicBioPage />} />
               <Route path="/aceitar-convite/:token" element={<AcceptInvitePage />} />
+              <Route path="/precos" element={<PricingPage />} />
+              <Route path="/checkout/:plan" element={<CheckoutPage />} />
               <Route
                 path="/onboarding"
                 element={
@@ -240,6 +246,8 @@ const App = () => (
                 <Route path="configuracoes/privacidade" element={<PrivacyPage />} />
                 <Route path="marketplace" element={<MarketplacePage />} />
                 <Route path="comecar" element={<StartHerePage />} />
+                <Route path="configuracoes/integracoes-externas" element={<ExternalIntegrationsPage />} />
+                <Route path="ia-proativa" element={<AiCopilotProactivePage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}
