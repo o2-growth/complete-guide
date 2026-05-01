@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TimerIndicator } from "@/components/timer/TimerIndicator";
 import { useUnreadCount } from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
+import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
 
 interface TopbarProps {
   onOpenCommand: () => void;
@@ -59,6 +60,8 @@ export function Topbar({ onOpenCommand }: TopbarProps) {
     <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
+      <WorkspaceSwitcher />
+      <Separator orientation="vertical" className="h-6 hidden md:block" />
 
       <button
         onClick={onOpenCommand}
