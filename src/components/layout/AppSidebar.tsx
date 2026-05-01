@@ -53,7 +53,6 @@ import {
   Database,
   Pin,
   Building2,
-  Sparkles,
   Zap,
 } from "lucide-react";
 import {
@@ -135,7 +134,7 @@ const sistema = [
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
   { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
-  { title: "Plano & billing", url: "/app/configuracoes/plano", icon: Sparkles },
+  { title: "Plano & billing", url: "/app/configuracoes/plano", icon: Crown },
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
   { title: "Busca global", url: "/app/buscar", icon: Search },
   { title: "Dados (import/export)", url: "/app/configuracoes/dados", icon: Database },
