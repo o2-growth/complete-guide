@@ -8,12 +8,19 @@ interface MobileBottomNavProps {
   onQuickAdd?: () => void;
 }
 
-const items = [
+type NavItem = {
+  to: string;
+  icon: typeof Inbox;
+  label: string;
+  end?: boolean;
+};
+
+const items: NavItem[] = [
   { to: "/app", icon: Inbox, label: "Inbox", end: true },
   { to: "/app/hoje", icon: Sun, label: "Hoje" },
   { to: "/app/calendario", icon: CalendarDays, label: "Agenda" },
   { to: "/app/notificacoes", icon: Bell, label: "Alertas" },
-] as const;
+];
 
 /**
  * Bottom navigation visível apenas em viewports < md (768px).
