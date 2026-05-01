@@ -134,6 +134,7 @@ const insights = [
   { title: "Capacity", url: "/app/capacity", icon: CalendarRange },
   { title: "Foco", url: "/app/foco", icon: Timer },
   { title: "Gênio Growth", url: "/app/genio", icon: Sparkles },
+  { title: "IA Proativa", url: "/app/ia-proativa", icon: Sparkles },
 ];
 
 const sistema = [
@@ -156,6 +157,7 @@ const sistema = [
   { title: "Idioma", url: "/app/configuracoes/idioma", icon: Languages },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
   { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
+  { title: "Integrações nativas", url: "/app/configuracoes/integracoes-externas", icon: Plug },
   { title: "Audit log", url: "/app/audit", icon: History },
   { title: "Configurações", url: "/app/configuracoes", icon: Settings, end: true as const },
 ];
