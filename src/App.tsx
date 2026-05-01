@@ -81,6 +81,7 @@ const LanguagePage = lazy(() => import("./pages/app/LanguagePage.tsx"));
 const SecurityPage = lazy(() => import("./pages/app/SecurityPage.tsx"));
 const PrivacyPage = lazy(() => import("./pages/app/PrivacyPage.tsx"));
 const MarketplacePage = lazy(() => import("./pages/app/MarketplacePage.tsx"));
+const StartHerePage = lazy(() => import("./pages/app/StartHerePage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -238,6 +239,7 @@ const App = () => (
                 <Route path="seguranca" element={<SecurityPage />} />
                 <Route path="configuracoes/privacidade" element={<PrivacyPage />} />
                 <Route path="marketplace" element={<MarketplacePage />} />
+                <Route path="comecar" element={<StartHerePage />} />
                 <Route
                   path="configuracoes"
                   element={<SettingsPage />}

@@ -60,6 +60,7 @@ import {
   Lock,
   ShieldAlert,
   Store,
+  Compass,
 } from "lucide-react";
 import {
   Sidebar,
@@ -137,6 +138,7 @@ const insights = [
 
 const sistema = [
   { title: "Notificações", url: "/app/notificacoes", icon: Bell },
+  { title: "Comece aqui", url: "/app/comecar", icon: Compass },
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
   { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
@@ -194,7 +196,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader data-tour="sidebar">
         <div className="flex items-center gap-2.5 px-2 py-1.5">
           <img
             src={branding.logoUrl || logoOxy}
