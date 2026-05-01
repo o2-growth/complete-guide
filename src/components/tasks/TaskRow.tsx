@@ -14,6 +14,8 @@ import { TaskRow as TTask, useDeleteTask, useToggleTaskDone } from "@/hooks/useT
 import { cn } from "@/lib/utils";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { SLABadge } from "@/components/sla/SLABadge";
+import { useConfetti } from "@/hooks/useConfetti";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "text-[hsl(var(--prio-urgent))]",
@@ -35,6 +37,20 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
   const toggle = useToggleTaskDone();
   const remove = useDeleteTask();
   const done = !!task.done_at;
+  const fire = useConfetti();
+  const handleToggle = (e?: React.MouseEvent | unknown) => {
+    if (!done) {
+      const ev = e as React.MouseEvent | undefined;
+      const x = ev?.clientX;
+      const y = ev?.clientY;
+      fire(x, y, 40);
+    }
+    toggle.mutate(task);
+  };
+  const swipeRef = useSwipeGesture<HTMLDivElement>({
+    onSwipeRight: () => handleToggle(),
+    onSwipeLeft: () => remove.mutate(task.id),
+  });
 
   const due = task.due_at ? new Date(task.due_at) : null;
   const overdue = due && !done && isPast(due) && !isToday(due);
@@ -42,6 +58,7 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
 
   return (
     <div
+      ref={swipeRef}
       className={cn(
         "group flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30",
         done && "opacity-60",
@@ -56,7 +73,7 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
     >
       <Checkbox
         checked={done}
-        onCheckedChange={() => toggle.mutate(task)}
+        onCheckedChange={() => handleToggle()}
         disabled={toggle.isPending}
         className="mt-0.5"
         data-no-open
