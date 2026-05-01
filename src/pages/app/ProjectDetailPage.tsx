@@ -22,6 +22,9 @@ export default function ProjectDetailPage() {
   const { data: project, isLoading } = useProject(id);
   const { data: tasks, isLoading: lt } = useProjectTasks(id);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [tplOpen, setTplOpen] = useState(false);
+  const [tplName, setTplName] = useState("");
+  const saveTpl = useSaveProjectAsTemplate();
 
   if (isLoading) {
     return (
@@ -44,10 +47,6 @@ export default function ProjectDetailPage() {
   const done = allTasks.filter((t) => !!t.done_at).length;
   const total = allTasks.length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-
-  const [tplOpen, setTplOpen] = useState(false);
-  const [tplName, setTplName] = useState("");
-  const saveTpl = useSaveProjectAsTemplate();
 
   return (
     <div className="container max-w-7xl py-6 space-y-5">
