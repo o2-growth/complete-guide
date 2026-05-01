@@ -53,8 +53,7 @@ export default function AutomationRulesPage() {
           icon={Zap}
           title="Nenhuma regra ainda"
           description="Crie sua primeira automação: por exemplo, notificar o líder quando uma tarefa urgente for criada."
-          actionLabel="Criar primeira regra"
-          onAction={startNew}
+          action={{ label: "Criar primeira regra", onClick: startNew }}
         />
       ) : (
         <div className="grid gap-3">
