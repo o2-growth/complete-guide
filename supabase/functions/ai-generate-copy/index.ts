@@ -1,4 +1,5 @@
-import { authenticate, callAI, aiErrorResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { authenticate, callAI, aiErrorResponse, aiUnavailableResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const PLATFORM_HINTS: Record<string, string> = {
   ig_feed: "Post para feed do Instagram. Até 2200 caracteres. Use 1 hook forte na primeira linha, parágrafos curtos, emojis pontuais e CTA claro. Inclua 5-10 hashtags relevantes ao final.",
@@ -25,13 +26,19 @@ Deno.serve(async (req) => {
     const started = Date.now();
     const hint = PLATFORM_HINTS[platform] ?? PLATFORM_HINTS.ig_feed;
 
-    const upstream = await callAI({
+    let upstream: Response;
+    try {
+      upstream = await withErrorBoundary((signal) => callAI({
       model,
       messages: [
         { role: "system", content: `${SYSTEM_TONE}\n\n${hint}\nTom: ${tone}.` },
         { role: "user", content: `Briefing:\n${brief}\n\nGere a copy completa pronta para publicar. Não inclua explicações antes ou depois — apenas a copy.` },
       ],
-    });
+    }, signal), { source: "ai-generate-copy", timeoutMs: 25000, retries: 3 });
+    } catch {
+      await logInteraction(ctx, { feature: "ai-generate-copy", model, status: "error", error: "boundary failed", latencyMs: Date.now() - started });
+      return aiUnavailableResponse();
+    }
 
     if (!upstream.ok) {
       await logInteraction(ctx, { feature: "ai-generate-copy", model, status: "error", error: `${upstream.status}`, latencyMs: Date.now() - started });
