@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.74.0";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,20 +26,28 @@ Deno.serve(async (req) => {
     let narrative = "";
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (apiKey) {
-      const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: "Você é um analista de growth. Em 3 frases curtas em PT-BR, explique o resultado da simulação, destaque o impacto principal e dê 1 recomendação acionável. Sem disclaimers." },
-            { role: "user", content: `Simulação ${kind} — inputs: ${JSON.stringify(inputs)} — resultado: ${JSON.stringify(result)}` },
-          ],
-        }),
-      });
-      if (aiResp.ok) {
-        const ai = await aiResp.json();
-        narrative = ai.choices?.[0]?.message?.content ?? "";
+      try {
+        const aiResp = await withErrorBoundary(
+          (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                { role: "system", content: "Você é um analista de growth. Em 3 frases curtas em PT-BR, explique o resultado da simulação, destaque o impacto principal e dê 1 recomendação acionável. Sem disclaimers." },
+                { role: "user", content: `Simulação ${kind} — inputs: ${JSON.stringify(inputs)} — resultado: ${JSON.stringify(result)}` },
+              ],
+            }),
+            signal,
+          }),
+          { source: "what-if-simulate", timeoutMs: 25000, retries: 3 },
+        );
+        if (aiResp.ok) {
+          const ai = await aiResp.json();
+          narrative = ai.choices?.[0]?.message?.content ?? "";
+        }
+      } catch {
+        narrative = "Serviço de IA temporariamente indisponível. Tente novamente em alguns segundos.";
       }
     }
 

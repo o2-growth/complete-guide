@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -59,17 +60,15 @@ Severidade: ${a.severity}
 Ação sugerida no sistema: ${a.suggested_action ?? "—"}
 Responda em português, direto, sem listas.`;
 
-            const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${LOVABLE_KEY}`,
-              },
-              body: JSON.stringify({
-                model: "google/gemini-2.5-flash",
-                messages: [{ role: "user", content: prompt }],
+            const r = await withErrorBoundary(
+              (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${LOVABLE_KEY}` },
+                body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: [{ role: "user", content: prompt }] }),
+                signal,
               }),
-            });
+              { source: "detect-anomalies", timeoutMs: 25000, retries: 3, fallback: () => new Response("{}", { status: 599 }) },
+            );
             if (r.ok) {
               const j = await r.json();
               const text = j?.choices?.[0]?.message?.content?.trim();

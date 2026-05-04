@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.74.0";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,18 +31,27 @@ Deno.serve(async (req) => {
     let recommendations: any[] = [];
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (apiKey) {
-      const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: "Você é um consultor sênior de growth. Gere um scorecard mensal em PT-BR com: (1) parágrafo executivo de 4 frases destacando o que foi melhor/pior vs benchmark e (2) JSON com 3 recomendações priorizadas {priority:'high|medium|low', title, rationale, expected_impact}. Resposta no formato: SUMMARY:\\n<texto>\\nRECOMMENDATIONS:\\n<json array>" },
-            { role: "user", content: `Métricas do mês:\n${JSON.stringify(ctx)}\n\nBenchmarks:\n${JSON.stringify(bench)}` },
-          ],
-        }),
-      });
-      if (aiResp.ok) {
+      let aiResp: Response | null = null;
+      try {
+        aiResp = await withErrorBoundary(
+          (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                { role: "system", content: "Você é um consultor sênior de growth. Gere um scorecard mensal em PT-BR com: (1) parágrafo executivo de 4 frases destacando o que foi melhor/pior vs benchmark e (2) JSON com 3 recomendações priorizadas {priority:'high|medium|low', title, rationale, expected_impact}. Resposta no formato: SUMMARY:\\n<texto>\\nRECOMMENDATIONS:\\n<json array>" },
+                { role: "user", content: `Métricas do mês:\n${JSON.stringify(ctx)}\n\nBenchmarks:\n${JSON.stringify(bench)}` },
+              ],
+            }),
+            signal,
+          }),
+          { source: "scorecard-monthly", timeoutMs: 25000, retries: 3, fallback: () => null as unknown as Response },
+        );
+      } catch { aiResp = null; }
+      if (!aiResp) {
+        summary = "Serviço de IA temporariamente indisponível. Tente novamente em alguns segundos.";
+      } else if (aiResp.ok) {
         const ai = await aiResp.json();
         const txt = ai.choices?.[0]?.message?.content ?? "";
         const sumMatch = txt.match(/SUMMARY:\s*([\s\S]*?)(?:RECOMMENDATIONS:|$)/i);

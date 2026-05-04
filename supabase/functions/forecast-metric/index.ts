@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,11 +44,17 @@ Média histórica (últimos ${days_back}d): ${avgHist.toFixed(1)}
 Média prevista (próximos ${days_ahead}d): ${avgFore.toFixed(1)}
 Variação prevista: ${trendPct}%
 Seja direto, traga 1 ação prática.`;
-        const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${LOVABLE_KEY}` },
-          body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: [{ role: "user", content: prompt }] }),
-        });
+        const r = await withErrorBoundary(
+          (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${LOVABLE_KEY}` },
+            body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: [{ role: "user", content: prompt }] }),
+            signal,
+          }),
+          { source: "forecast-metric", timeoutMs: 25000, retries: 3, fallback: () => null as unknown as Response },
+        );
+        if (!r) { narrative = "Narrativa indisponível no momento."; }
+        else
         if (r.ok) {
           const j = await r.json();
           narrative = j?.choices?.[0]?.message?.content?.trim() ?? null;

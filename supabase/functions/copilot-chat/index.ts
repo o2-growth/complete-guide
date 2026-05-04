@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.74.0";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,11 +98,20 @@ Deno.serve(async (req) => {
     // tool loop (max 4 rounds)
     let final = "";
     for (let round = 0; round < 4; round++) {
-      const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "google/gemini-2.5-flash", messages, tools: TOOLS }),
-      });
+      let aiResp: Response;
+      try {
+        aiResp = await withErrorBoundary(
+          (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "google/gemini-2.5-flash", messages, tools: TOOLS }),
+            signal,
+          }),
+          { source: "copilot-chat", timeoutMs: 25000, retries: 3 },
+        );
+      } catch {
+        return new Response(JSON.stringify({ error: "Serviço de IA temporariamente indisponível. Tente novamente em alguns segundos." }), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
       if (aiResp.status === 429) return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers: corsHeaders });
       if (aiResp.status === 402) return new Response(JSON.stringify({ error: "Credits exhausted" }), { status: 402, headers: corsHeaders });
       if (!aiResp.ok) return new Response(JSON.stringify({ error: "AI error", detail: await aiResp.text() }), { status: 500, headers: corsHeaders });

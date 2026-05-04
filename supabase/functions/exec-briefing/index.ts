@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -42,20 +43,22 @@ Deno.serve(async (req) => {
 
 Comece pelo destaque positivo, depois aponte 1 risco prioritário e 1 ação concreta para a semana. PT-BR, sem listas, tom executivo.`;
 
-      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-      if (r.ok) {
-        const j = await r.json();
-        narrative = j?.choices?.[0]?.message?.content ?? narrative;
+      try {
+        const r = await withErrorBoundary(
+          (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${LOVABLE_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: [{ role: "user", content: prompt }] }),
+            signal,
+          }),
+          { source: "exec-briefing", timeoutMs: 25000, retries: 3 },
+        );
+        if (r.ok) {
+          const j = await r.json();
+          narrative = j?.choices?.[0]?.message?.content ?? narrative;
+        }
+      } catch {
+        narrative = "Serviço de IA temporariamente indisponível. Tente novamente em alguns segundos.";
       }
     }
 
