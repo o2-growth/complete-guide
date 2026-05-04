@@ -1,4 +1,5 @@
-import { authenticate, corsHeaders, logInteraction, aiErrorResponse } from "../_shared/ai-helpers.ts";
+import { authenticate, corsHeaders, logInteraction, aiErrorResponse, aiUnavailableResponse } from "../_shared/ai-helpers.ts";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 /**
  * Gera uma imagem com Nano Banana (google/gemini-2.5-flash-image) e devolve data URL base64.
@@ -22,15 +23,21 @@ Deno.serve(async (req) => {
 
     const model = "google/gemini-2.5-flash-image";
     const started = Date.now();
-    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "user", content: fullPrompt }],
-        modalities: ["image", "text"],
-      }),
-    });
+    let upstream: Response;
+    try {
+      upstream = await withErrorBoundary(
+        (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model, messages: [{ role: "user", content: fullPrompt }], modalities: ["image", "text"] }),
+          signal,
+        }),
+        { source: "ai-generate-image", timeoutMs: 45000, retries: 2 },
+      );
+    } catch {
+      await logInteraction(ctx, { feature: "ai-generate-image", model, status: "error", error: "boundary failed", latencyMs: Date.now() - started });
+      return aiUnavailableResponse();
+    }
 
     if (!upstream.ok) {
       await logInteraction(ctx, { feature: "ai-generate-image", model, status: "error", error: `${upstream.status}`, latencyMs: Date.now() - started });
