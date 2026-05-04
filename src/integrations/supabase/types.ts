@@ -6013,6 +6013,10 @@ export type Database = {
         Returns: Json
       }
       benchmark_compare: { Args: { _tenant: string }; Returns: Json }
+      broadcast_table_change: {
+        Args: { _channel: string; _event: string; _payload: Json }
+        Returns: undefined
+      }
       campaign_report: { Args: { _campaign_id: string }; Returns: Json }
       campaign_roas: { Args: { _campaign_id: string }; Returns: Json }
       capacity_for_user: {
