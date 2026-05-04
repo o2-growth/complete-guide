@@ -1,4 +1,5 @@
-import { authenticate, callAI, aiErrorResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { authenticate, callAI, aiErrorResponse, aiUnavailableResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 interface ChatMessage { role: "user" | "assistant" | "system"; content: string }
 
@@ -27,11 +28,16 @@ Deno.serve(async (req) => {
     const model = "google/gemini-2.5-pro";
     const started = Date.now();
 
-    const upstream = await callAI({
-      model,
-      stream: true,
-      messages: [{ role: "system", content: systemPrompt }, ...messages],
-    });
+    let upstream: Response;
+    try {
+      upstream = await withErrorBoundary(
+        (signal) => callAI({ model, stream: true, messages: [{ role: "system", content: systemPrompt }, ...messages] }, signal),
+        { source: "ai-chat", timeoutMs: 25000, retries: 3 },
+      );
+    } catch {
+      await logInteraction(ctx, { feature: "ai-chat", model, status: "error", error: "boundary failed", latencyMs: Date.now() - started });
+      return aiUnavailableResponse();
+    }
 
     if (!upstream.ok || !upstream.body) {
       const status = upstream.status;
