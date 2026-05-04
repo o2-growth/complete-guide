@@ -92,14 +92,22 @@ export async function logInteraction(
 
 export const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-export async function callAI(body: Record<string, unknown>): Promise<Response> {
+export async function callAI(body: Record<string, unknown>, signal?: AbortSignal): Promise<Response> {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Response(JSON.stringify({ error: "LOVABLE_API_KEY missing" }), { status: 500, headers: corsHeaders });
   return await fetch(GATEWAY_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal,
   });
+}
+
+export function aiUnavailableResponse(): Response {
+  return new Response(
+    JSON.stringify({ error: "Serviço de IA temporariamente indisponível. Tente novamente em alguns segundos." }),
+    { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
 }
 
 export function aiErrorResponse(status: number): Response {
