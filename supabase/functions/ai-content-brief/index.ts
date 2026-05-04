@@ -1,4 +1,5 @@
-import { authenticate, callAI, aiErrorResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { authenticate, callAI, aiErrorResponse, aiUnavailableResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 /**
  * Gera uma pauta de conteúdo (content brief) com 3-5 ângulos + 5 hooks acionáveis.
@@ -17,7 +18,9 @@ Deno.serve(async (req) => {
     const model = "google/gemini-2.5-pro";
     const started = Date.now();
 
-    const upstream = await callAI({
+    let upstream: Response;
+    try {
+      upstream = await withErrorBoundary((signal) => callAI({
       model,
       messages: [
         { role: "system", content: SYSTEM_TONE },
@@ -35,7 +38,11 @@ Retorne JSON puro (sem markdown) com este schema:
   "hooks": ["frase 1", "frase 2", ...]   // 5 hooks fortes (primeira linha)
 }` },
       ],
-    });
+    }, signal), { source: "ai-content-brief", timeoutMs: 25000, retries: 3 });
+    } catch {
+      await logInteraction(ctx, { feature: "ai-content-brief", model, status: "error", error: "boundary failed", latencyMs: Date.now() - started });
+      return aiUnavailableResponse();
+    }
 
     if (!upstream.ok) {
       await logInteraction(ctx, { feature: "ai-content-brief", model, status: "error", error: `${upstream.status}`, latencyMs: Date.now() - started });
