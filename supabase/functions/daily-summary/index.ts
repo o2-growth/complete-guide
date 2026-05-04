@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,17 +62,15 @@ Deno.serve(async (req) => {
 
 Tom motivador mas direto. Sem bullets, sem emojis em excesso (no máximo 1).`;
       try {
-        const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [{ role: "user", content: prompt }],
+        const r = await withErrorBoundary(
+          (signal) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${LOVABLE_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: [{ role: "user", content: prompt }] }),
+            signal,
           }),
-        });
+          { source: "daily-summary", timeoutMs: 25000, retries: 3, fallback: () => new Response(JSON.stringify({ choices: [] }), { status: 599 }) },
+        );
         if (r.ok) {
           const j = await r.json();
           content = j?.choices?.[0]?.message?.content ?? content;
