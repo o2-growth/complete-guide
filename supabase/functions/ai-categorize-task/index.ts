@@ -1,4 +1,5 @@
-import { authenticate, callAI, aiErrorResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { authenticate, callAI, aiErrorResponse, aiUnavailableResponse, corsHeaders, logInteraction, SYSTEM_TONE } from "../_shared/ai-helpers.ts";
+import { withErrorBoundary } from "../_shared/withErrorBoundary.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -21,7 +22,9 @@ Deno.serve(async (req) => {
     const model = "google/gemini-2.5-flash";
     const started = Date.now();
 
-    const upstream = await callAI({
+    let upstream: Response;
+    try {
+      upstream = await withErrorBoundary((signal) => callAI({
       model,
       messages: [
         { role: "system", content: SYSTEM_TONE },
@@ -47,7 +50,11 @@ Deno.serve(async (req) => {
         },
       }],
       tool_choice: { type: "function", function: { name: "categorize" } },
-    });
+    }, signal), { source: "ai-categorize-task", timeoutMs: 25000, retries: 3 });
+    } catch {
+      await logInteraction(ctx, { feature: "ai-categorize-task", model, status: "error", error: "boundary failed", taskId, latencyMs: Date.now() - started });
+      return aiUnavailableResponse();
+    }
 
     if (!upstream.ok) {
       await logInteraction(ctx, { feature: "ai-categorize-task", model, status: "error", error: `${upstream.status}`, taskId, latencyMs: Date.now() - started });
