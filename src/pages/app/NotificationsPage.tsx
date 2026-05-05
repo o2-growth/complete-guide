@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Bell, Check, RefreshCw, Settings as SettingsIcon, AlertOctagon, Target, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -10,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import {
-  useNotifications,
+  useNotificationsInfinite,
   useMarkRead,
   useScanNotifications,
   useNotificationPrefs,
   useUpdatePrefs,
   type Notification,
 } from "@/hooks/useNotifications";
+import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
 import { cn } from "@/lib/utils";
 
 const KIND_ICON: Record<string, typeof Bell> = {
@@ -32,14 +34,43 @@ const SEV: Record<Notification["severity"], string> = {
 };
 
 export default function NotificationsPage() {
-  const { data: list = [] } = useNotifications();
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useNotificationsInfinite();
   const { data: prefs } = useNotificationPrefs();
   const markRead = useMarkRead();
   const scan = useScanNotifications();
   const updatePrefs = useUpdatePrefs();
 
+  const list = useMemo<Notification[]>(
+    () => data?.pages.flatMap((p) => p.rows) ?? [],
+    [data],
+  );
+
   const unread = list.filter((n) => !n.read_at);
   const read = list.filter((n) => n.read_at);
+
+  const renderLoadMore = (label: string) =>
+    hasNextPage ? (
+      <div className="flex justify-center pt-2">
+        <Button
+          variant="outline"
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+          aria-label={label}
+        >
+          {isFetchingNextPage ? (
+            <span role="status" aria-live="polite">Carregando...</span>
+          ) : (
+            "Carregar mais"
+          )}
+        </Button>
+      </div>
+    ) : null;
 
   const renderCard = (n: Notification) => {
     const Icon = KIND_ICON[n.kind] ?? Bell;
@@ -103,15 +134,29 @@ export default function NotificationsPage() {
         </TabsList>
 
         <TabsContent value="unread" className="space-y-2 mt-4">
-          {unread.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">Tudo em dia 🎉</p>
-          ) : unread.map(renderCard)}
+          {isLoading ? (
+            <ListSkeleton rows={5} />
+          ) : unread.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">Tudo em dia.</p>
+          ) : (
+            <>
+              {unread.map(renderCard)}
+              {renderLoadMore("Carregar mais notificações não lidas")}
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="read" className="space-y-2 mt-4">
-          {read.length === 0 ? (
+          {isLoading ? (
+            <ListSkeleton rows={5} />
+          ) : read.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">Nada por aqui ainda.</p>
-          ) : read.map(renderCard)}
+          ) : (
+            <>
+              {read.map(renderCard)}
+              {renderLoadMore("Carregar mais notificações lidas")}
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="prefs" className="mt-4">

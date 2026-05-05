@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
 
 export interface Project {
@@ -30,6 +31,7 @@ export interface ProjectWithStats extends Project {
 export function useProjects() {
   const { tenantId, loading } = useWorkspace();
   return useQuery({
+    ...queryProfile("structural"),
     queryKey: ["projects-list", tenantId],
     enabled: !loading && !!tenantId,
     queryFn: async (): Promise<ProjectWithStats[]> => {
@@ -70,6 +72,7 @@ export function useProjects() {
 
 export function useProject(id: string | undefined) {
   return useQuery({
+    ...queryProfile("structural"),
     queryKey: ["project", id],
     enabled: !!id,
     queryFn: async () => {
@@ -82,6 +85,7 @@ export function useProject(id: string | undefined) {
 
 export function useProjectTasks(projectId: string | undefined) {
   return useQuery({
+    ...queryProfile("structural"),
     queryKey: ["project-tasks", projectId],
     enabled: !!projectId,
     queryFn: async () => {

@@ -13,7 +13,8 @@ export default function AdminErrorsPage() {
 
   const toggle = (id: string) => {
     const n = new Set(open);
-    n.has(id) ? n.delete(id) : n.add(id);
+    if (n.has(id)) n.delete(id);
+    else n.add(id);
     setOpen(n);
   };
 

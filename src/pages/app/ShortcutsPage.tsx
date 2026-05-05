@@ -37,6 +37,17 @@ const SECTIONS: { title: string; items: { keys: string[]; label: string }[] }[] 
     ],
   },
   {
+    title: "Kanban",
+    items: [
+      { keys: ["Tab"], label: "Navegar entre cards" },
+      { keys: ["Enter"], label: "Abrir detalhe da tarefa" },
+      { keys: ["Espaço"], label: "Abrir detalhe da tarefa" },
+      { keys: ["F2"], label: "Editar título inline" },
+      { keys: ["⌘", "←"], label: "Mover card para coluna anterior" },
+      { keys: ["⌘", "→"], label: "Mover card para próxima coluna" },
+    ],
+  },
+  {
     title: "Editor (TipTap)",
     items: [
       { keys: ["⌘", "B"], label: "Negrito" },
@@ -81,9 +92,9 @@ export default function ShortcutsPage() {
         ))}
       </div>
 
-      <p className="mt-6 text-xs text-muted-foreground">
+      <div className="mt-6 text-xs text-muted-foreground">
         Dica: pressione <Badge variant="outline" className="mx-1 font-mono text-[10px]">⌘K</Badge> em qualquer tela pra abrir a busca global.
-      </p>
+      </div>
     </div>
   );
 }

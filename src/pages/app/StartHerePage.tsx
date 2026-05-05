@@ -15,6 +15,7 @@ import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { useOnboardingChecklist } from "@/hooks/useOnboardingChecklist";
 import { Progress } from "@/components/ui/progress";
 import { SEO } from "@/components/SEO";
+import DailyFocusCard from "@/components/ai/DailyFocusCard";
 
 type Persona = "agencia" | "freelancer" | "interno";
 
@@ -58,6 +59,8 @@ export default function StartHerePage() {
   return (
     <div className="container max-w-6xl space-y-8 py-8">
       <SEO title="Comece aqui — Oxy Growth OS" description="Trilha de onboarding guiada: escolha persona, gere dados de exemplo e faça o tour." />
+
+      <DailyFocusCard />
 
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-brand text-primary-foreground shadow-brand">

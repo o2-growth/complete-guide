@@ -1,0 +1,428 @@
+{
+  "auth": {
+    "authed": true,
+    "mode": "signup:qa.a11y+1777916657556@oxytest.dev"
+  },
+  "ts": 1777916657556,
+  "totalViolations": 106,
+  "scans": [
+    {
+      "route": "/",
+      "violationCount": 11,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 11,
+          "sampleTargets": [
+            ".text-\\[11px\\]",
+            ".border-primary\\/30.bg-primary\\/5.px-2\\.5",
+            ".text-lg"
+          ],
+          "sampleHtml": [
+            "<span class=\"text-[11px] text-muted-foreground\">por O2 Inc.</span>",
+            "<div class=\"inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-primary/30 bg-primary/5 text-prima",
+            "<p class=\"mx-auto mb-10 max-w-2xl text-lg text-muted-foreground md:text-xl\">TickTick + Ekyte adaptado para o time de Growth: Inbox, Kanban, calendário editorial, workload, time tracking, portal de demandas e o Gênio Grow"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/auth",
+      "violationCount": 9,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 9,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/precos",
+      "violationCount": 9,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 9,
+          "sampleTargets": [
+            ".hover\\:text-foreground",
+            ".h-9",
+            ".max-w-2xl.text-center.mx-auto > .mt-4"
+          ],
+          "sampleHtml": [
+            "<a class=\"text-sm text-muted-foreground hover:text-foreground\" href=\"/precos\">Preços</a>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<p class=\"mt-4 text-muted-foreground\">Comece grátis. Sem cartão. Sem amarras.</p>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app",
+      "violationCount": 9,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 9,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/hoje",
+      "violationCount": 9,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 9,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/proximos",
+      "violationCount": 5,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 5,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/kanban",
+      "violationCount": 4,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 4,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10.font-semibold.text-primary"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/calendario",
+      "violationCount": 8,
+      "violations": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "help": "ARIA attributes must conform to valid values",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=playwright",
+          "nodeCount": 1,
+          "sampleTargets": [
+            "#radix-\\:r4f\\:-trigger-month"
+          ],
+          "sampleHtml": [
+            "<button type=\"button\" role=\"tab\" aria-selected=\"true\" aria-controls=\"radix-:r4f:-content-...\" data-state=\"active\" id=\"radix-:r4f:-trigger-...\" class=\"inline-flex items-ce...\" tabindex=\"-1\" data-orientation=\"horizontal\" d"
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 7,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10.font-semibold.text-primary"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/projetos",
+      "violationCount": 6,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 6,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/squads",
+      "violationCount": 6,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 6,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/genio",
+      "violationCount": 5,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 5,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/notificacoes",
+      "violationCount": 8,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 8,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/configuracoes",
+      "violationCount": 6,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 6,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/configuracoes/aparencia",
+      "violationCount": 6,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 6,
+          "sampleTargets": [
+            ".flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/app/configuracoes/idioma",
+      "violationCount": 5,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodeCount": 5,
+          "sampleTargets": [
+            ".max-w-md > .flex-1.text-left",
+            ".gap-1\\.5",
+            ".bg-primary\\/10"
+          ],
+          "sampleHtml": [
+            "<span class=\"flex-1 text-left\">Buscar tarefas, projetos, atalhos…</span>",
+            "<button class=\"inline-flex items-ce...\">",
+            "<span class=\"flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary\">QA</span>"
+          ]
+        }
+      ]
+    }
+  ],
+  "aggregated": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "totalNodes": 105,
+      "routes": [
+        "/",
+        "/auth",
+        "/precos",
+        "/app",
+        "/app/hoje",
+        "/app/proximos",
+        "/app/kanban",
+        "/app/calendario",
+        "/app/projetos",
+        "/app/squads",
+        "/app/genio",
+        "/app/notificacoes",
+        "/app/configuracoes",
+        "/app/configuracoes/aparencia",
+        "/app/configuracoes/idioma"
+      ],
+      "sampleHtml": [
+        "<span class=\"text-[11px] text-muted-foreground\">por O2 Inc.</span>",
+        "<div class=\"inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-primary/30 bg-primary/5 text-prima",
+        "<p class=\"mx-auto mb-10 max-w-2xl text-lg text-muted-foreground md:text-xl\">TickTick + Ekyte adaptado para o time de Growth: Inbox, Kanban, calendário editorial, workload, time tracking, portal de demandas e o Gênio Grow"
+      ]
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": "critical",
+      "help": "ARIA attributes must conform to valid values",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=playwright",
+      "totalNodes": 1,
+      "routes": [
+        "/app/calendario"
+      ],
+      "sampleHtml": [
+        "<button type=\"button\" role=\"tab\" aria-selected=\"true\" aria-controls=\"radix-:r4f:-content-...\" data-state=\"active\" id=\"radix-:r4f:-trigger-...\" class=\"inline-flex items-ce...\" tabindex=\"-1\" data-orientation=\"horizontal\" d"
+      ]
+    }
+  ]
+}

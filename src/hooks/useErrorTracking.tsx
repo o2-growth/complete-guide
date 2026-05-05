@@ -20,7 +20,9 @@ function enqueue(e: QueuedError) {
     const cur = JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]");
     cur.push({ ...e, queued_at: new Date().toISOString() });
     localStorage.setItem(QUEUE_KEY, JSON.stringify(cur.slice(-50)));
-  } catch {}
+  } catch {
+    // Falha ao serializar/persistir é ignorada (storage cheio ou indisponível).
+  }
 }
 
 async function flush(userId: string | undefined, tenantId: string | null) {
@@ -30,7 +32,9 @@ async function flush(userId: string | undefined, tenantId: string | null) {
     const rows = cur.map((e) => ({ ...e, user_id: userId ?? null, tenant_id: tenantId }));
     const { error } = await supabase.from("error_events").insert(rows as never);
     if (!error) localStorage.removeItem(QUEUE_KEY);
-  } catch {}
+  } catch {
+    // Falha de rede/storage é tolerada — fila será reenviada no próximo tick.
+  }
 }
 
 export function reportError(err: Error | string, context: Record<string, unknown> = {}) {

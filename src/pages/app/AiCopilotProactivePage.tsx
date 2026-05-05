@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import ProactiveSuggestions from "@/components/ai/ProactiveSuggestions";
+import DailyFocusCard from "@/components/ai/DailyFocusCard";
 import { useTodaySummary, useGenerateDailySummary } from "@/hooks/useAiSuggestions";
 
 export default function AiCopilotProactivePage() {
@@ -16,6 +17,8 @@ export default function AiCopilotProactivePage() {
         <h1 className="text-3xl font-bold flex items-center gap-2"><Sparkles className="h-7 w-7 text-primary" /> IA Proativa</h1>
         <p className="mt-1 text-muted-foreground">Sugestões contextuais e seu briefing matinal — atualizados automaticamente.</p>
       </header>
+
+      <DailyFocusCard />
 
       <Card className="border-primary/20 p-6">
         <div className="flex items-center justify-between">

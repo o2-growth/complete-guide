@@ -52,7 +52,7 @@ export default function CopilotPage() {
             <p className="text-xs text-muted-foreground">Acessa tarefas, posts, OKRs, anomalias, ROAS e benchmarks em tempo real.</p>
           </div>
         </div>
-        <ScrollArea className="flex-1 p-4" ref={scrollRef as any}>
+        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center gap-3">
               <Bot className="h-12 w-12 text-muted-foreground/40" />

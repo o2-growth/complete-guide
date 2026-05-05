@@ -8,7 +8,7 @@ export interface CopilotMessage {
   role: "user" | "assistant" | "tool" | "system";
   content: string;
   tool_name?: string | null;
-  tool_result?: any;
+  tool_result?: unknown;
   created_at: string;
 }
 
@@ -29,13 +29,13 @@ export function useCopilot() {
     if (!tenantId) return;
     const { data } = await supabase.from("copilot_conversations")
       .select("id,title,updated_at").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(30);
-    setConversations((data ?? []) as any);
+    setConversations((data ?? []) as CopilotConversation[]);
   }, [tenantId]);
 
   const loadMessages = useCallback(async (convId: string) => {
     const { data } = await supabase.from("copilot_messages")
       .select("*").eq("conversation_id", convId).order("created_at");
-    setMessages((data ?? []) as any);
+    setMessages((data ?? []) as CopilotMessage[]);
   }, []);
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
@@ -49,13 +49,13 @@ export function useCopilot() {
         body: { conversation_id: activeId, tenant_id: tenantId, user_message: text },
       });
       if (error) throw error;
-      const newId = (data as any)?.conversation_id;
+      const newId = (data as { conversation_id?: string } | null)?.conversation_id;
       if (newId && newId !== activeId) setActiveId(newId);
       else if (activeId) await loadMessages(activeId);
       if (newId) await loadMessages(newId);
       await loadConversations();
-    } catch (e: any) {
-      toast.error("Erro no copiloto: " + (e.message || e));
+    } catch (e: unknown) {
+      toast.error("Erro no copiloto: " + (e instanceof Error ? e.message : String(e)));
     } finally { setSending(false); }
   };
 

@@ -35,9 +35,9 @@ export function TaskList({ list, emptyTitle = "Nada por aqui", emptyDescription 
 
   return (
     <>
-      <div className="space-y-2 animate-fade-in">
-        {data.map((task) => (
-          <TaskRow key={task.id} task={task} onOpen={setOpenId} />
+      <div className="space-y-2">
+        {data.map((task, i) => (
+          <TaskRow key={task.id} task={task} onOpen={setOpenId} index={i} />
         ))}
       </div>
       <TaskDetailSheet taskId={openId} onOpenChange={(o) => !o && setOpenId(null)} />

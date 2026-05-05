@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Hash, Loader2, Sparkles, FileText, Plus, Copy } from "lucide-react";
+import { Hash, Loader2, Sparkles, FileText, Plus, Copy, FileStack } from "lucide-react";
+import { TemplatePicker } from "@/components/modelos/TemplatePicker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ export function TaskSocialContentPanel({ taskId, channel, caption, onCaptionChan
   const [variations, setVariations] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [tone, setTone] = useState("profissional");
+  const [unifiedPickerOpen, setUnifiedPickerOpen] = useState(false);
 
   const persist = async (next: string) => {
     onCaptionChange(next);
@@ -65,12 +67,35 @@ export function TaskSocialContentPanel({ taskId, channel, caption, onCaptionChan
     await saveSnippet.mutateAsync({ name, body: caption, channel });
   };
 
+  const insertUnifiedCaption = async (body: unknown) => {
+    const text = (body as { text?: string })?.text ?? "";
+    if (!text) {
+      toast.error("Modelo de legenda vazio");
+      return;
+    }
+    const next = caption ? `${caption}\n\n${text}` : text;
+    await persist(next);
+    toast.success("Legenda do catálogo inserida");
+  };
+
   return (
     <div className="space-y-3 rounded-lg border bg-muted/20 p-3">
-      <div className="flex items-center gap-2 text-sm font-semibold">
-        <FileText className="h-4 w-4 text-primary" />
-        Conteúdo & IA
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <FileText className="h-4 w-4 text-primary" />
+          Conteúdo & IA
+        </div>
+        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setUnifiedPickerOpen(true)}>
+          <FileStack className="mr-1 h-3 w-3" /> Inserir legenda
+        </Button>
       </div>
+      <TemplatePicker
+        open={unifiedPickerOpen}
+        onOpenChange={setUnifiedPickerOpen}
+        kind="content_caption"
+        title="Inserir legenda do catálogo"
+        onSelect={(body) => insertUnifiedCaption(body)}
+      />
 
       <Tabs defaultValue="snippets">
         <TabsList className="h-8">

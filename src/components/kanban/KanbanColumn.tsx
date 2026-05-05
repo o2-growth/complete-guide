@@ -17,10 +17,12 @@ export interface KanbanStatus {
 interface Props {
   status: KanbanStatus;
   tasks: TaskRow[];
+  allStatuses: KanbanStatus[];
   onOpen?: (id: string) => void;
+  onMoveToStatus?: (taskId: string, statusId: string) => void;
 }
 
-export function KanbanColumn({ status, tasks, onOpen }: Props) {
+export function KanbanColumn({ status, tasks, allStatuses, onOpen, onMoveToStatus }: Props) {
   const { setNodeRef, isOver } = useDroppable({
     id: status.id,
     data: { type: "column", status },
@@ -29,8 +31,13 @@ export function KanbanColumn({ status, tasks, onOpen }: Props) {
   const accent = status.color || "hsl(var(--muted-foreground))";
 
   return (
-    <div className="flex h-full w-[300px] shrink-0 flex-col rounded-xl border bg-muted/20">
-      <div className="flex items-center justify-between gap-2 border-b px-3 py-2.5">
+    <div
+      className={cn(
+        "flex h-full w-[300px] shrink-0 flex-col rounded-xl border bg-muted/20 transition-shadow",
+        isOver && "ring-2 ring-primary/40",
+      )}
+    >
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-xl border-b bg-background/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="flex items-center gap-2 min-w-0">
           <span
             className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -54,7 +61,13 @@ export function KanbanColumn({ status, tasks, onOpen }: Props) {
         >
           <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
             {tasks.map((t) => (
-              <KanbanCard key={t.id} task={t} onOpen={onOpen} />
+              <KanbanCard
+                key={t.id}
+                task={t}
+                allStatuses={allStatuses}
+                onOpen={onOpen}
+                onMoveToStatus={onMoveToStatus}
+              />
             ))}
           </SortableContext>
           {tasks.length === 0 && (

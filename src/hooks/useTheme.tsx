@@ -43,4 +43,5 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- Provider e hook do contexto coexistem por convenção React.
 export const useTheme = () => useContext(ThemeContext);

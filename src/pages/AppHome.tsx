@@ -5,10 +5,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { TaskList } from "@/components/tasks/TaskList";
 import { QuickAdd } from "@/components/tasks/QuickAdd";
 import { Badge } from "@/components/ui/badge";
+import DailyFocusCard from "@/components/ai/DailyFocusCard";
+import { useOnboardingChecklist } from "@/hooks/useOnboardingChecklist";
 
 const AppHome = () => {
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState("");
+  const { allDone: onboardingDone } = useOnboardingChecklist();
 
   useEffect(() => {
     if (!user) return;
@@ -36,6 +39,8 @@ const AppHome = () => {
         </div>
 
         <QuickAdd />
+
+        {onboardingDone && <DailyFocusCard />}
 
         <TaskList
           list="inbox"

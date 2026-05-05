@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import { useTimerStore } from "@/stores/timerStore";
 import { toast } from "sonner";
 
@@ -13,6 +14,7 @@ import { toast } from "sonner";
  */
 export function useTimerSync() {
   const { user } = useAuth();
+  const { tenantId } = useWorkspace();
   const setTimer = useTimerStore((s) => s.setTimer);
   const setPomodoro = useTimerStore((s) => s.setPomodoro);
   const tick = useTimerStore((s) => s.tick);
@@ -30,6 +32,8 @@ export function useTimerSync() {
       setPomodoro(null);
       return;
     }
+    // namespace por tenant (regra de ouro CLAUDE.md §1.3): sem tenantId não subscreve realtime
+    if (!tenantId) return;
 
     let cancelled = false;
     (async () => {
@@ -56,73 +60,76 @@ export function useTimerSync() {
       setPomodoro(pomo ?? null);
     })();
 
+    // Realtime via Broadcast (regra de ouro CLAUDE.md §1.3) — triggers em time_entries
+    // e pomodoros disparam realtime.send no canal tenant:{id}:timer:{user_id}.
+    // Discriminamos a tabela pelo shape do payload (time_entries tem `note`,
+    // pomodoros tem `planned_minutes`).
+    type BroadcastRow = Record<string, unknown> & {
+      id?: string;
+      task_id?: string | null;
+      started_at?: string;
+      ended_at?: string | null;
+    };
+
+    const handleEvent = (msg: { event?: string; payload?: BroadcastRow }) => {
+      const row = msg.payload;
+      const op = (msg.event ?? "").toUpperCase();
+      if (!row || !row.id) return;
+
+      const isPomodoro = "planned_minutes" in row;
+      if (isPomodoro) {
+        if (op === "DELETE") {
+          setPomodoro(null);
+          return;
+        }
+        if (row.ended_at) {
+          useTimerStore.setState((s) => (s.pomodoro?.id === row.id ? { pomodoro: null } : s));
+        } else {
+          setPomodoro({
+            id: row.id as string,
+            task_id: (row.task_id as string | null) ?? null,
+            started_at: row.started_at as string,
+            planned_minutes: (row.planned_minutes as number) ?? 25,
+            break_minutes: (row.break_minutes as number) ?? 5,
+          });
+        }
+        return;
+      }
+
+      // time_entries
+      if (op === "DELETE") {
+        setTimer(null);
+        return;
+      }
+      if (row.ended_at) {
+        useTimerStore.setState((s) => (s.timer?.id === row.id ? { timer: null } : s));
+      } else {
+        setTimer({
+          id: row.id as string,
+          task_id: row.task_id as string,
+          started_at: row.started_at as string,
+          note: (row.note as string | null) ?? null,
+        });
+      }
+    };
+
     const ch = supabase
-      .channel(`timer:${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "time_entries", filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as {
-            id: string;
-            task_id: string;
-            started_at: string;
-            ended_at: string | null;
-            note: string | null;
-          };
-          if (!row) return;
-          if (payload.eventType === "DELETE") {
-            setTimer(null);
-            return;
-          }
-          if (row.ended_at) {
-            useTimerStore.setState((s) => (s.timer?.id === row.id ? { timer: null } : s));
-          } else {
-            setTimer({
-              id: row.id,
-              task_id: row.task_id,
-              started_at: row.started_at,
-              note: row.note,
-            });
-          }
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "pomodoros", filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as {
-            id: string;
-            task_id: string | null;
-            started_at: string;
-            ended_at: string | null;
-            planned_minutes: number;
-            break_minutes: number;
-          };
-          if (!row) return;
-          if (payload.eventType === "DELETE") {
-            setPomodoro(null);
-            return;
-          }
-          if (row.ended_at) {
-            useTimerStore.setState((s) => (s.pomodoro?.id === row.id ? { pomodoro: null } : s));
-          } else {
-            setPomodoro({
-              id: row.id,
-              task_id: row.task_id,
-              started_at: row.started_at,
-              planned_minutes: row.planned_minutes,
-              break_minutes: row.break_minutes,
-            });
-          }
-        }
-      )
+      .channel(`tenant:${tenantId}:timer:${user.id}`)
+      .on("broadcast", { event: "*" }, (msg) => handleEvent(msg as never))
+      .subscribe();
+
+    // Canal alternativo caso o trigger de pomodoros use namespace separado.
+    const chPomo = supabase
+      .channel(`tenant:${tenantId}:pomodoro:${user.id}`)
+      .on("broadcast", { event: "*" }, (msg) => handleEvent(msg as never))
       .subscribe();
 
     return () => {
       cancelled = true;
       supabase.removeChannel(ch);
+      supabase.removeChannel(chPomo);
     };
-  }, [user, setTimer, setPomodoro]);
+  }, [user, tenantId, setTimer, setPomodoro]);
 }
 
 /* ----------------- Mutations ----------------- */

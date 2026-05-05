@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
 import {
   Select,
   SelectContent,
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuditLog, useAuditActors, type ActivityKind } from "@/hooks/useAuditLog";
+import { useAuditLogInfinite, useAuditActors, type ActivityKind, type AuditEntry } from "@/hooks/useAuditLog";
 import { useProjects } from "@/hooks/useProjects";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -46,22 +47,22 @@ function actorName(a: { display_name?: string | null; full_name?: string | null 
 
 function payloadSummary(kind: ActivityKind, payload: Record<string, unknown>): string | null {
   if (!payload || typeof payload !== "object") return null;
-  const p = payload as any;
+  const p = payload as Record<string, unknown>;
   if (kind === "status_changed") {
-    const from = p.from_status_name || p.from || null;
-    const to = p.to_status_name || p.to || null;
+    const from = (p.from_status_name as string | undefined) || (p.from as string | undefined) || null;
+    const to = (p.to_status_name as string | undefined) || (p.to as string | undefined) || null;
     if (from && to) return `${from} → ${to}`;
     if (to) return `→ ${to}`;
   }
   if (kind === "assigned") {
-    return p.assignee_name || p.to_name || null;
+    return (p.assignee_name as string | undefined) || (p.to_name as string | undefined) || null;
   }
   if (kind === "updated") {
-    const fields = p.fields || p.changed;
+    const fields = (p.fields ?? p.changed) as unknown;
     if (Array.isArray(fields) && fields.length) return fields.join(", ");
   }
   if (kind === "commented" && typeof p.preview === "string") {
-    return p.preview.slice(0, 80);
+    return (p.preview as string).slice(0, 80);
   }
   if (kind === "time_logged" && p.minutes) {
     return `${p.minutes} min`;
@@ -75,13 +76,32 @@ export default function AuditLogPage() {
   const [projectId, setProjectId] = useState<string>("all");
   const [search, setSearch] = useState("");
 
-  const { data: entries, isLoading } = useAuditLog({ kind, actorId, projectId, search });
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useAuditLogInfinite({ kind, actorId, projectId });
   const { data: actors } = useAuditActors();
   const { data: projects } = useProjects();
 
+  const entries = useMemo<AuditEntry[]>(() => {
+    const flat = data?.pages.flatMap((p) => p.rows) ?? [];
+    if (!search.trim()) return flat;
+    const s = search.trim().toLowerCase();
+    return flat.filter(
+      (e) =>
+        e.task?.title?.toLowerCase().includes(s) ||
+        e.task?.code?.toLowerCase().includes(s) ||
+        e.project?.name?.toLowerCase().includes(s) ||
+        (e.actor?.display_name ?? e.actor?.full_name ?? "").toLowerCase().includes(s),
+    );
+  }, [data, search]);
+
   const grouped = useMemo(() => {
-    if (!entries) return [];
-    const map = new Map<string, typeof entries>();
+    if (!entries.length) return [];
+    const map = new Map<string, AuditEntry[]>();
     for (const e of entries) {
       const day = format(new Date(e.created_at), "yyyy-MM-dd");
       if (!map.has(day)) map.set(day, []);
@@ -114,7 +134,7 @@ export default function AuditLogPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={kind} onValueChange={(v) => setKind(v as any)}>
+        <Select value={kind} onValueChange={(v) => setKind(v as ActivityKind | "all")}>
           <SelectTrigger className="h-9 w-[170px]"><SelectValue placeholder="Tipo" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os tipos</SelectItem>
@@ -127,7 +147,7 @@ export default function AuditLogPage() {
           <SelectTrigger className="h-9 w-[180px]"><SelectValue placeholder="Pessoa" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as pessoas</SelectItem>
-            {(actors ?? []).map((a: any) => (
+            {(actors ?? []).map((a) => (
               <SelectItem key={a.id} value={a.id}>{actorName(a)}</SelectItem>
             ))}
           </SelectContent>
@@ -144,9 +164,7 @@ export default function AuditLogPage() {
       </Card>
 
       {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
-        </div>
+        <ListSkeleton rows={6} />
       ) : !grouped.length ? (
         <Card className="p-10 text-center">
           <History className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
@@ -214,6 +232,22 @@ export default function AuditLogPage() {
               </Card>
             </section>
           ))}
+          {hasNextPage && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                aria-label="Carregar mais entradas do audit log"
+              >
+                {isFetchingNextPage ? (
+                  <span role="status" aria-live="polite">Carregando...</span>
+                ) : (
+                  "Carregar mais"
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

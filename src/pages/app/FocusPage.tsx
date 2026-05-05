@@ -1,13 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Play, Square, Coffee, Timer as TimerIcon, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Timer as TimerIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,15 +15,12 @@ import {
   formatMSS,
   useTimerStore,
 } from "@/stores/timerStore";
-import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-
-const PRESETS: { label: string; minutes: number }[] = [
-  { label: "Pomodoro 25/5", minutes: 25 },
-  { label: "Curto 15/3", minutes: 15 },
-  { label: "Foco profundo 50/10", minutes: 50 },
-  { label: "Maratona 90/15", minutes: 90 },
-];
+import { FocusTimerDisplay } from "./_components/focus/FocusTimerDisplay";
+import { FocusSettings } from "./_components/focus/FocusSettings";
+import { FocusStats } from "./_components/focus/FocusStats";
+import { FocusWeeklyChart } from "./_components/focus/FocusWeeklyChart";
+import { AmbientPlayer } from "@/components/timer/AmbientPlayer";
 
 export default function FocusPage() {
   const { user } = useAuth();
@@ -56,7 +45,6 @@ export default function FocusPage() {
   const timer = useTimerStore((s) => s.timer);
   const now = useTimerStore((s) => s.tickNow);
 
-  // tarefas atribuídas a mim, ativas
   const { data: tasks } = useQuery({
     queryKey: ["focus-tasks", user?.id, tenantId],
     enabled: !!user && !!tenantId,
@@ -75,7 +63,6 @@ export default function FocusPage() {
     },
   });
 
-  // estatísticas de hoje
   const { data: today } = useQuery({
     queryKey: ["focus-today", user?.id, now ? Math.floor(now / 60000) : 0],
     enabled: !!user,
@@ -101,7 +88,7 @@ export default function FocusPage() {
     refetchInterval: 60_000,
   });
 
-  // auto-stop ao chegar em 0 e tocar bipe
+  // auto-bipe ao chegar em 0
   useEffect(() => {
     if (!pomo) return;
     const total = pomo.planned_minutes * 60;
@@ -170,171 +157,49 @@ export default function FocusPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
-        <header className="mb-6">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-            <TimerIcon className="h-3.5 w-3.5" /> Modo foco
-          </div>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Pomodoro & cronômetro</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Trabalhe em blocos. O timer fica salvo no servidor e sincroniza entre suas abas e dispositivos.
-          </p>
-        </header>
+      <header className="mb-6">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+          <TimerIcon className="h-3.5 w-3.5" /> Modo foco
+        </div>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight">Pomodoro & cronômetro</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Trabalhe em blocos. O timer fica salvo no servidor e sincroniza entre suas abas e dispositivos.
+        </p>
+      </header>
 
-        {/* Display principal */}
-        <section
-          className={cn(
-            "relative overflow-hidden rounded-2xl border bg-card p-8 text-center shadow-sm",
-            display.active && "ring-2 ring-primary/30",
-          )}
-        >
-          {display.progress !== null && (
-            <div
-              className="absolute inset-x-0 top-0 h-1 bg-primary transition-[width] duration-1000"
-              style={{ width: `${display.progress}%` }}
-            />
-          )}
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            {display.sub}
-          </p>
-          <p className="mt-2 font-mono text-7xl font-bold tabular-nums sm:text-8xl">
-            {display.label}
-          </p>
+      <FocusTimerDisplay
+        display={display}
+        taskId={taskId}
+        startPomoPending={startPomo.isPending}
+        startTimerPending={startTimer.isPending}
+        stopPomoPending={stopPomo.isPending}
+        stopTimerPending={stopTimer.isPending}
+        onStartPomo={onStartPomo}
+        onStartTimer={onStartTimer}
+        onStopPomo={(completed) => stopPomo.mutate(completed)}
+        onStopTimer={() => stopTimer.mutate()}
+      />
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-            {!display.active && (
-              <>
-                <Button size="lg" onClick={onStartPomo} disabled={startPomo.isPending}>
-                  <Play className="mr-2 h-4 w-4" /> Iniciar Pomodoro
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={onStartTimer}
-                  disabled={taskId === "none" || startTimer.isPending}
-                >
-                  <TimerIcon className="mr-2 h-4 w-4" /> Cronômetro contínuo
-                </Button>
-              </>
-            )}
-            {display.active && display.pomodoro && (
-              <>
-                <Button
-                  size="lg"
-                  variant="default"
-                  onClick={() => stopPomo.mutate(true)}
-                  disabled={stopPomo.isPending}
-                >
-                  <CheckCircle2 className="mr-2 h-4 w-4" /> Concluir
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => stopPomo.mutate(false)}
-                  disabled={stopPomo.isPending}
-                >
-                  <Square className="mr-2 h-4 w-4" /> Cancelar
-                </Button>
-              </>
-            )}
-            {display.active && !display.pomodoro && (
-              <Button
-                size="lg"
-                variant="default"
-                onClick={() => stopTimer.mutate()}
-                disabled={stopTimer.isPending}
-              >
-                <Square className="mr-2 h-4 w-4" /> Parar e registrar
-              </Button>
-            )}
-          </div>
-        </section>
+      {!display.active && (
+        <FocusSettings
+          preset={preset}
+          onPresetChange={setPreset}
+          taskId={taskId}
+          onTaskChange={setTaskId}
+          tasks={tasks ?? []}
+        />
+      )}
 
-        {/* Configurações */}
-        {!display.active && (
-          <section className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border bg-card p-4">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Duração
-              </p>
-              <Select value={String(preset)} onValueChange={(v) => setPreset(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRESETS.map((p) => (
-                    <SelectItem key={p.minutes} value={String(p.minutes)}>
-                      {p.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="rounded-xl border bg-card p-4">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Tarefa em foco
-              </p>
-              <Select value={taskId} onValueChange={setTaskId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione…" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sem tarefa específica</SelectItem>
-                  {(tasks ?? []).map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.code ? `${t.code} · ` : ""}
-                      {t.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </section>
-        )}
+      <section className="mt-8 rounded-xl border bg-card p-4">
+        <h2 className="mb-3 text-sm font-semibold">Sons ambientes</h2>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Toque em um som para começar. Volume e seleção persistem entre sessões.
+        </p>
+        <AmbientPlayer />
+      </section>
 
-        {/* Stats hoje */}
-        <section className="mt-8 grid gap-3 sm:grid-cols-3">
-          <StatCard
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            label="Pomodoros concluídos"
-            value={today?.completed ?? 0}
-          />
-          <StatCard
-            icon={<TimerIcon className="h-4 w-4" />}
-            label="Sessões iniciadas"
-            value={today?.pomosToday ?? 0}
-          />
-          <StatCard
-            icon={<Coffee className="h-4 w-4" />}
-            label="Tempo registrado"
-            value={
-              today?.totalMin
-                ? today.totalMin >= 60
-                  ? `${Math.floor(today.totalMin / 60)}h ${today.totalMin % 60}m`
-                  : `${today.totalMin}m`
-                : "0m"
-            }
-          />
-        </section>
-    </div>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <div className="rounded-xl border bg-card p-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        {icon}
-        <span className="uppercase tracking-wider">{label}</span>
-      </div>
-      <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
+      <FocusStats today={today} />
+      <FocusWeeklyChart />
     </div>
   );
 }

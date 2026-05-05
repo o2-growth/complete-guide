@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Users, Plus, Trash2, Bot, Megaphone, Rocket, Sparkles, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { Users, Plus, Trash2, Bot, Megaphone, Rocket, Sparkles, CheckCircle2, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CardGridSkeleton } from "@/components/skeletons/ListSkeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,7 +51,7 @@ function CreateSquadDialog() {
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label>Nome</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Squad Performance" />
+            <Input name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Squad Performance" />
           </div>
           <div className="space-y-1.5">
             <Label>Tipo</Label>
@@ -78,6 +79,9 @@ function CreateSquadDialog() {
               setDescription("");
             }}
           >
+            {create.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
             Criar
           </Button>
         </DialogFooter>
@@ -145,6 +149,9 @@ function AddMemberDialog({ squad }: { squad: SquadWithStats }) {
               setUserId("");
             }}
           >
+            {add.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
             Adicionar
           </Button>
         </DialogFooter>
@@ -153,16 +160,21 @@ function AddMemberDialog({ squad }: { squad: SquadWithStats }) {
   );
 }
 
-function SquadCard({ squad }: { squad: SquadWithStats }) {
+function SquadCard({ squad, index }: { squad: SquadWithStats; index?: number }) {
   const meta = KIND_META[squad.kind] ?? KIND_META.custom;
   const Icon = meta.icon;
   const remove = useRemoveSquadMember();
   const utilization = squad.totalCapacity > 0
     ? Math.min(100, Math.round((squad.openTasks / Math.max(squad.members.length, 1)) * 10))
     : 0;
+  const staggerDelay =
+    typeof index === "number" && index < 5 ? `${index * 40}ms` : undefined;
 
   return (
-    <Card className="overflow-hidden">
+    <Card
+      className="overflow-hidden animate-fade-in"
+      style={staggerDelay ? { animationDelay: staggerDelay } : undefined}
+    >
       <div className={cn("h-1.5 w-full bg-gradient-to-r", meta.color)} />
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
@@ -253,9 +265,7 @@ export default function SquadsPage() {
     return (
       <div className="container max-w-7xl py-8 space-y-4">
         <Skeleton className="h-8 w-64" />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-80 w-full" />)}
-        </div>
+        <CardGridSkeleton count={6} />
       </div>
     );
   }
@@ -283,7 +293,7 @@ export default function SquadsPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {data!.map((s) => <SquadCard key={s.id} squad={s} />)}
+          {data!.map((s, i) => <SquadCard key={s.id} squad={s} index={i} />)}
         </div>
       )}
     </div>

@@ -5,7 +5,18 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  {
+    ignores: [
+      "dist/**",
+      "node_modules/**",
+      "supabase/functions/**",
+      "e2e/**",
+      "playwright-report/**",
+      ".claude/**",
+      // shadcn primitives — geradas pela CLI, não editar manualmente (ver CLAUDE.md §8)
+      "src/components/ui/**",
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

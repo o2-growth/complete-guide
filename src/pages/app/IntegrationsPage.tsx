@@ -11,6 +11,7 @@ import {
   useIntegrations, useUpsertIntegration, useDeleteIntegration,
   useScheduledPublishes, runPublishTick, publishNow,
 } from "@/hooks/useSocialIntel";
+import { DemoBadge } from "@/components/feedback/DemoBadge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -58,6 +59,12 @@ export default function IntegrationsPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <DemoBadge
+        variant="banner"
+        feature="OAuth Meta/LinkedIn/Google"
+        description="As contas conectadas operam em modo mock até o OAuth real ser ativado."
+        lovableHint="Defina META_APP_ID, LINKEDIN_CLIENT_ID e secrets correspondentes em Lovable Cloud para ativar OAuth real."
+      />
       <header className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Plug className="h-5 w-5" />
@@ -111,7 +118,7 @@ export default function IntegrationsPage() {
           </div>
         )}
         <p className="mt-3 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
-          💡 Para ativar publicação real, peça ao admin para adicionar os secrets <code>META_APP_ID/SECRET</code> e/ou <code>LINKEDIN_CLIENT_ID/SECRET</code>. Sem eles, a fila roda em modo mock — agenda, marca como publicado e registra no audit log.
+          A fila de publicação agenda, marca como publicado e registra no audit log mesmo sem credenciais reais — ideal para testar fluxos.
         </p>
       </Card>
 

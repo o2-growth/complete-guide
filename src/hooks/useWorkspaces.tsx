@@ -113,7 +113,11 @@ export function useSendInvite() {
         .single();
       if (error) throw error;
       // dispara email (modo best-effort — sem RESEND_API_KEY apenas registra)
-      await supabase.functions.invoke("send-invite", { body: { invitation_id: data.id } }).catch(() => null);
+      await supabase.functions.invoke("send-invite", { body: { invitation_id: data.id } })
+        .catch((err) => {
+          toast.warning(`Convite criado, mas e-mail pode não ter sido enviado: ${err?.message ?? "erro desconhecido"}`);
+          return null;
+        });
       return data;
     },
     onSuccess: () => {

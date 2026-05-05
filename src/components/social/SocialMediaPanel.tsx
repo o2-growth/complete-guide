@@ -58,7 +58,9 @@ export function SocialMediaPanel({ taskId, channel, state, caption, campaignId, 
   const generateLink = async () => {
     const req = await createReq.mutateAsync({ taskId, expiresInDays: 14 });
     const url = buildApprovalUrl(req.token);
-    await navigator.clipboard.writeText(url).catch(() => {});
+    await navigator.clipboard.writeText(url).catch(() => {
+      toast.error("Não foi possível copiar — copie manualmente.");
+    });
     toast.success("Link copiado!");
   };
 

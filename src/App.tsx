@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { DEFAULT_QUERY_CLIENT_CONFIG } from "@/lib/query-config";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -36,6 +37,7 @@ const ProjectDetailPage = lazy(() => import("./pages/app/ProjectDetailPage.tsx")
 const ApprovalsPage = lazy(() => import("./pages/app/ApprovalsPage.tsx"));
 const SLAPage = lazy(() => import("./pages/app/SLAPage.tsx"));
 const TemplatesPage = lazy(() => import("./pages/app/TemplatesPage.tsx"));
+const ModelosPage = lazy(() => import("./pages/app/ModelosPage.tsx"));
 const AuditLogPage = lazy(() => import("./pages/app/AuditLogPage.tsx"));
 const RequestPage = lazy(() => import("./pages/public/RequestPage.tsx"));
 const ApprovePage = lazy(() => import("./pages/public/ApprovePage.tsx"));
@@ -89,9 +91,17 @@ const CheckoutPage = lazy(() => import("./pages/public/CheckoutPage.tsx"));
 const HelpCenterPage = lazy(() => import("./pages/app/HelpCenterPage.tsx"));
 const AchievementsPage = lazy(() => import("./pages/app/AchievementsPage.tsx"));
 const EnterprisePage = lazy(() => import("./pages/app/EnterprisePage.tsx"));
+const EisenhowerPage = lazy(() => import("./pages/app/EisenhowerPage.tsx"));
+const HabitsPage = lazy(() => import("./pages/app/HabitsPage.tsx"));
+const PlanYourDayPage = lazy(() => import("./pages/app/PlanYourDayPage.tsx"));
+const TimelinePage = lazy(() => import("./pages/app/TimelinePage.tsx"));
+const ConhecimentoPage = lazy(() => import("./pages/app/ConhecimentoPage.tsx"));
+const PersonasPage = lazy(() => import("./pages/app/PersonasPage.tsx"));
+const AtendimentoPage = lazy(() => import("./pages/app/AtendimentoPage.tsx"));
+const AtendimentoTicketPage = lazy(() => import("./pages/app/AtendimentoTicketPage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(DEFAULT_QUERY_CLIENT_CONFIG);
 
 const PageFallback = () => (
   <div className="flex h-[60vh] items-center justify-center" role="status" aria-live="polite">
@@ -195,11 +205,18 @@ const App = () => (
                   element={<KanbanPage />}
                 />
                 <Route path="foco" element={<FocusPage />} />
+                <Route path="eisenhower" element={<EisenhowerPage />} />
+                <Route path="habitos" element={<HabitsPage />} />
+                <Route path="plano-do-dia" element={<PlanYourDayPage />} />
+                <Route path="timeline" element={<TimelinePage />} />
+                <Route path="atendimento" element={<AtendimentoPage />} />
+                <Route path="atendimento/:id" element={<AtendimentoTicketPage />} />
                 <Route path="projetos" element={<ProjectsPage />} />
                 <Route path="projetos/:id" element={<ProjectDetailPage />} />
                 <Route path="aprovacoes" element={<ApprovalsPage />} />
                 <Route path="slas" element={<SLAPage />} />
                 <Route path="templates" element={<TemplatesPage />} />
+                <Route path="modelos" element={<ModelosPage />} />
                 <Route path="audit" element={<AuditLogPage />} />
                 <Route path="squads" element={<SquadsPage />} />
                 <Route path="demandas" element={<DemandsPage />} />
@@ -219,6 +236,7 @@ const App = () => (
                 <Route path="social/creators" element={<CreatorsPage />} />
                 <Route path="social/bio" element={<BioEditorPage />} />
                 <Route path="social/boosts" element={<BoostsPage />} />
+                <Route path="personas" element={<PersonasPage />} />
                 <Route path="configuracoes/integracoes" element={<IntegrationsPage />} />
                 <Route path="genio" element={<GeniusPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
@@ -252,6 +270,8 @@ const App = () => (
                 <Route path="configuracoes/integracoes-externas" element={<ExternalIntegrationsPage />} />
                 <Route path="ia-proativa" element={<AiCopilotProactivePage />} />
                 <Route path="ajuda" element={<HelpCenterPage />} />
+                <Route path="conhecimento" element={<ConhecimentoPage />} />
+                <Route path="conhecimento/:slug" element={<ConhecimentoPage />} />
                 <Route path="conquistas" element={<AchievementsPage />} />
                 <Route path="enterprise" element={<EnterprisePage />} />
                 <Route

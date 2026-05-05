@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TrendingUp, Sparkles, Play } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,13 @@ export default function ForecastPage() {
 
   const metrics = source === "tasks" ? TASK_METRICS : POST_METRICS;
 
-  const run = async () => {
+  const run = useCallback(async () => {
     const r = await forecast.mutateAsync({ source, metric, days_back: 60, days_ahead: 30 });
     setData(r);
-  };
-  useEffect(() => { run(); /* eslint-disable-next-line */ }, []);
+  }, [forecast, source, metric]);
+  // Roda só no mount: a primeira chamada usa os valores iniciais; mudanças
+  // de source/metric são tratadas pelo botão "Atualizar".
+  useEffect(() => { run(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chart = (data?.series ?? []).map((p) => ({
     d: p.d.slice(5),

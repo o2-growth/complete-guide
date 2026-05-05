@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
 
 export interface TaskType {
@@ -22,6 +23,7 @@ export interface TaskType {
 export function useTaskTypes() {
   const { tenantId, loading } = useWorkspace();
   return useQuery({
+    ...queryProfile("static"),
     queryKey: ["task-types", tenantId],
     enabled: !loading && !!tenantId,
     queryFn: async (): Promise<TaskType[]> => {

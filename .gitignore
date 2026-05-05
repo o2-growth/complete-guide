@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Credenciais temporárias para análise competitiva — nunca commitar
+.claude/secrets-temp/
+.claude/reports/competitive-analysis/**/.auth/

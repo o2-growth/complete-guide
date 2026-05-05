@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useBranding, BrandingSettings } from "@/hooks/useBranding";
+import { usePreferences } from "@/hooks/usePreferences";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -40,6 +41,7 @@ const FONT_SIZES: Array<{ value: BrandingSettings["fontSize"]; label: string; sa
 
 export default function AppearancePage() {
   const branding = useBranding();
+  const prefs = usePreferences();
   const { tenantId } = useWorkspace();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -58,9 +60,8 @@ export default function AppearancePage() {
       const { data } = supabase.storage.from("media-assets").getPublicUrl(path);
       await branding.update({ logoUrl: data.publicUrl });
       toast.success("Logo atualizado");
-    } catch (e) {
+    } catch {
       toast.error("Falha no upload do logo");
-      console.error(e);
     } finally {
       setUploading(false);
     }
@@ -121,7 +122,12 @@ export default function AppearancePage() {
             <CardDescription>Aparece na sidebar e em PDFs gerados.</CardDescription>
           </CardHeader>
           <CardContent className="flex gap-2">
-            <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={60}
+              aria-label="Nome do workspace"
+            />
             <Button onClick={saveName} disabled={name === branding.workspaceName || !name.trim()}>
               Salvar
             </Button>
@@ -221,6 +227,7 @@ export default function AppearancePage() {
                 }}
                 className="w-32 font-mono text-sm uppercase"
                 maxLength={7}
+                aria-label="Cor primária em hexadecimal"
               />
             </div>
           </CardContent>
@@ -279,6 +286,33 @@ export default function AppearancePage() {
                   <p className="text-xs text-muted-foreground">{f.sample}</p>
                 </button>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Formato de data de vencimento */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Datas de vencimento</CardTitle>
+            <CardDescription>
+              Mostra prazos como data absoluta ("23 de mai") ou contagem regressiva ("em 3 dias").
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Mostrar como contagem regressiva</p>
+                <p className="text-xs text-muted-foreground">
+                  Atualiza automaticamente a cada minuto.
+                </p>
+              </div>
+              <Switch
+                checked={prefs.due_at_format === "countdown"}
+                onCheckedChange={(v) =>
+                  prefs.update({ due_at_format: v ? "countdown" : "absolute" })
+                }
+                aria-label="Mostrar prazos como contagem regressiva"
+              />
             </div>
           </CardContent>
         </Card>

@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
+import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
 
 export interface Notification {
@@ -30,9 +31,11 @@ export interface NotificationPrefs {
 
 export function useNotifications() {
   const { user } = useAuth();
+  const { tenantId } = useWorkspace();
   const qc = useQueryClient();
 
   const q = useQuery({
+    ...queryProfile("realtime"),
     queryKey: ["notifications", user?.id],
     enabled: !!user,
     queryFn: async () => {
@@ -46,21 +49,82 @@ export function useNotifications() {
     },
   });
 
-  // Realtime
+  // Realtime via Broadcast (regra de ouro CLAUDE.md §1.3) — trigger em notifications
+  // dispara realtime.send no canal tenant:{id}:notifications-{user_id}.
   useEffect(() => {
-    if (!user) return;
-    const ch = supabase.channel(`notifications-realtime-${user.id}-${Math.random().toString(36).slice(2)}`);
-    ch.on(
-      "postgres_changes" as never,
-      { event: "*", schema: "public", table: "notifications" } as never,
-      () => {
+    if (!user || !tenantId) return;
+    const ch = supabase
+      .channel(`tenant:${tenantId}:notifications-${user.id}`)
+      .on("broadcast", { event: "*" }, () => {
         qc.invalidateQueries({ queryKey: ["notifications"] });
-      },
-    ).subscribe();
+      })
+      .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [user, qc]);
+  }, [user, tenantId, qc]);
+
+  return q;
+}
+
+const NOTIF_PAGE_SIZE = 30;
+
+export interface NotificationsFilters {
+  /** "unread" | "read" | "all" — apenas filtra client-side as páginas carregadas. */
+  status?: "unread" | "read" | "all";
+}
+
+export interface NotificationsPage {
+  rows: Notification[];
+  nextCursor: string | undefined;
+}
+
+/**
+ * Versão paginada com cursor por created_at desc. Mesmo realtime do hook full.
+ * Filtros (read/unread) ficam client-side — server só pagina por created_at.
+ */
+export function useNotificationsInfinite(_filters: NotificationsFilters = {}) {
+  const { user } = useAuth();
+  const { tenantId } = useWorkspace();
+  const qc = useQueryClient();
+
+  const q = useInfiniteQuery({
+    ...queryProfile("realtime"),
+    queryKey: ["notifications-infinite", user?.id],
+    enabled: !!user,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage: NotificationsPage) => lastPage.nextCursor,
+    queryFn: async ({ pageParam }): Promise<NotificationsPage> => {
+      let query = supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(NOTIF_PAGE_SIZE);
+      if (pageParam) query = query.lt("created_at", pageParam);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      const rows = (data ?? []) as unknown as Notification[];
+      const nextCursor =
+        rows.length === NOTIF_PAGE_SIZE ? rows[rows.length - 1].created_at : undefined;
+      return { rows, nextCursor };
+    },
+  });
+
+  // Realtime via Broadcast: mesmo canal de useNotifications, invalida ambas as queries.
+  useEffect(() => {
+    if (!user || !tenantId) return;
+    const ch = supabase
+      .channel(`tenant:${tenantId}:notifications-${user.id}-infinite`)
+      .on("broadcast", { event: "*" }, () => {
+        qc.invalidateQueries({ queryKey: ["notifications"] });
+        qc.invalidateQueries({ queryKey: ["notifications-infinite"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [user, tenantId, qc]);
 
   return q;
 }
@@ -104,6 +168,7 @@ export function useScanNotifications() {
 export function useNotificationPrefs() {
   const { user } = useAuth();
   return useQuery({
+    ...queryProfile("realtime"),
     queryKey: ["notification_prefs", user?.id],
     enabled: !!user,
     queryFn: async () => {

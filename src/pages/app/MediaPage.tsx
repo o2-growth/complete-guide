@@ -16,7 +16,8 @@ export default function MediaPage() {
   const { data, isLoading } = useKanbanTasks(null);
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
 
-  const tasks = (data ?? []) as TaskWithFields[];
+  // useMemo evita recriar o array vazio a cada render enquanto data é undefined.
+  const tasks = useMemo(() => (data ?? []) as TaskWithFields[], [data]);
 
   const linkedinTasks = useMemo(
     () => tasks.filter((t) => getTaskPreview(t.custom_fields).kind === "linkedin"),

@@ -65,7 +65,7 @@ export function useReplyComment(taskId: string) {
   return useMutation({
     mutationFn: async ({ parentId, body }: { parentId: string; body: string }) => {
       if (!user) throw new Error("auth");
-      const mentions = Array.from(body.matchAll(/@(\w[\w.\-]*)/g)).map(m => m[1]);
+      const mentions = Array.from(body.matchAll(/@(\w[\w.-]*)/g)).map(m => m[1]);
       const { error } = await supabase
         .from("comments")
         .insert({ task_id: taskId, author_id: user.id, body, parent_id: parentId, mentions });

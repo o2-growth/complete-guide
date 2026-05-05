@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { FlaskConical, Save, Trash2, TrendingUp, Users, Calendar, Sparkles } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
-const KIND_META: Record<SimKind, { label: string; icon: any; desc: string }> = {
+import type { LucideIcon } from "lucide-react";
+
+const KIND_META: Record<SimKind, { label: string; icon: LucideIcon; desc: string }> = {
   boost_budget: { label: "Boost de budget", icon: TrendingUp, desc: "E se eu multiplicar o budget de mídia paga?" },
   team_capacity: { label: "Capacidade do time", icon: Users, desc: "E se eu contratar mais gente?" },
   cadence_change: { label: "Cadência de posts", icon: Calendar, desc: "E se eu publicar mais (ou menos) por semana?" },

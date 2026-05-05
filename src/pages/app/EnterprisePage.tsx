@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, Globe, Shield, Users, FileCheck, Plus, Database, Zap } from "lucide-react";
+import { Building2, Globe, Shield, Users, FileCheck, Plus, Database, Zap, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,7 +105,14 @@ export default function EnterprisePage() {
                 </Select>
               </div>
             </div>
-            <Button onClick={saveTenant} disabled={updateTenant.isPending}><Database className="h-4 w-4 mr-1" /> Salvar configurações</Button>
+            <Button onClick={saveTenant} disabled={updateTenant.isPending}>
+              {updateTenant.isPending ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <Database className="h-4 w-4 mr-1" />
+              )}
+              Salvar configurações
+            </Button>
           </Card>
         </TabsContent>
 

@@ -49,4 +49,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- Provider e hook do contexto coexistem por convenção React; separar quebraria 60+ imports.
 export const useAuth = () => useContext(AuthContext);

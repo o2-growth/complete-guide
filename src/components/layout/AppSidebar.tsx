@@ -63,6 +63,13 @@ import {
   Compass,
   HelpCircle,
   Trophy,
+  Grid2X2,
+  Sunrise,
+  Repeat,
+  GanttChartSquare,
+  UserCircle,
+  BookOpen,
+  LifeBuoy,
 } from "lucide-react";
 import {
   Sidebar,
@@ -80,90 +87,104 @@ import {
 import logoOxy from "@/assets/logo-oxy.png";
 import { useBranding } from "@/hooks/useBranding";
 import { useSavedViews } from "@/hooks/useGlobalSearchAdvanced";
+import { ProjectTreeSidebar } from "@/components/layout/ProjectTreeSidebar";
 
-const principal = [
-  { title: "Inbox", url: "/app", icon: Inbox, end: true as const },
-  { title: "Hoje", url: "/app/hoje", icon: Sun },
-  { title: "Próximos 7", url: "/app/proximos", icon: CalendarClock },
-  { title: "Atrasadas", url: "/app/atrasadas", icon: AlertTriangle },
-  { title: "Atribuídas", url: "/app/atribuidas", icon: UserCheck },
-];
+// Sub-fase 6F.5: 6 domínios principais. Comportamento idêntico — todas as URLs
+// continuam funcionando; apenas o agrupamento muda para ficar mais escaneável.
 
 const visoes = [
+  { title: "Inbox", url: "/app", icon: Inbox, end: true as const },
+  { title: "Hoje", url: "/app/hoje", icon: Sun },
+  { title: "Próximos 7 dias", url: "/app/proximos", icon: CalendarClock },
+  { title: "Atrasadas", url: "/app/atrasadas", icon: AlertTriangle },
+  { title: "Atribuídas a mim", url: "/app/atribuidas", icon: UserCheck },
   { title: "Calendário", url: "/app/calendario", icon: CalendarDays },
   { title: "Kanban", url: "/app/kanban", icon: KanbanSquare },
-  { title: "Lista", url: "/app/projetos", icon: ListTodo },
+  { title: "Eisenhower", url: "/app/eisenhower", icon: Grid2X2 },
+  { title: "Plano do dia", url: "/app/plano-do-dia", icon: Sunrise },
+  { title: "Timeline", url: "/app/timeline", icon: GanttChartSquare },
+  { title: "Foco", url: "/app/foco", icon: Timer },
+  { title: "Hábitos", url: "/app/habitos", icon: Repeat },
 ];
 
 const trabalho = [
   { title: "Projetos", url: "/app/projetos", icon: FolderKanban },
-  { title: "Templates", url: "/app/templates", icon: FileStack },
   { title: "Squads", url: "/app/squads", icon: Users },
   { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
+  { title: "Workload", url: "/app/workload", icon: BarChart3 },
+  { title: "Skills", url: "/app/skills", icon: Award },
+  { title: "Capacity", url: "/app/capacity", icon: CalendarRange },
   { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
   { title: "SLAs", url: "/app/slas", icon: Shield },
-  { title: "Mídias (previews)", url: "/app/midias", icon: ImageIcon },
+  { title: "Modelos", url: "/app/modelos", icon: FileStack },
+  { title: "Templates", url: "/app/templates", icon: ListTodo },
+  { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
+  { title: "Audit log", url: "/app/audit", icon: History },
+];
+
+const atendimento = [
+  { title: "Tickets", url: "/app/atendimento", icon: LifeBuoy },
 ];
 
 const social = [
   { title: "Calendário editorial", url: "/app/social", icon: CalendarRange },
+  { title: "Pipeline", url: "/app/social/pipeline", icon: Workflow },
+  { title: "Studio", url: "/app/social/studio", icon: Wand2 },
+  { title: "Inteligência IA", url: "/app/social/intel", icon: Brain },
   { title: "Inbox social", url: "/app/social/inbox", icon: InboxIcon },
   { title: "Cadência", url: "/app/social/cadencia", icon: Clock },
-  { title: "Studio criativo", url: "/app/social/studio", icon: Wand2 },
-  { title: "Pipeline de produção", url: "/app/social/pipeline", icon: Workflow },
-  { title: "Inteligência IA", url: "/app/social/intel", icon: Brain },
-  { title: "Analytics", url: "/app/social/analytics", icon: PieChart },
   { title: "Campanhas", url: "/app/campanhas", icon: Megaphone },
-  { title: "Boost manager", url: "/app/social/boosts", icon: Rocket },
-  { title: "Creators & UGC", url: "/app/social/creators", icon: UserPlus },
-  { title: "Link-in-bio", url: "/app/social/bio", icon: Link2 },
-  { title: "Biblioteca de mídia", url: "/app/biblioteca", icon: Library },
-  { title: "Legendas & hashtags", url: "/app/snippets", icon: FileText },
+  { title: "Boosts/ROAS", url: "/app/social/boosts", icon: Rocket },
+  { title: "Creators", url: "/app/social/creators", icon: UserPlus },
+  { title: "Link in bio", url: "/app/social/bio", icon: Link2 },
+  { title: "Biblioteca", url: "/app/biblioteca", icon: Library },
+  { title: "Snippets", url: "/app/snippets", icon: FileText },
+  { title: "Personas", url: "/app/personas", icon: UserCircle },
+  { title: "Mídias", url: "/app/midias", icon: ImageIcon },
+  { title: "Analytics social", url: "/app/social/analytics", icon: PieChart },
 ];
 
 const insights = [
   { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
-  { title: "Executive", url: "/app/exec", icon: Crown },
+  { title: "Reports", url: "/app/reports", icon: FileBarChart },
+  { title: "Anomalias", url: "/app/anomalias", icon: AlertOctagon },
+  { title: "Forecast", url: "/app/forecast", icon: TrendingUp },
+  { title: "OKRs", url: "/app/okrs", icon: Target },
+  { title: "Executivo", url: "/app/exec", icon: Crown },
   { title: "Copilot IA", url: "/app/copilot", icon: Bot },
   { title: "Benchmarks", url: "/app/benchmarks", icon: Gauge },
   { title: "Simulações", url: "/app/simulacoes", icon: FlaskConical },
-  { title: "Report Builder", url: "/app/reports", icon: FileBarChart },
-  { title: "Forecast IA", url: "/app/forecast", icon: TrendingUp },
-  { title: "Goals & OKRs", url: "/app/okrs", icon: Target },
-  { title: "Anomalias IA", url: "/app/anomalias", icon: AlertOctagon },
-  { title: "Workload", url: "/app/workload", icon: BarChart3 },
-  { title: "Skills", url: "/app/skills", icon: Award },
-  { title: "Capacity", url: "/app/capacity", icon: CalendarRange },
-  { title: "Foco", url: "/app/foco", icon: Timer },
-  { title: "Gênio Growth", url: "/app/genio", icon: Sparkles },
   { title: "IA Proativa", url: "/app/ia-proativa", icon: Sparkles },
+  { title: "Gênio", url: "/app/genio", icon: Sparkles },
+];
+
+const conhecimento = [
+  { title: "Wiki interna", url: "/app/conhecimento", icon: BookOpen },
+  { title: "Central de Ajuda", url: "/app/ajuda", icon: HelpCircle },
 ];
 
 const sistema = [
   { title: "Notificações", url: "/app/notificacoes", icon: Bell },
-  { title: "Comece aqui", url: "/app/comecar", icon: Compass },
-  { title: "Central de Ajuda", url: "/app/ajuda", icon: HelpCircle },
-  { title: "Conquistas & XP", url: "/app/conquistas", icon: Trophy },
-  { title: "Enterprise", url: "/app/enterprise", icon: Building2 },
   { title: "Automações", url: "/app/automacoes", icon: Workflow },
   { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
   { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
   { title: "Plano & billing", url: "/app/configuracoes/plano", icon: Crown },
   { title: "Marketplace", url: "/app/marketplace", icon: Store },
   { title: "Developer Hub", url: "/app/developer", icon: Code2 },
-  { title: "Busca global", url: "/app/buscar", icon: Search },
-  { title: "Dados (import/export)", url: "/app/configuracoes/dados", icon: Database },
-  { title: "Segurança (2FA)", url: "/app/seguranca", icon: Lock },
-  { title: "Privacidade (LGPD)", url: "/app/configuracoes/privacidade", icon: ShieldAlert },
-  { title: "Saúde do sistema", url: "/app/admin/saude", icon: Activity },
-  { title: "Erros (admin)", url: "/app/admin/erros", icon: Bug },
+  { title: "Conquistas & XP", url: "/app/conquistas", icon: Trophy },
+  { title: "Comece aqui", url: "/app/comecar", icon: Compass },
   { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
+  { title: "Busca global", url: "/app/buscar", icon: Search },
+  { title: "Enterprise", url: "/app/enterprise", icon: Building2 },
+  { title: "Segurança", url: "/app/seguranca", icon: Lock },
+  { title: "Privacidade", url: "/app/configuracoes/privacidade", icon: ShieldAlert },
   { title: "Aparência", url: "/app/configuracoes/aparencia", icon: Palette },
   { title: "Idioma", url: "/app/configuracoes/idioma", icon: Languages },
-  { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
+  { title: "Dados", url: "/app/configuracoes/dados", icon: Database },
   { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
-  { title: "Integrações nativas", url: "/app/configuracoes/integracoes-externas", icon: Plug },
-  { title: "Audit log", url: "/app/audit", icon: History },
+  { title: "Integrações externas", url: "/app/configuracoes/integracoes-externas", icon: Plug },
+  { title: "Saúde do sistema", url: "/app/admin/saude", icon: Activity },
+  { title: "Erros (admin)", url: "/app/admin/erros", icon: Bug },
   { title: "Configurações", url: "/app/configuracoes", icon: Settings, end: true as const },
 ];
 
@@ -178,7 +199,7 @@ export function AppSidebar() {
   const isActive = (url: string, end?: boolean) =>
     end ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
-  const renderGroup = (label: string, items: typeof principal) => (
+  const renderGroup = (label: string, items: typeof visoes) => (
     <SidebarGroup>
       {!collapsed && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarGroupContent>
@@ -222,7 +243,6 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {renderGroup("Principal", principal)}
         {renderGroup("Visões", visoes)}
         {pinnedViews.length > 0 && (
           <SidebarGroup>
@@ -250,8 +270,15 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
         {renderGroup("Trabalho", trabalho)}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <ProjectTreeSidebar collapsed={collapsed} />
+          </SidebarGroupContent>
+        </SidebarGroup>
+        {renderGroup("Atendimento", atendimento)}
         {renderGroup("Mídias sociais", social)}
         {renderGroup("Insights", insights)}
+        {renderGroup("Conhecimento", conhecimento)}
         {renderGroup("Sistema", sistema)}
       </SidebarContent>
 

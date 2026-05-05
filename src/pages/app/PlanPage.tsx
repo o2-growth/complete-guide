@@ -5,6 +5,7 @@ import { Check, Sparkles } from "lucide-react";
 import { usePlans, useTenantBilling, useChangePlan } from "@/hooks/useWorkspaces";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { SEO } from "@/components/SEO";
+import { DemoBadge } from "@/components/feedback/DemoBadge";
 
 export default function PlanPage() {
   const { tenantId } = useWorkspace();
@@ -20,8 +21,14 @@ export default function PlanPage() {
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" /> Plano do workspace
         </h1>
-        <p className="text-sm text-muted-foreground">Plano atual: <Badge>{currentPlanId.toUpperCase()}</Badge></p>
+        <div className="text-sm text-muted-foreground flex items-center gap-2">Plano atual: <Badge>{currentPlanId.toUpperCase()}</Badge></div>
       </div>
+      <DemoBadge
+        variant="banner"
+        feature="Stripe"
+        description="Billing está em modo simulação."
+        lovableHint="Configure STRIPE_SECRET_KEY e webhook em Lovable Cloud → Secrets para ativar cobrança real."
+      />
       <div className="grid md:grid-cols-3 gap-4">
         {plans.map((p) => {
           const features = (p.features as Record<string, unknown>) ?? {};
@@ -57,7 +64,6 @@ export default function PlanPage() {
           );
         })}
       </div>
-      <p className="text-xs text-muted-foreground">Billing está em modo simulação — selecionar um plano apenas atualiza o registro local.</p>
     </div>
   );
 }

@@ -95,12 +95,24 @@ export function AIChat({ taskContext, suggestions = DEFAULT_SUGGESTIONS, placeho
             disabled={isStreaming}
           />
           {isStreaming ? (
-            <Button onClick={cancel} size="icon" variant="destructive" className="h-[60px]">
-              <Square className="h-4 w-4" />
+            <Button
+              onClick={cancel}
+              size="icon"
+              variant="destructive"
+              className="h-[60px]"
+              aria-label="Interromper resposta"
+            >
+              <Square className="h-4 w-4" aria-hidden />
             </Button>
           ) : (
-            <Button onClick={submit} size="icon" disabled={!input.trim()} className="h-[60px]">
-              <Send className="h-4 w-4" />
+            <Button
+              onClick={submit}
+              size="icon"
+              disabled={!input.trim()}
+              className="h-[60px]"
+              aria-label="Enviar mensagem"
+            >
+              <Send className="h-4 w-4" aria-hidden />
             </Button>
           )}
         </div>

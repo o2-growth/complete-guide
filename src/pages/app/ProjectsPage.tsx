@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FolderKanban, Plus, Archive, ArchiveRestore, Search } from "lucide-react";
+import { FolderKanban, Plus, Archive, ArchiveRestore, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CardGridSkeleton } from "@/components/skeletons/ListSkeleton";
 import { useProjects, useCreateProject, useArchiveProject, ProjectWithStats } from "@/hooks/useProjects";
 import { useSquads } from "@/hooks/useSquads";
 import { cn } from "@/lib/utils";
@@ -35,14 +36,14 @@ function CreateProjectDialog() {
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2 space-y-1.5">
               <Label>Nome</Label>
-              <Input value={name} onChange={(e) => {
+              <Input name="name" value={name} onChange={(e) => {
                 setName(e.target.value);
                 if (!key) setKey(e.target.value.slice(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, ""));
               }} placeholder="Ex: Lançamento Q3" />
             </div>
             <div className="space-y-1.5">
               <Label>Sigla</Label>
-              <Input value={key} maxLength={6} onChange={(e) => setKey(e.target.value.toUpperCase())} placeholder="LQ3" />
+              <Input name="key" value={key} maxLength={6} onChange={(e) => setKey(e.target.value.toUpperCase())} placeholder="LQ3" />
             </div>
           </div>
           <div className="space-y-1.5">
@@ -73,17 +74,27 @@ function CreateProjectDialog() {
               });
               setOpen(false); setName(""); setKey(""); setDescription(""); setSquadId("none");
             }}
-          >Criar</Button>
+          >
+            {create.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            Criar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function ProjectCard({ project }: { project: ProjectWithStats }) {
+function ProjectCard({ project, index }: { project: ProjectWithStats; index?: number }) {
   const archive = useArchiveProject();
+  const staggerDelay =
+    typeof index === "number" && index < 5 ? `${index * 40}ms` : undefined;
   return (
-    <Card className="group relative overflow-hidden transition hover:shadow-md">
+    <Card
+      className="group relative overflow-hidden transition hover:shadow-md animate-fade-in"
+      style={staggerDelay ? { animationDelay: staggerDelay } : undefined}
+    >
       <div className="absolute left-0 top-0 h-full w-1" style={{ backgroundColor: project.color || project.squadColor || "hsl(var(--primary))" }} />
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
@@ -159,9 +170,7 @@ export default function ProjectsPage() {
     return (
       <div className="container max-w-7xl py-8 space-y-4">
         <Skeleton className="h-8 w-48" />
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {[1,2,3].map((i) => <Skeleton key={i} className="h-40 w-full" />)}
-        </div>
+        <CardGridSkeleton count={6} />
       </div>
     );
   }
@@ -203,7 +212,7 @@ export default function ProjectsPage() {
                 <span className="text-[11px] text-muted-foreground/60">· {g.items.length}</span>
               </div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {g.items.map((p) => <ProjectCard key={p.id} project={p} />)}
+                {g.items.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)}
               </div>
             </section>
           ))}

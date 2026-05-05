@@ -4,7 +4,7 @@ interface SEOProps {
   title?: string;
   description?: string;
   noIndex?: boolean;
-  jsonLd?: Record<string, any>;
+  jsonLd?: Record<string, unknown>;
   canonical?: string;
 }
 
@@ -33,6 +33,8 @@ function setLink(rel: string, href: string) {
  * Garante: title <60, description <160, single canonical, opcional JSON-LD.
  */
 export function SEO({ title, description, noIndex, jsonLd, canonical }: SEOProps) {
+  // Serializa jsonLd uma vez para uso na dep array (evita reexecução por identidade do objeto).
+  const jsonLdSerialized = jsonLd ? JSON.stringify(jsonLd) : null;
   useEffect(() => {
     const prevTitle = document.title;
     if (title) {
@@ -49,10 +51,10 @@ export function SEO({ title, description, noIndex, jsonLd, canonical }: SEOProps
     if (canonical) setLink("canonical", canonical);
 
     let scriptEl: HTMLScriptElement | null = null;
-    if (jsonLd) {
+    if (jsonLdSerialized) {
       scriptEl = document.createElement("script");
       scriptEl.type = "application/ld+json";
-      scriptEl.text = JSON.stringify(jsonLd);
+      scriptEl.text = jsonLdSerialized;
       scriptEl.dataset.seo = "true";
       document.head.appendChild(scriptEl);
     }
@@ -60,7 +62,7 @@ export function SEO({ title, description, noIndex, jsonLd, canonical }: SEOProps
       document.title = prevTitle;
       scriptEl?.remove();
     };
-  }, [title, description, noIndex, canonical, JSON.stringify(jsonLd)]);
+  }, [title, description, noIndex, canonical, jsonLdSerialized]);
 
   return null;
 }

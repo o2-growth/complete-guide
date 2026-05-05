@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
 
 export type SquadKind = "ia" | "marketing" | "expansao" | "custom";
@@ -42,6 +43,7 @@ export interface SquadWithStats extends Squad {
 export function useSquads() {
   const { tenantId, loading } = useWorkspace();
   return useQuery({
+    ...queryProfile("structural"),
     queryKey: ["squads", tenantId],
     enabled: !loading && !!tenantId,
     queryFn: async (): Promise<SquadWithStats[]> => {
@@ -178,6 +180,7 @@ export function useRemoveSquadMember() {
 export function useTenantMembers() {
   const { tenantId, loading } = useWorkspace();
   return useQuery({
+    ...queryProfile("structural"),
     queryKey: ["tenant-members", tenantId],
     enabled: !loading && !!tenantId,
     queryFn: async () => {

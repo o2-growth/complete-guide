@@ -15,10 +15,12 @@ export function useSwipeGesture<T extends HTMLElement>(opts: SwipeOptions) {
   const ref = useRef<T | null>(null);
   const start = useRef<{ x: number; y: number; t: number } | null>(null);
 
+  // Desestruturação estabiliza deps (linter não lê propriedades de objeto).
+  const { onSwipeLeft, onSwipeRight, threshold = 60, enabled = true } = opts;
+
   useEffect(() => {
     const el = ref.current;
-    if (!el || opts.enabled === false) return;
-    const threshold = opts.threshold ?? 60;
+    if (!el || enabled === false) return;
 
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
@@ -33,8 +35,8 @@ export function useSwipeGesture<T extends HTMLElement>(opts: SwipeOptions) {
       start.current = null;
       if (dt > 600) return;
       if (Math.abs(dx) < threshold || Math.abs(dy) > Math.abs(dx)) return;
-      if (dx < 0) opts.onSwipeLeft?.();
-      else opts.onSwipeRight?.();
+      if (dx < 0) onSwipeLeft?.();
+      else onSwipeRight?.();
     };
 
     el.addEventListener("touchstart", onStart, { passive: true });
@@ -43,7 +45,7 @@ export function useSwipeGesture<T extends HTMLElement>(opts: SwipeOptions) {
       el.removeEventListener("touchstart", onStart);
       el.removeEventListener("touchend", onEnd);
     };
-  }, [opts.onSwipeLeft, opts.onSwipeRight, opts.threshold, opts.enabled]);
+  }, [onSwipeLeft, onSwipeRight, threshold, enabled]);
 
   return ref;
 }

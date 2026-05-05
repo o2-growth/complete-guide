@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useWorkspace } from "@/hooks/useWorkspace";
 
 export interface PresenceUser {
   user_id: string;
@@ -16,12 +17,17 @@ export interface PresenceUser {
  */
 export function usePresence(room: string | null | undefined) {
   const { user } = useAuth();
+  const { tenantId } = useWorkspace();
   const [users, setUsers] = useState<PresenceUser[]>([]);
 
   useEffect(() => {
-    if (!user || !room) return;
+    // namespace por tenant (regra de ouro CLAUDE.md §1.3): sem tenantId não conecta
+    if (!user || !room || !tenantId) {
+      setUsers([]);
+      return;
+    }
 
-    const channel = supabase.channel(`presence:${room}`, {
+    const channel = supabase.channel(`tenant:${tenantId}:presence:${room}`, {
       config: { presence: { key: user.id } },
     });
 
@@ -51,7 +57,7 @@ export function usePresence(room: string | null | undefined) {
     return () => {
       channel.unsubscribe();
     };
-  }, [user, room]);
+  }, [user, room, tenantId]);
 
   return users;
 }

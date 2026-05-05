@@ -20,7 +20,11 @@ export default function CampaignReportPage() {
   const { data: posts = [] } = useSocialPosts({ campaignId: id ?? null });
   const { data: report, isLoading, refetch } = useCampaignReport(id ?? null);
 
-  const totals = report?.totals ?? { posts: 0, reach: 0, impressions: 0, likes: 0, comments: 0, shares: 0, saves: 0, clicks: 0, followers_gained: 0 };
+  // useMemo estabiliza o objeto fallback para evitar nova identidade a cada render.
+  const totals = useMemo(
+    () => report?.totals ?? { posts: 0, reach: 0, impressions: 0, likes: 0, comments: 0, shares: 0, saves: 0, clicks: 0, followers_gained: 0 },
+    [report],
+  );
   const engagement = totals.reach > 0 ? ((totals.likes + totals.comments + totals.shares + totals.saves) / totals.reach) * 100 : 0;
 
   // série temporal por dia (post.published_at -> métricas agregadas)

@@ -69,7 +69,7 @@ export default function BenchmarksPage() {
               {Array.isArray(s.recommendations) && s.recommendations.length > 0 && (
                 <div className="space-y-1.5 pt-2 border-t">
                   <p className="text-xs font-semibold text-muted-foreground">Recomendações priorizadas</p>
-                  {s.recommendations.map((r: any, i: number) => (
+                  {s.recommendations.map((r, i) => (
                     <div key={i} className="flex gap-2 text-sm">
                       <Badge variant={r.priority === "high" ? "destructive" : r.priority === "medium" ? "default" : "secondary"} className="text-[10px] h-5">{r.priority}</Badge>
                       <div><strong>{r.title}</strong> — <span className="text-muted-foreground">{r.rationale}</span> {r.expected_impact && <em className="text-xs"> ({r.expected_impact})</em>}</div>

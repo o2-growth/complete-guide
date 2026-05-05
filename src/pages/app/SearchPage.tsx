@@ -1,9 +1,18 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search, ListTodo, FolderKanban, MessageSquare, Paperclip,
-  Pin, Trash2, Plus, History, Sparkles,
+  Pin, Trash2, Plus, History, Sparkles, ListFilter,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import {
+  applySmartListFilters,
+  collectTagIds,
+  type RuleGroup,
+} from "@/lib/smart-list-query";
+import { SavedViewsList } from "@/components/saved-views/SavedViewsList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,9 +44,17 @@ export default function SearchPage() {
   const [tab, setTab] = useState("all");
   const [saveOpen, setSaveOpen] = useState(false);
   const [viewName, setViewName] = useState("");
+  const [outerTab, setOuterTab] = useState<"search" | "smart-lists">("search");
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const viewId = searchParams.get("view");
+  const smartListResults = useSmartListResults(viewId);
   const { data: results, isLoading } = useAdvancedSearch(q);
+
+  useEffect(() => {
+    if (viewId) setOuterTab("smart-lists");
+  }, [viewId]);
   const { data: history } = useSearchHistory(8);
   const { data: views } = useSavedViews();
   const recordSearch = useRecordSearch();
@@ -45,7 +62,9 @@ export default function SearchPage() {
   const deleteView = useDeleteSavedView();
   const grouped = useGroupedResults(results);
 
-  // Registra busca após resultados chegarem
+  // Registra busca após resultados chegarem.
+  // recordSearch é uma mutation cuja identidade muda a cada render — ignoramos
+  // de propósito para que o efeito reaja só à query/resultado.
   useEffect(() => {
     if (q.trim().length >= 3 && results && !isLoading) {
       const timer = setTimeout(() => {
@@ -53,7 +72,7 @@ export default function SearchPage() {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [q, results, isLoading]);
+  }, [q, results, isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = (() => {
     if (!results) return [];
@@ -107,6 +126,39 @@ export default function SearchPage() {
           Tarefas, projetos, comentários e anexos do workspace inteiro.
         </p>
       </div>
+
+      <Tabs
+        value={outerTab}
+        onValueChange={(v) => setOuterTab(v as "search" | "smart-lists")}
+        className="mb-6"
+      >
+        <TabsList>
+          <TabsTrigger value="search">Busca</TabsTrigger>
+          <TabsTrigger value="smart-lists">
+            <ListFilter className="mr-1.5 h-3.5 w-3.5" /> Saved views
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="smart-lists" className="mt-6">
+          {viewId && smartListResults.data && (
+            <div className="mb-4 rounded-lg border bg-muted/30 p-3 text-sm">
+              <p className="font-medium">Smart list aplicada — {smartListResults.data.length} tarefas</p>
+              <ul className="mt-2 space-y-1">
+                {smartListResults.data.slice(0, 30).map((t) => (
+                  <li key={t.id} className="text-xs">
+                    <button
+                      className="hover:underline"
+                      onClick={() => navigate(`/app/projetos/${t.project_id}?task=${t.id}`)}
+                    >
+                      {t.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <SavedViewsList />
+        </TabsContent>
+        <TabsContent value="search" className="mt-6">
 
       <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
         <div className="space-y-4">
@@ -277,6 +329,63 @@ export default function SearchPage() {
           </Card>
         </aside>
       </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
+}
+
+/**
+ * Executa as filters JSONB de uma saved_view contra a tabela tasks.
+ * Pré-resolve tags em task_tags (por causa do M:N) e usa
+ * applySmartListFilters para o resto.
+ */
+function useSmartListResults(viewId: string | null) {
+  const { tenantId } = useWorkspace();
+  return useQuery({
+    queryKey: ["smart-list-results", viewId, tenantId],
+    enabled: !!viewId && !!tenantId,
+    queryFn: async () => {
+      const { data: view, error } = await supabase
+        .from("saved_views")
+        .select("filters")
+        .eq("id", viewId!)
+        .single();
+      if (error) throw error;
+      const group = view?.filters as unknown as RuleGroup;
+      if (!group || !Array.isArray(group.rules)) return [];
+
+      const tagIds = collectTagIds(group);
+      let tagFilteredTaskIds: string[] | undefined;
+      if (tagIds.length) {
+        const { data: tt } = await supabase
+          .from("task_tags")
+          .select("task_id")
+          .in("tag_id", tagIds);
+        tagFilteredTaskIds = Array.from(new Set((tt ?? []).map((r) => r.task_id)));
+      }
+
+      const baseQuery = supabase
+        .from("tasks")
+        .select("id, title, project_id, due_at, priority")
+        .eq("tenant_id", tenantId!)
+        .eq("archived", false)
+        .limit(200);
+      const filtered = applySmartListFilters(
+        baseQuery as never,
+        group,
+        tagFilteredTaskIds,
+      ) as typeof baseQuery;
+
+      const { data: rows, error: rowsErr } = await filtered;
+      if (rowsErr) throw rowsErr;
+      return (rows ?? []) as Array<{
+        id: string;
+        title: string;
+        project_id: string;
+        due_at: string | null;
+        priority: string;
+      }>;
+    },
+  });
 }

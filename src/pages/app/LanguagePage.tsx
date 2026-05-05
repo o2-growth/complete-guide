@@ -20,26 +20,25 @@ export default function LanguagePage() {
       <Card>
         <CardHeader><CardTitle>{t("settings.language")}</CardTitle></CardHeader>
         <CardContent>
-          <ul className="space-y-2" role="radiogroup" aria-label={t("settings.language")}>
+          <div className="space-y-2" role="radiogroup" aria-label={t("settings.language")}>
             {LOCALES.map((l) => {
               const active = locale === l.code;
               return (
-                <li key={l.code}>
-                  <Button
-                    variant={active ? "default" : "outline"}
-                    role="radio"
-                    aria-checked={active}
-                    onClick={() => setLocale(l.code as Locale)}
-                    className="w-full justify-start gap-3"
-                  >
-                    <span aria-hidden className="text-xl">{l.flag}</span>
-                    <span className="flex-1 text-left">{l.label}</span>
-                    {active && <Check className="h-4 w-4" aria-hidden />}
-                  </Button>
-                </li>
+                <Button
+                  key={l.code}
+                  variant={active ? "default" : "outline"}
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setLocale(l.code as Locale)}
+                  className="w-full justify-start gap-3"
+                >
+                  <span aria-hidden className="text-xl">{l.flag}</span>
+                  <span className="flex-1 text-left">{l.label}</span>
+                  {active && <Check className="h-4 w-4" aria-hidden />}
+                </Button>
               );
             })}
-          </ul>
+          </div>
         </CardContent>
       </Card>
 

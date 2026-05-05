@@ -47,7 +47,7 @@ export function EmailPreview({ content, className }: Props) {
         )}
         <p className="border-t pt-3 text-center text-[11px] text-muted-foreground">
           © {new Date().getFullYear()} {brand} · você está recebendo porque assinou nossa lista ·
-          <a className="ml-1 underline" href="#">descadastrar</a>
+          <span className="ml-1 underline opacity-70" aria-label="Link de descadastro (preview)">descadastrar</span>
         </p>
       </div>
     </div>

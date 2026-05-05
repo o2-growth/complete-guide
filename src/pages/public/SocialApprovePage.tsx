@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CheckCircle2, XCircle, Loader2, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +38,7 @@ export default function SocialApprovePage() {
   const [submitting, setSubmitting] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     const { data: rows, error } = await supabase.rpc("get_social_approval_by_token", { _token: token });
@@ -49,9 +49,9 @@ export default function SocialApprovePage() {
     }
     const row = Array.isArray(rows) ? rows[0] : rows;
     setData(row as ApprovalData);
-  };
+  }, [token]);
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [token]);
+  useEffect(() => { load(); }, [load]);
 
   const decide = async (decision: "approved" | "rejected") => {
     if (!token || !name.trim()) {

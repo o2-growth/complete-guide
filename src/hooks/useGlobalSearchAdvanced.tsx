@@ -134,6 +134,26 @@ export function useCreateSavedView() {
   });
 }
 
+export function useUpdateSavedView() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      id: string;
+      name?: string;
+      filters?: Record<string, unknown>;
+      icon?: string | null;
+      color?: string | null;
+      pinned?: boolean;
+    }) => {
+      const { id, ...rest } = input;
+      const patch = { ...rest } as never;
+      const { error } = await supabase.from("saved_views").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["saved-views"] }),
+  });
+}
+
 export function useDeleteSavedView() {
   const qc = useQueryClient();
   return useMutation({

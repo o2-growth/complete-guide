@@ -35,8 +35,8 @@ export function useOnboardingChecklist() {
       .select("preferences")
       .eq("id", user.id)
       .maybeSingle();
-    const prefs = (profile?.preferences as Record<string, any> | null) ?? {};
-    const ob: OnboardingState = prefs.onboarding_v2 ?? DEFAULT_STATE;
+    const prefs = (profile?.preferences as Record<string, unknown> | null) ?? {};
+    const ob: OnboardingState = (prefs.onboarding_v2 as OnboardingState | undefined) ?? DEFAULT_STATE;
     setState(ob);
 
     // Detect completion via DB
@@ -109,8 +109,8 @@ export function useOnboardingChecklist() {
     setState(next);
     if (!user) return;
     const { data: profile } = await supabase.from("profiles").select("preferences").eq("id", user.id).maybeSingle();
-    const prefs = (profile?.preferences as Record<string, any> | null) ?? {};
-    await supabase.from("profiles").update({ preferences: { ...prefs, onboarding_v2: { ...next } } as any }).eq("id", user.id);
+    const prefs = (profile?.preferences as Record<string, unknown> | null) ?? {};
+    await supabase.from("profiles").update({ preferences: { ...prefs, onboarding_v2: { ...next } } }).eq("id", user.id);
   }, [user]);
 
   const dismiss = useCallback(() => persist({ ...state, dismissed: true }), [state, persist]);

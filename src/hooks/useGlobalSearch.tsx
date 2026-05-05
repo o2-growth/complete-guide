@@ -34,8 +34,11 @@ export function useGlobalSearch(query: string) {
       ]);
       if (cancelled) return;
 
+      type TaskRow = { id: string; title: string; status: string; publish_state: string | null };
+      type ProjectRow = { id: string; name: string; archived_at: string | null };
+
       const out: SearchResult[] = [];
-      (tasks.data ?? []).forEach((t: any) => {
+      ((tasks.data ?? []) as TaskRow[]).forEach((t) => {
         const isPost = !!t.publish_state;
         out.push({
           kind: isPost ? "post" : "task",
@@ -45,7 +48,7 @@ export function useGlobalSearch(query: string) {
           href: isPost ? "/app/social" : "/app",
         });
       });
-      (projects.data ?? []).forEach((p: any) => out.push({
+      ((projects.data ?? []) as ProjectRow[]).forEach((p) => out.push({
         kind: "project",
         id: p.id,
         title: p.name,

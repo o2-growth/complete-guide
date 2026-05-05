@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, FileStack, Plus, Trash2, Sparkles } from "lucide-react";
+import { Copy, FileStack, Plus, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,7 +77,10 @@ function ApplyDialog({ template }: { template: ProjectTemplate }) {
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button disabled={!name || !key || apply.isPending} onClick={submit}>Criar projeto</Button>
+          <Button disabled={!name || !key || apply.isPending} onClick={submit}>
+            {apply.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Criar projeto
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -123,7 +126,10 @@ function CreateFromProjectDialog() {
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button disabled={!projectId || !name || save.isPending} onClick={submit}>Salvar</Button>
+          <Button disabled={!projectId || !name || save.isPending} onClick={submit}>
+            {save.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Salvar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

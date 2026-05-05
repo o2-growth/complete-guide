@@ -73,9 +73,14 @@ export function useHealthSnapshot() {
     queryKey: ["health_snapshot", tenantId],
     enabled: !!tenantId,
     refetchInterval: 30000,
-    queryFn: async () => {
+    retry: false,
+    queryFn: async (): Promise<HealthSnapshot | { forbidden: true }> => {
       const { data, error } = await supabase.rpc("health_snapshot", { _tenant: tenantId! });
-      if (error) throw error;
+      if (error) {
+        // RPC retorna 'forbidden' quando o usuário não é admin/manager do tenant.
+        if (/forbidden/i.test(error.message)) return { forbidden: true };
+        throw error;
+      }
       return data as unknown as HealthSnapshot;
     },
   });

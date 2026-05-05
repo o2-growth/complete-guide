@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import logoOxy from "@/assets/logo-oxy.png";
 import SEO from "@/components/SEO";
+import { DemoBadge } from "@/components/feedback/DemoBadge";
 import { usePublicPlans, useCreateCheckout, useMarkCheckoutSuccess } from "@/hooks/useCommercial";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -50,7 +51,6 @@ export default function CheckoutPage() {
     }
     try {
       const session = await create.mutateAsync({ plan_slug: plan.slug, billing_cycle: cycle, amount });
-      // Stripe real ainda não conectado: marcamos sucesso em modo preview.
       await markSuccess.mutateAsync(session.id);
       setTimeout(() => nav("/app/configuracoes/plano"), 1200);
     } catch (err) {
@@ -80,11 +80,13 @@ export default function CheckoutPage() {
             <Lock className="h-3 w-3" /> Pagamento seguro
           </p>
 
-          <Card className="mt-6 border-warning/40 bg-warning/5 p-4">
-            <p className="text-sm">
-              <strong>Modo preview:</strong> A integração Stripe ainda não está ativada neste workspace. Concluir aqui ativa o plano em modo demonstração — nenhum cartão é cobrado.
-            </p>
-          </Card>
+          <DemoBadge
+            variant="banner"
+            feature="Stripe"
+            description="Checkout em modo preview — nenhuma cobrança real será efetuada."
+            lovableHint="Configure STRIPE_SECRET_KEY e webhook em Lovable Cloud → Secrets para ativar cobrança real."
+            className="mt-6"
+          />
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>

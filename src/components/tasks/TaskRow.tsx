@@ -1,9 +1,8 @@
-import { format, isPast, isToday } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { Calendar, Clock, MoreHorizontal, Trash2, Flag } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,9 +13,9 @@ import { TaskRow as TTask, useDeleteTask, useToggleTaskDone } from "@/hooks/useT
 import { cn } from "@/lib/utils";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { SLABadge } from "@/components/sla/SLABadge";
-import type { MouseEvent as ReactMouseEvent } from "react";
-import { useConfetti } from "@/hooks/useConfetti";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import { DueDateLabel } from "@/components/tasks/DueDateLabel";
+import { ProgressBar } from "@/components/tasks/ProgressBar";
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "text-[hsl(var(--prio-urgent))]",
@@ -34,37 +33,40 @@ const PRIO_LABEL: Record<string, string> = {
   none: "",
 };
 
-export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) => void }) {
+export function TaskRow({
+  task,
+  onOpen,
+  index,
+}: {
+  task: TTask;
+  onOpen?: (id: string) => void;
+  index?: number;
+}) {
   const toggle = useToggleTaskDone();
   const remove = useDeleteTask();
   const done = !!task.done_at;
-  const fire = useConfetti();
-  const handleToggle = (e?: ReactMouseEvent | unknown) => {
-    if (!done) {
-      const ev = e as ReactMouseEvent | undefined;
-      const x = ev?.clientX;
-      const y = ev?.clientY;
-      fire(x, y, 40);
-    }
-    toggle.mutate(task);
-  };
+  const handleToggle = () => toggle.mutate(task);
   const swipeRef = useSwipeGesture<HTMLDivElement>({
     onSwipeRight: () => handleToggle(),
     onSwipeLeft: () => remove.mutate(task.id),
   });
 
   const due = task.due_at ? new Date(task.due_at) : null;
-  const overdue = due && !done && isPast(due) && !isToday(due);
-  const today = due && isToday(due);
+  const progress = task.progress_pct ?? 0;
+
+  // Stagger leve só nos primeiros 5 itens — listas longas ficariam lentas.
+  const staggerDelay =
+    typeof index === "number" && index < 5 ? `${index * 40}ms` : undefined;
 
   return (
     <div
       ref={swipeRef}
       className={cn(
-        "group flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30",
+        "group flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30 animate-fade-in",
         done && "opacity-60",
         onOpen && "cursor-pointer",
       )}
+      style={staggerDelay ? { animationDelay: staggerDelay } : undefined}
       onClick={(e) => {
         if (!onOpen) return;
         const target = e.target as HTMLElement;
@@ -98,21 +100,28 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
               {task.code}
             </Badge>
           )}
-          <SLABadge task={task as never} compact />
+          {task.gcal_event_id && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="shrink-0 text-muted-foreground"
+                  aria-label="Sincronizada com Google Calendar"
+                  data-no-open
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Sincronizada com Google Calendar</TooltipContent>
+            </Tooltip>
+          )}
+          <SLABadge task={task} compact />
         </div>
 
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           {due && (
-            <span
-              className={cn(
-                "inline-flex items-center gap-1",
-                overdue && "text-destructive font-medium",
-                today && !overdue && "text-primary font-medium",
-              )}
-            >
+            <span className="inline-flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              {format(due, "dd 'de' MMM", { locale: ptBR })}
-              {due.getHours() !== 0 && ` às ${format(due, "HH'h'mm")}`}
+              <DueDateLabel due={due} done={done} />
             </span>
           )}
           {task.estimate_minutes && (
@@ -129,6 +138,11 @@ export function TaskRow({ task, onOpen }: { task: TTask; onOpen?: (id: string) =
             </span>
           )}
         </div>
+        {progress > 0 && (
+          <div className="mt-2">
+            <ProgressBar value={progress} thin hideLabel />
+          </div>
+        )}
       </div>
 
       <DropdownMenu>

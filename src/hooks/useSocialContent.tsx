@@ -200,7 +200,7 @@ export function usePostMetrics(filters?: { from?: string; to?: string; campaignI
       if (error) throw error;
       const metrics = (data ?? []) as PostMetric[];
       const taskIds = Array.from(new Set(metrics.map((m) => m.task_id)));
-      let tasksMap = new Map<string, { id: string; title: string; social_channel: SocialChannel | null; campaign_id: string | null; published_at: string | null; scheduled_at: string | null }>();
+      const tasksMap = new Map<string, { id: string; title: string; social_channel: SocialChannel | null; campaign_id: string | null; published_at: string | null; scheduled_at: string | null }>();
       if (taskIds.length > 0) {
         const { data: tasksData } = await supabase
           .from("tasks")

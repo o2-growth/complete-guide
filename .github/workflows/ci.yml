@@ -13,3 +13,16 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bunx vitest run
       - run: bunx tsc --noEmit
+
+  a11y:
+    runs-on: ubuntu-latest
+    needs: test
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run dev &
+      - run: sleep 10
+      - run: bunx playwright test e2e/a11y.spec.ts --reporter=list

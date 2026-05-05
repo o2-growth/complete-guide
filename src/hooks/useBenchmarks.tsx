@@ -3,6 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 
+export interface Scorecard {
+  id: string;
+  period_month: string;
+  created_at: string;
+  ai_summary?: string | null;
+  recommendations?: Array<{ priority: string; title: string; rationale: string; expected_impact?: string }>;
+  [key: string]: unknown;
+}
+
 export interface BenchComparison {
   metric: string; unit: string; tenant: number;
   p25: number; p50: number; p75: number;
@@ -25,14 +34,14 @@ export function useBenchmarks() {
   const { tenantId } = useWorkspace();
   const [data, setData] = useState<{ industry: string; comparisons: BenchComparison[] } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [scorecards, setScorecards] = useState<any[]>([]);
+  const [scorecards, setScorecards] = useState<Scorecard[]>([]);
   const [building, setBuilding] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!tenantId) return;
     setLoading(true);
     const { data: r, error } = await supabase.rpc("benchmark_compare", { _tenant: tenantId });
-    if (error) toast.error(error.message); else setData(r as any);
+    if (error) toast.error(error.message); else setData(r as { industry: string; comparisons: BenchComparison[] } | null);
     setLoading(false);
   }, [tenantId]);
 
@@ -40,7 +49,7 @@ export function useBenchmarks() {
     if (!tenantId) return;
     const { data: r } = await supabase.from("monthly_scorecards")
       .select("*").eq("tenant_id", tenantId).order("period_month", { ascending: false }).limit(12);
-    setScorecards(r ?? []);
+    setScorecards((r ?? []) as Scorecard[]);
   }, [tenantId]);
 
   useEffect(() => { refresh(); loadScorecards(); }, [refresh, loadScorecards]);
@@ -53,7 +62,7 @@ export function useBenchmarks() {
       if (error) throw error;
       toast.success("Scorecard gerado");
       await loadScorecards();
-    } catch (e: any) { toast.error(e.message || String(e)); } finally { setBuilding(false); }
+    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : String(e)); } finally { setBuilding(false); }
   };
 
   return { data, loading, refresh, scorecards, buildScorecard, building, METRIC_LABEL };

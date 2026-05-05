@@ -70,11 +70,16 @@ export function KanbanBoard({ projectId }: Props) {
 
     if (!destStatusId || destStatusId === task.status_id) return;
 
-    const destStatus = (statuses ?? []).find((s) => s.id === destStatusId);
+    moveToStatus(task.id, destStatusId);
+  };
+
+  const moveToStatus = (taskId: string, statusId: string) => {
+    const destStatus = (statuses ?? []).find((s) => s.id === statusId);
+    if (!destStatus) return;
     move.mutate({
-      taskId: task.id,
-      statusId: destStatusId,
-      isDone: !!destStatus?.is_done,
+      taskId,
+      statusId,
+      isDone: !!destStatus.is_done,
     });
   };
 
@@ -124,7 +129,9 @@ export function KanbanBoard({ projectId }: Props) {
                 key={s.id}
                 status={s as KanbanStatus}
                 tasks={grouped.get(s.id) ?? []}
+                allStatuses={statuses as KanbanStatus[]}
                 onOpen={setOpenId}
+                onMoveToStatus={moveToStatus}
               />
             ))}
           </div>

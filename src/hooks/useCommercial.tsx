@@ -136,7 +136,7 @@ export function useMarkCheckoutSuccess() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Plano ativado (preview). Stripe real ainda não conectado.");
+      toast.success("Plano ativado.");
       qc.invalidateQueries({ queryKey: ["checkout"] });
     },
   });

@@ -16,10 +16,10 @@ import {
   X,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PresenceAvatars } from "@/components/presence/PresenceAvatars";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,7 +36,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { RichEditor } from "./RichEditor";
 import { useAuth } from "@/hooks/useAuth";
-import { useTaskStatuses, useToggleTaskDone } from "@/hooks/useTasks";
+import { useTaskStatuses, useToggleTaskDone, type TaskRow } from "@/hooks/useTasks";
 import {
   useTask,
   useUpdateTask,
@@ -59,9 +59,18 @@ import { PreviewEditor } from "@/components/previews/PreviewEditor";
 import { TaskAIPanel } from "@/components/ai/TaskAIPanel";
 import { TaskApprovalsPanel } from "@/components/approvals/TaskApprovalsPanel";
 import { SocialMediaPanel } from "@/components/social/SocialMediaPanel";
+import type { SocialChannel, PublishState } from "@/hooks/useSocialMedia";
 import { TaskSocialContentPanel } from "@/components/social/TaskSocialContentPanel";
 import { TaskMetricsPanel } from "@/components/social/TaskMetricsPanel";
 import { SLABadge } from "@/components/sla/SLABadge";
+import { RecurrenceBuilder } from "./RecurrenceBuilder";
+import { useRecurrence, useUpdateRecurrence } from "@/hooks/useRecurrence";
+import { DueDateLabel } from "./DueDateLabel";
+import { ProgressBar } from "./ProgressBar";
+import { useUpdateTaskProgress } from "@/hooks/useTaskProgress";
+import { usePersonas } from "@/hooks/usePersonas";
+import { useAudiences } from "@/hooks/useAudiences";
+import { TemplatePicker } from "@/components/modelos/TemplatePicker";
 
 const PRIORITIES = [
   { value: "none", label: "Nenhuma" },
@@ -116,6 +125,9 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
   const { data: statuses } = useTaskStatuses();
   const update = useUpdateTask();
   const toggleDone = useToggleTaskDone();
+  const recurrenceQuery = useRecurrence(taskId);
+  const updateRecurrence = useUpdateRecurrence(taskId);
+  const updateProgress = useUpdateTaskProgress(taskId);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -137,6 +149,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
 
   const done = !!task.done_at;
   const due = task.due_at ? new Date(task.due_at) : null;
+  const progress = task.progress_pct ?? 0;
 
   const saveTitle = () => {
     const t = title.trim();
@@ -157,7 +170,20 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
               {task.code}
             </Badge>
           )}
-          <SLABadge task={task as never} />
+          <SLABadge task={task} />
+          {task.gcal_event_id && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  aria-label="Sincronizada com Google Calendar"
+                  className="inline-flex items-center text-primary"
+                >
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Sincronizada com Google Calendar</TooltipContent>
+            </Tooltip>
+          )}
           <span className="text-xs text-muted-foreground">
             criada {formatDistanceToNow(new Date(task.created_at), { addSuffix: true, locale: ptBR })}
           </span>
@@ -244,7 +270,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
                 <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                {due ? format(due, "dd 'de' MMM, yyyy", { locale: ptBR }) : "Sem data"}
+                {due ? <DueDateLabel due={due} done={done} absoluteFormat="dd 'de' MMM, yyyy" /> : "Sem data"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -276,6 +302,25 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
         </FieldLabel>
       </div>
 
+      <div className="grid gap-4 border-b bg-background px-6 py-4 sm:grid-cols-2">
+        <div>
+          <RecurrenceBuilder
+            value={recurrenceQuery.data?.rrule ?? null}
+            onChange={(rule) => updateRecurrence.mutate(rule)}
+            dtstart={due ?? undefined}
+          />
+        </div>
+        <div className="space-y-2">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+            Progresso
+          </p>
+          <ProgressBar
+            value={progress}
+            onChange={(v) => updateProgress.mutate(v)}
+          />
+        </div>
+      </div>
+
       <div className="flex-1 px-6 py-4">
         <Tabs defaultValue="details">
           <TabsList>
@@ -288,6 +333,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <TabsTrigger value="ai">IA</TabsTrigger>
             <TabsTrigger value="approvals">Aprovações</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
+            <TabsTrigger value="strategy">Estratégia</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="mt-4">
@@ -296,6 +342,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
               onChange={setDescription}
               onBlur={saveDescription}
               placeholder="Detalhe a tarefa, objetivos, links de referência…"
+              task={task}
             />
             <p className="mt-2 text-xs text-muted-foreground">
               Formate com **negrito**, listas, checklists e títulos. Salva ao perder o foco.
@@ -314,7 +361,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <PreviewEditor
               customFields={task.custom_fields ?? null}
               onSave={(merged) =>
-                update.mutate({ id: task.id, patch: { custom_fields: merged } as never })
+                update.mutate({ id: task.id, patch: { custom_fields: merged } })
               }
             />
           </TabsContent>
@@ -324,7 +371,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
           </TabsContent>
 
           <TabsContent value="comments" className="mt-4">
-            <CommentsPanel taskId={task.id} />
+            <CommentsPanel taskId={task.id} task={task} />
           </TabsContent>
 
           <TabsContent value="ai" className="mt-4">
@@ -338,19 +385,28 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
           <TabsContent value="social" className="mt-4 space-y-4">
             <SocialMediaPanel
               taskId={task.id}
-              channel={(task as { social_channel?: string | null }).social_channel as never ?? null}
-              state={(task as { publish_state?: string | null }).publish_state as never ?? null}
-              caption={(task as { social_caption?: string | null }).social_caption ?? null}
-              campaignId={(task as { campaign_id?: string | null }).campaign_id ?? null}
-              scheduledAt={(task as { scheduled_at?: string | null }).scheduled_at ?? null}
+              channel={(task.social_channel as SocialChannel | null) ?? null}
+              state={(task.publish_state as PublishState | null) ?? null}
+              caption={task.social_caption ?? null}
+              campaignId={task.campaign_id ?? null}
+              scheduledAt={task.scheduled_at ?? null}
             />
             <TaskSocialContentPanel
               taskId={task.id}
-              channel={(task as { social_channel?: string | null }).social_channel as never ?? null}
-              caption={(task as { social_caption?: string | null }).social_caption ?? ""}
+              channel={(task.social_channel as SocialChannel | null) ?? null}
+              caption={task.social_caption ?? ""}
               onCaptionChange={() => { /* refetch via query invalidation no save */ }}
             />
             <TaskMetricsPanel taskId={task.id} />
+          </TabsContent>
+
+          <TabsContent value="strategy" className="mt-4">
+            <StrategyPanel
+              taskId={task.id}
+              personaId={task.persona_id ?? null}
+              audienceId={task.audience_id ?? null}
+              onUpdate={update.mutate}
+            />
           </TabsContent>
         </Tabs>
       </div>
@@ -379,10 +435,25 @@ function ChecklistPanel({
 }) {
   const items = getChecklist(task);
   const [text, setText] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const save = (next: ChecklistItem[]) => {
     if (!task) return;
-    onUpdate({ id: task.id, patch: { checklist: next } as never });
+    onUpdate({ id: task.id, patch: { checklist: next } });
+  };
+
+  const applyTemplate = (body: unknown) => {
+    if (!task) return;
+    const tplItems = (body as { items?: Array<{ text: string; required?: boolean }> })?.items ?? [];
+    const additions: ChecklistItem[] = tplItems
+      .filter((it) => !!it.text)
+      .map((it) => ({ id: crypto.randomUUID(), text: it.text, done: false }));
+    if (additions.length === 0) {
+      toast.error("Modelo sem itens");
+      return;
+    }
+    save([...items, ...additions]);
+    toast.success(`${additions.length} itens adicionados ao checklist`);
   };
 
   const add = () => {
@@ -400,6 +471,18 @@ function ChecklistPanel({
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setPickerOpen(true)}>
+          <Plus className="mr-1 h-3 w-3" /> Aplicar checklist do catálogo
+        </Button>
+      </div>
+      <TemplatePicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        kind="task_checklist"
+        title="Aplicar checklist"
+        onSelect={(body) => applyTemplate(body)}
+      />
       {items.length > 0 && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <CheckCircle2 className="h-3.5 w-3.5" />
@@ -469,7 +552,7 @@ function SubtasksPanel({ task }: { task: NonNullable<ReturnType<typeof useTask>[
                     id: s.id,
                     done_at: s.done_at,
                     status_id: s.status_id,
-                  } as never)
+                  } as Parameters<typeof toggle.mutate>[0])
                 }
               />
               {s.code && (
@@ -514,7 +597,11 @@ function AttachmentsPanel({ taskId }: { taskId: string }) {
 
   const onPick = async (files: FileList | null) => {
     if (!files) return;
-    for (const f of Array.from(files)) await upload.mutateAsync(f).catch(() => {});
+    for (const f of Array.from(files)) {
+      await upload.mutateAsync(f).catch((err) => {
+        toast.error(`Falha ao enviar ${f.name}: ${err?.message ?? "erro desconhecido"}`);
+      });
+    }
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -598,32 +685,34 @@ function AttachmentsPanel({ taskId }: { taskId: string }) {
 }
 
 /* ---------------- Comments ---------------- */
-function CommentsPanel({ taskId }: { taskId: string }) {
+function CommentsPanel({ taskId, task }: { taskId: string; task: TaskRow }) {
   const { user } = useAuth();
   const { data, isLoading } = useComments(taskId);
   const add = useAddComment(taskId);
   const del = useDeleteComment(taskId);
   const [body, setBody] = useState("");
 
+  const isEmpty = !body.replace(/<[^>]*>/g, "").trim();
+
   const submit = () => {
-    const t = body.trim();
-    if (!t) return;
-    add.mutate(t, { onSuccess: () => setBody("") });
+    if (isEmpty) return;
+    add.mutate(body, { onSuccess: () => setBody("") });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <Textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
-          }}
-          placeholder="Escreva um comentário… (⌘/Ctrl+Enter)"
-          className="min-h-[70px] flex-1"
-        />
-        <Button onClick={submit} disabled={add.isPending || !body.trim()} size="icon">
+        <div className="flex-1">
+          <RichEditor
+            value={body}
+            onChange={setBody}
+            placeholder="Escreva um comentário… ('/' para comandos, '@' para mencionar)"
+            enableMentions
+            className="min-h-[70px]"
+            task={task}
+          />
+        </div>
+        <Button onClick={submit} disabled={add.isPending || isEmpty} size="icon">
           {add.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </Button>
       </div>
@@ -662,7 +751,10 @@ function CommentsPanel({ taskId }: { taskId: string }) {
                     </Button>
                   )}
                 </div>
-                <p className="mt-0.5 whitespace-pre-wrap text-sm">{c.body}</p>
+                <div
+                  className="prose prose-sm dark:prose-invert mt-0.5 max-w-none whitespace-pre-wrap text-sm"
+                  dangerouslySetInnerHTML={{ __html: c.body }}
+                />
               </div>
             </li>
           ))}
@@ -671,6 +763,87 @@ function CommentsPanel({ taskId }: { taskId: string }) {
           )}
         </ul>
       )}
+    </div>
+  );
+}
+
+/* ---------------- Strategy (Persona / Audience) ---------------- */
+function StrategyPanel({
+  taskId,
+  personaId,
+  audienceId,
+  onUpdate,
+}: {
+  taskId: string;
+  personaId: string | null;
+  audienceId: string | null;
+  onUpdate: ReturnType<typeof useUpdateTask>["mutate"];
+}) {
+  const personasQuery = usePersonas();
+  const audiencesQuery = useAudiences();
+  const personas = personasQuery.data ?? [];
+  const audiences = audiencesQuery.data ?? [];
+
+  const setPersona = (v: string) =>
+    onUpdate({
+      id: taskId,
+      patch: { persona_id: v === "_" ? null : v },
+    });
+  const setAudience = (v: string) =>
+    onUpdate({
+      id: taskId,
+      patch: { audience_id: v === "_" ? null : v },
+    });
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Vincule a tarefa a uma persona e/ou público para alinhar entrega e mensageria com a estratégia.
+      </p>
+
+      <div className="space-y-1.5">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          Persona
+        </p>
+        <Select value={personaId ?? "_"} onValueChange={setPersona}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Sem persona" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="_">Sem persona</SelectItem>
+            {personas.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                <span className="inline-flex items-center gap-2">
+                  <span
+                    className="inline-block h-2 w-2 rounded-full"
+                    style={{ background: p.color }}
+                  />
+                  {p.name}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1.5">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          Público
+        </p>
+        <Select value={audienceId ?? "_"} onValueChange={setAudience}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Sem público" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="_">Sem público</SelectItem>
+            {audiences.map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }

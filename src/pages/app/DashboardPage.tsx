@@ -1,19 +1,4 @@
-import { useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,21 +19,37 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Charts em lazy: recharts só baixa quando o dashboard renderiza, separado em chunk próprio.
+const TimelineChart = lazy(() => import("@/components/dashboard/TimelineChart"));
+const BreakdownPieChart = lazy(() => import("@/components/dashboard/BreakdownPieChart"));
+const AssigneeBarChart = lazy(() => import("@/components/dashboard/AssigneeBarChart"));
+
 const RANGE_LABEL: Record<DateRange, string> = {
   "7d": "Últimos 7 dias",
   "30d": "Últimos 30 dias",
   "90d": "Últimos 90 dias",
 };
 
+// Fallback comum para os Suspense dos charts.
+function ChartFallback() {
+  return (
+    <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+      <Loader2 className="h-4 w-4 animate-spin mr-2" /> Carregando gráfico…
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const [range, setRange] = useState<DateRange>("30d");
   const { data, isLoading } = useDashboardData(range);
 
-  const tasks = data?.tasks ?? [];
-  const statuses = data?.statuses ?? [];
-  const types = data?.types ?? [];
-  const projects = data?.projects ?? [];
-  const profiles = data?.profiles ?? [];
+  // useMemo estabiliza arrays vazios para que dependências dos memos abaixo
+  // não mudem identidade a cada render quando data ainda é undefined.
+  const tasks = useMemo(() => data?.tasks ?? [], [data]);
+  const statuses = useMemo(() => data?.statuses ?? [], [data]);
+  const types = useMemo(() => data?.types ?? [], [data]);
+  const projects = useMemo(() => data?.projects ?? [], [data]);
+  const profiles = useMemo(() => data?.profiles ?? [], [data]);
 
   const kpis = useMemo(() => buildKPIs(tasks), [tasks]);
   const timeline = useMemo(
@@ -138,24 +139,9 @@ export default function DashboardPage() {
               <CardTitle className="text-base">Criadas vs concluídas</CardTitle>
             </CardHeader>
             <CardContent className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timeline}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="criadas" stroke="#0EA5E9" strokeWidth={2} dot={false} name="Criadas" />
-                  <Line type="monotone" dataKey="concluidas" stroke="#22c55e" strokeWidth={2} dot={false} name="Concluídas" />
-                </LineChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<ChartFallback />}>
+                <TimelineChart data={timeline} />
+              </Suspense>
             </CardContent>
           </Card>
 
@@ -164,45 +150,27 @@ export default function DashboardPage() {
             <Card>
               <CardHeader><CardTitle className="text-base">Por status</CardTitle></CardHeader>
               <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
-                      {statusData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <Suspense fallback={<ChartFallback />}>
+                  <BreakdownPieChart data={statusData} />
+                </Suspense>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader><CardTitle className="text-base">Por tipo</CardTitle></CardHeader>
               <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={typeData} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
-                      {typeData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <Suspense fallback={<ChartFallback />}>
+                  <BreakdownPieChart data={typeData} />
+                </Suspense>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader><CardTitle className="text-base">Por prioridade</CardTitle></CardHeader>
               <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={priorityData} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
-                      {priorityData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <Suspense fallback={<ChartFallback />}>
+                  <BreakdownPieChart data={priorityData} />
+                </Suspense>
               </CardContent>
             </Card>
           </div>
@@ -213,17 +181,9 @@ export default function DashboardPage() {
               <CardTitle className="text-base">Carga por responsável (top 8)</CardTitle>
             </CardHeader>
             <CardContent className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={assigneeData} layout="vertical" margin={{ left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
-                  <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={140} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="abertas" stackId="a" fill="#0EA5E9" name="Abertas" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="concluidas" stackId="a" fill="#22c55e" name="Concluídas" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<ChartFallback />}>
+                <AssigneeBarChart data={assigneeData} />
+              </Suspense>
             </CardContent>
           </Card>
         </>

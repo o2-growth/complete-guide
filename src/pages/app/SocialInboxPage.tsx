@@ -13,6 +13,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { SocialChannel } from "@/hooks/useSocialMedia";
+import { DemoBadge } from "@/components/feedback/DemoBadge";
 
 const SENT_META: Record<InboxSentiment, { label: string; cls: string; Icon: typeof Smile }> = {
   positive: { label: "Positivo",  cls: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400", Icon: Smile },
@@ -52,6 +53,12 @@ export default function SocialInboxPage() {
 
   return (
     <div className="space-y-4 p-6">
+      <DemoBadge
+        variant="banner"
+        feature="Inbox social"
+        description="Comentários e DMs estão em modo mock."
+        lovableHint="Conecte OAuth de Meta/LinkedIn em Configurações → Integrações para receber dados reais."
+      />
       <header className="flex flex-wrap items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <InboxIcon className="h-5 w-5" />

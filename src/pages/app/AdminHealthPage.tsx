@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, AlertTriangle, Workflow, Webhook, Send, Bug } from "lucide-react";
-import { useHealthSnapshot, usePerfMetrics } from "@/hooks/useAdminObservability";
+import { Activity, AlertTriangle, Workflow, Webhook, Send, Bug, Lock } from "lucide-react";
+import { useHealthSnapshot, usePerfMetrics, type HealthSnapshot } from "@/hooks/useAdminObservability";
 import { SEO } from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 
@@ -20,13 +20,41 @@ function KPI({ icon: Icon, label, value, tone = "default" }: { icon: typeof Acti
 }
 
 export default function AdminHealthPage() {
-  const { data: h, isLoading } = useHealthSnapshot();
+  const { data, isLoading } = useHealthSnapshot();
   const { data: lcp = [] } = usePerfMetrics("LCP");
   const { data: cls = [] } = usePerfMetrics("CLS");
+
+  const forbidden = data && "forbidden" in data;
+  const h = forbidden ? null : (data as HealthSnapshot | undefined);
 
   const avg = (arr: { value: number }[]) => arr.length ? arr.reduce((a, b) => a + b.value, 0) / arr.length : 0;
   const lcpAvg = avg(lcp);
   const clsAvg = avg(cls);
+
+  if (forbidden) {
+    return (
+      <div className="space-y-6 p-6">
+        <SEO title="Admin · Saúde do sistema" description="Healthcheck de filas, jobs e métricas Web Vitals" />
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Activity className="h-6 w-6 text-primary" /> Saúde do sistema
+          </h1>
+        </div>
+        <Card className="border-warning/40 bg-warning/5">
+          <CardContent className="p-6 flex items-start gap-3">
+            <Lock className="h-5 w-5 text-warning mt-0.5" aria-hidden />
+            <div className="space-y-1">
+              <p className="font-semibold">Acesso restrito a administradores</p>
+              <p className="text-sm text-muted-foreground">
+                Esta página exibe métricas de saúde da plataforma e está disponível apenas para usuários com papel <strong>admin</strong> ou <strong>manager</strong> no workspace atual.
+                Solicite o acesso ao administrador do seu time se precisar dessas informações.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-6">

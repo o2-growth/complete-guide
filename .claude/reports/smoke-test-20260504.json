@@ -1,0 +1,708 @@
+{
+  "auth": {
+    "authed": true,
+    "mode": "signup:qa.cto+1777917309936@oxytest.dev"
+  },
+  "results": [
+    {
+      "route": "/app",
+      "label": "AppHome (Inbox)",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "sidebar e topbar visíveis",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/app-home.png"
+    },
+    {
+      "route": "/app",
+      "label": "Inbox",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1059ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/inbox.png"
+    },
+    {
+      "route": "/app/hoje",
+      "label": "Hoje",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1041ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/hoje.png"
+    },
+    {
+      "route": "/app/proximos",
+      "label": "Próximos 7",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1041ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/proximos-7.png"
+    },
+    {
+      "route": "/app/atrasadas",
+      "label": "Atrasadas",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/atrasadas.png"
+    },
+    {
+      "route": "/app/atribuidas",
+      "label": "Atribuídas",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/atribuidas.png"
+    },
+    {
+      "route": "/app/calendario",
+      "label": "Calendário",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1041ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/calendario.png"
+    },
+    {
+      "route": "/app/kanban",
+      "label": "Kanban",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1027ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/kanban.png"
+    },
+    {
+      "route": "/app/projetos",
+      "label": "Lista (projetos)",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1062ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/lista-projetos.png"
+    },
+    {
+      "route": "/app/templates",
+      "label": "Templates",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1046ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/templates.png"
+    },
+    {
+      "route": "/app/squads",
+      "label": "Squads",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 2850ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/squads.png"
+    },
+    {
+      "route": "/app/demandas",
+      "label": "Demandas",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1045ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/demandas.png"
+    },
+    {
+      "route": "/app/aprovacoes",
+      "label": "Aprovações",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1027ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/aprovacoes.png"
+    },
+    {
+      "route": "/app/slas",
+      "label": "SLAs",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1033ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/slas.png"
+    },
+    {
+      "route": "/app/midias",
+      "label": "Mídias previews",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1034ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/midias-previews.png"
+    },
+    {
+      "route": "/app/social",
+      "label": "Calendário editorial",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1054ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/calendario-editorial.png"
+    },
+    {
+      "route": "/app/social/inbox",
+      "label": "Inbox social",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/inbox-social.png"
+    },
+    {
+      "route": "/app/social/cadencia",
+      "label": "Cadência",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1043ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/cadencia.png"
+    },
+    {
+      "route": "/app/social/studio",
+      "label": "Studio criativo",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1083ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/studio-criativo.png"
+    },
+    {
+      "route": "/app/social/pipeline",
+      "label": "Pipeline produção",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1026ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/pipeline-producao.png"
+    },
+    {
+      "route": "/app/social/intel",
+      "label": "Inteligência IA",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1042ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/inteligencia-ia.png"
+    },
+    {
+      "route": "/app/social/analytics",
+      "label": "Analytics social",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1040ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/analytics-social.png"
+    },
+    {
+      "route": "/app/campanhas",
+      "label": "Campanhas",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1048ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/campanhas.png"
+    },
+    {
+      "route": "/app/social/boosts",
+      "label": "Boost manager",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1042ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/boost-manager.png"
+    },
+    {
+      "route": "/app/social/creators",
+      "label": "Creators",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1035ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/creators.png"
+    },
+    {
+      "route": "/app/social/bio",
+      "label": "Link-in-bio",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1029ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/link-in-bio.png"
+    },
+    {
+      "route": "/app/biblioteca",
+      "label": "Biblioteca de mídia",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1060ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/biblioteca-de-midia.png"
+    },
+    {
+      "route": "/app/snippets",
+      "label": "Snippets",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1042ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/snippets.png"
+    },
+    {
+      "route": "/app/dashboard",
+      "label": "Dashboard",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1020ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/dashboard.png"
+    },
+    {
+      "route": "/app/exec",
+      "label": "Executive",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1036ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/executive.png"
+    },
+    {
+      "route": "/app/copilot",
+      "label": "Copilot IA",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1032ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/copilot-ia.png"
+    },
+    {
+      "route": "/app/benchmarks",
+      "label": "Benchmarks",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1033ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/benchmarks.png"
+    },
+    {
+      "route": "/app/simulacoes",
+      "label": "Simulações",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1045ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/simulacoes.png"
+    },
+    {
+      "route": "/app/reports",
+      "label": "Report Builder",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [],
+      "note": "ok em 1055ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/report-builder.png"
+    },
+    {
+      "route": "/app/forecast",
+      "label": "Forecast IA",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/functions/v1/forecast-metric"
+      ],
+      "note": "ok em 1074ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/forecast-ia.png"
+    },
+    {
+      "route": "/app/okrs",
+      "label": "OKRs",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1079ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/okrs.png"
+    },
+    {
+      "route": "/app/anomalias",
+      "label": "Anomalias",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1058ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/anomalias.png"
+    },
+    {
+      "route": "/app/workload",
+      "label": "Workload",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1035ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/workload.png"
+    },
+    {
+      "route": "/app/skills",
+      "label": "Skills",
+      "status": "parcial",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "sem h1/h2",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/skills.png"
+    },
+    {
+      "route": "/app/capacity",
+      "label": "Capacity",
+      "status": "parcial",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "sem h1/h2",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/capacity.png"
+    },
+    {
+      "route": "/app/foco",
+      "label": "Foco",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1073ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/foco.png"
+    },
+    {
+      "route": "/app/genio",
+      "label": "Gênio Growth",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1068ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/genio-growth.png"
+    },
+    {
+      "route": "/app/ia-proativa",
+      "label": "IA Proativa",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1016ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/ia-proativa.png"
+    },
+    {
+      "route": "/app/notificacoes",
+      "label": "Notificações",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1043ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/notificacoes.png"
+    },
+    {
+      "route": "/app/comecar",
+      "label": "Comece aqui",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/comece-aqui.png"
+    },
+    {
+      "route": "/app/ajuda",
+      "label": "Ajuda",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1036ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/ajuda.png"
+    },
+    {
+      "route": "/app/conquistas",
+      "label": "Conquistas",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1058ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/conquistas.png"
+    },
+    {
+      "route": "/app/enterprise",
+      "label": "Enterprise",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1049ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/enterprise.png"
+    },
+    {
+      "route": "/app/automacoes",
+      "label": "Automações",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1068ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/automacoes.png"
+    },
+    {
+      "route": "/app/automacoes/regras",
+      "label": "Regras (no-code)",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1047ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/regras-no-code.png"
+    },
+    {
+      "route": "/app/workspaces",
+      "label": "Workspaces",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1040ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/workspaces.png"
+    },
+    {
+      "route": "/app/configuracoes/plano",
+      "label": "Plano & billing",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/plano-billing.png"
+    },
+    {
+      "route": "/app/marketplace",
+      "label": "Marketplace",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1057ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/marketplace.png"
+    },
+    {
+      "route": "/app/developer",
+      "label": "Developer Hub",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1030ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/developer-hub.png"
+    },
+    {
+      "route": "/app/buscar",
+      "label": "Busca global",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1035ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/busca-global.png"
+    },
+    {
+      "route": "/app/configuracoes/dados",
+      "label": "Dados (import/export)",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1046ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/dados-import-export.png"
+    },
+    {
+      "route": "/app/seguranca",
+      "label": "Segurança 2FA",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1034ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/seguranca-2fa.png"
+    },
+    {
+      "route": "/app/configuracoes/privacidade",
+      "label": "Privacidade LGPD",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1024ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/privacidade-lgpd.png"
+    },
+    {
+      "route": "/app/admin/saude",
+      "label": "Saúde sistema",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2",
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/rpc/health_snapshot"
+      ],
+      "note": "ok em 1047ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/saude-sistema.png"
+    },
+    {
+      "route": "/app/admin/erros",
+      "label": "Erros admin",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1053ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/erros-admin.png"
+    },
+    {
+      "route": "/app/atalhos",
+      "label": "Atalhos",
+      "status": "OK",
+      "consoleErrors": [
+        "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavio"
+      ],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1041ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/atalhos.png"
+    },
+    {
+      "route": "/app/configuracoes/aparencia",
+      "label": "Aparência",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1052ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/aparencia.png"
+    },
+    {
+      "route": "/app/configuracoes/idioma",
+      "label": "Idioma",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1018ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/idioma.png"
+    },
+    {
+      "route": "/app/configuracoes/tipos",
+      "label": "Tipos de tarefa",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1038ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/tipos-de-tarefa.png"
+    },
+    {
+      "route": "/app/configuracoes/integracoes",
+      "label": "Integrações",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/integracoes.png"
+    },
+    {
+      "route": "/app/configuracoes/integracoes-externas",
+      "label": "Integrações nativas",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/integracoes-nativas.png"
+    },
+    {
+      "route": "/app/audit",
+      "label": "Audit log",
+      "status": "mock",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2",
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "texto sugere placeholder",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/audit-log.png"
+    },
+    {
+      "route": "/app/configuracoes",
+      "label": "Configurações",
+      "status": "OK",
+      "consoleErrors": [],
+      "networkErrors": [
+        "400 https://dboftogzjobfvtjaoifh.supabase.co/rest/v1/error_events?columns=%22source%22%2C%22level%22%2C%22message%22%2C%22stack%22%2C%22url%22%2C%22user_agent%22%2C%22queued_at%22%2C%2"
+      ],
+      "note": "ok em 1092ms",
+      "screenshot": "/Users/andreylopes/complete-guide/.claude/reports/screenshots/configuracoes.png"
+    }
+  ],
+  "interactionFindings": [
+    "Auth OK (signup:qa.cto+1777917309936@oxytest.dev).",
+    "Onboarding travou: TimeoutError: click: Timeout 8000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Concluir e entrar/i })\u001b[22m\n",
+    "QuickAdd /hoje: input enviado mas tarefa não foi visível",
+    "Kanban: 5 elementos coluna detectados",
+    "Calendário: 3 células detectadas",
+    "Novo projeto: submit não confirmou criação",
+    "Novo squad: botão não encontrado",
+    "Gênio chat: mensagem de erro visível",
+    "Notificações: 3 tabs detectadas",
+    "Aparência: botão tema não encontrado",
+    "Idioma: opção alternativa clicável",
+    "Buscar: input não encontrado"
+  ],
+  "ts": 1777917309936,
+  "newEmail": "qa.cto+1777917309936@oxytest.dev"
+}
