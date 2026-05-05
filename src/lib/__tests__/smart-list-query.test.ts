@@ -115,6 +115,101 @@ describe("smart-list-query", () => {
     });
   });
 
+  describe("operadores estendidos (Fase 7G)", () => {
+    it("beginsWith e endsWith viram ilike com prefix/suffix", () => {
+      const { stub, calls } = makeQueryStub();
+      const group: RuleGroup = {
+        combinator: "and",
+        rules: [
+          { field: "keyword", operator: "beginsWith", value: "Sprint" },
+          { field: "keyword", operator: "endsWith", value: "Q1" },
+        ],
+      };
+      applySmartListFilters(stub, group);
+      expect(calls).toEqual([
+        ["ilike", "title", "Sprint%"],
+        ["ilike", "title", "%Q1"],
+      ]);
+    });
+
+    it("doesNotContain usa not(ilike)", () => {
+      const { stub, calls } = makeQueryStub();
+      const group: RuleGroup = {
+        combinator: "and",
+        rules: [
+          { field: "keyword", operator: "doesNotContain", value: "draft" },
+        ],
+      };
+      applySmartListFilters(stub, group);
+      expect(calls).toEqual([["not", "title", "ilike", "%draft%"]]);
+    });
+
+    it("priority_score com between aplica gte+lte", () => {
+      const { stub, calls } = makeQueryStub();
+      const group: RuleGroup = {
+        combinator: "and",
+        rules: [
+          { field: "priority_score", operator: "between", value: [10, 50] },
+        ],
+      };
+      applySmartListFilters(stub, group);
+      expect(calls).toEqual([
+        ["gte", "priority_score", 10],
+        ["lte", "priority_score", 50],
+      ]);
+    });
+
+    it("aceita campo legado `list` mapeado para project_id", () => {
+      const { stub, calls } = makeQueryStub();
+      const group: RuleGroup = {
+        combinator: "and",
+        rules: [{ field: "list", operator: "in", value: ["proj-1"] }],
+      };
+      applySmartListFilters(stub, group);
+      expect(calls).toEqual([["in", "project_id", ["proj-1"]]]);
+    });
+
+    it("nesting infinito (3 níveis: AND > OR > AND)", () => {
+      const { stub, calls } = makeQueryStub();
+      const group: RuleGroup = {
+        combinator: "and",
+        rules: [
+          { field: "priority", operator: "in", value: ["urgent"] },
+          {
+            combinator: "or",
+            rules: [
+              {
+                combinator: "and",
+                rules: [
+                  { field: "assignee_id", operator: "in", value: ["u1"] },
+                  { field: "due_at", operator: "before", value: "2026-12-31" },
+                ],
+              },
+              { field: "keyword", operator: "contains", value: "bug" },
+            ],
+          },
+        ],
+      };
+      applySmartListFilters(stub, group);
+      expect(calls[0]).toEqual(["in", "priority", ["urgent"]]);
+      expect(calls[1][0]).toBe("or");
+      const orStr = String(calls[1][1]);
+      expect(orStr).toContain("and(assignee_id.in.(u1)");
+      expect(orStr).toContain("due_at.lt.2026-12-31");
+      expect(orStr).toContain("title.ilike.*bug*");
+    });
+
+    it("notNull aplica `not is null` no campo correto", () => {
+      const { stub, calls } = makeQueryStub();
+      const group: RuleGroup = {
+        combinator: "and",
+        rules: [{ field: "due_at", operator: "notNull", value: null }],
+      };
+      applySmartListFilters(stub, group);
+      expect(calls).toEqual([["not", "due_at", "is", null]]);
+    });
+  });
+
   describe("collectTagIds", () => {
     it("acumula tag ids de regras aninhadas", () => {
       const group: RuleGroup = {

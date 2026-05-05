@@ -68,6 +68,18 @@ COMMENT ON COLUMN public.tasks.progress_pct IS
   'Progresso manual 0-100. Independente de subtarefas.';
 ```
 
+## Bloco D — Fase 7 (Coerência sistêmica + Notion+ClickUp parity)
+
+| Sub-fase | Arquivo | O que faz |
+|----------|---------|-----------|
+| 7A.5 — Notificação de atribuição | [7A-task-assigned-trigger.sql.md](./7A-task-assigned-trigger.sql.md) | Cria `tg_notify_task_assigned` para inserir em `notifications` quando `tasks.assignee_id` muda |
+| 7B — Custom Fields | [7B-custom-fields.sql.md](./7B-custom-fields.sql.md) | `custom_field_definitions` + `task_custom_field_values` (17 tipos: text, number, date, select, multi_select, checkbox, currency, rating, user, tag, file, formula, etc) com escopo global/task_type/project |
+| 7C — Time Tracking | [7C-time-tracking.sql.md](./7C-time-tracking.sql.md) | Adiciona `billable`/`hourly_rate`/`tags` em `time_entries` + RPC `user_timesheet` (agregado dia a dia com receita) |
+| 7D — Goals upgrade | [7D-goals-upgrade.sql.md](./7D-goals-upgrade.sql.md) | Adiciona `target_type`/`auto_update`/`linked_task_filter` em `key_results` + RPC `refresh_kr_progress(_tenant)` |
+| 7E — Whiteboards | [7E-whiteboards.sql.md](./7E-whiteboards.sql.md) | Tabela `whiteboards` com snapshot JSON lib-agnostic (Excalidraw — MIT) |
+| 7F — Dashboards customizáveis | [7F-dashboards.sql.md](./7F-dashboards.sql.md) | `dashboards` + `dashboard_widgets` (12 kinds) — canvas drag-drop com KPI/charts/listas/embeds |
+| 7I — Automations upgrade | [7I-automations-upgrade.sql.md](./7I-automations-upgrade.sql.md) | ALTER `automation_rules` (icon/color/is_template/category) + 6 templates seeded |
+
 ## Bloco B — Schemas grandes (Fase 6F)
 
 Cada um tem arquivo dedicado com SQL completo. Abra, copie inteiro, cola no Lovable.

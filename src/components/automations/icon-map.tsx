@@ -1,0 +1,58 @@
+import {
+  AlarmClock,
+  AlertTriangle,
+  ArrowRight,
+  Bell,
+  BookOpen,
+  Calendar,
+  CheckCircle2,
+  MessageCircle,
+  MessageSquare,
+  MousePointerClick,
+  MoveRight,
+  Paperclip,
+  Pencil,
+  Plus,
+  Sparkles,
+  Tag as TagIcon,
+  Target,
+  Ticket,
+  TicketCheck,
+  UserPlus,
+  Webhook,
+  Workflow,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+
+const REGISTRY: Record<string, LucideIcon> = {
+  AlarmClock,
+  AlertTriangle,
+  ArrowRight,
+  Bell,
+  BookOpen,
+  Calendar,
+  CheckCircle2,
+  MessageCircle,
+  MessageSquare,
+  MousePointerClick,
+  MoveRight,
+  Paperclip,
+  Pencil,
+  Plus,
+  Sparkles,
+  Tag: TagIcon,
+  TagIcon,
+  Target,
+  Ticket,
+  TicketCheck,
+  UserPlus,
+  Webhook,
+  Workflow,
+  Zap,
+};
+
+export function getAutomationIcon(name: string | null | undefined): LucideIcon {
+  if (!name) return Zap;
+  return REGISTRY[name] ?? Zap;
+}

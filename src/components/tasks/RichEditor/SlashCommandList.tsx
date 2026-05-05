@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import type { Editor, Range } from "@tiptap/core";
 import {
   Code,
+  Database,
   Hash,
   Heading2,
   Heading3,
@@ -30,7 +31,8 @@ export type SlashIconName =
   | "Paperclip"
   | "ListTree"
   | "Hash"
-  | "Link2";
+  | "Link2"
+  | "Database";
 
 export interface SlashCommandItem {
   id: string;
@@ -54,6 +56,7 @@ const ICON_MAP: Record<SlashIconName, LucideIcon> = {
   ListTree,
   Hash,
   Link2,
+  Database,
 };
 
 export interface SlashCommandListHandle {

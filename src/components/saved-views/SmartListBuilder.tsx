@@ -1,64 +1,120 @@
-import { useState, useMemo } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { QueryBuilder, formatQuery } from "react-querybuilder";
+import type { Field, RuleGroupType } from "react-querybuilder";
+import "react-querybuilder/dist/query-builder.css";
+import { Download, Upload } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useProjects } from "@/hooks/useProjects";
 import { useTenantMembers } from "@/hooks/useTenantMembers";
 import { useTaskStatuses } from "@/hooks/useTasks";
-import type {
-  FilterField,
-  Rule,
-  RuleGroup,
-  Operator,
+import {
+  applySmartListFilters,
+  collectTagIds,
+  countLeafRules,
+  type RuleGroup,
 } from "@/lib/smart-list-query";
+import { toast } from "sonner";
 
-const FIELDS: { value: FilterField; label: string }[] = [
-  { value: "list", label: "Projeto" },
-  { value: "tag", label: "Tag" },
-  { value: "assignee", label: "Responsável" },
-  { value: "priority", label: "Prioridade" },
-  { value: "status", label: "Status" },
-  { value: "due_at", label: "Data limite" },
-  { value: "keyword", label: "Palavra-chave" },
-  { value: "done", label: "Concluída" },
+const PRIORITIES: { name: string; label: string }[] = [
+  { name: "urgent", label: "P0 — Urgente" },
+  { name: "high", label: "P1 — Alta" },
+  { name: "medium", label: "P2 — Média" },
+  { name: "low", label: "P3 — Baixa" },
+  { name: "none", label: "Sem prioridade" },
 ];
 
-const PRIORITIES: { value: string; label: string }[] = [
-  { value: "urgent", label: "P0 — Urgente" },
-  { value: "high", label: "P1 — Alta" },
-  { value: "medium", label: "P2 — Média" },
-  { value: "low", label: "P3 — Baixa" },
-  { value: "none", label: "Sem prioridade" },
+/**
+ * Operadores customizados em pt-BR. Os values são os identificadores que o
+ * adapter `smart-list-query.ts` entende.
+ */
+const STRING_OPERATORS = [
+  { name: "=", label: "é igual a" },
+  { name: "!=", label: "é diferente de" },
+  { name: "contains", label: "contém" },
+  { name: "doesNotContain", label: "não contém" },
+  { name: "beginsWith", label: "começa com" },
+  { name: "endsWith", label: "termina com" },
+  { name: "null", label: "está vazio" },
+  { name: "notNull", label: "não está vazio" },
 ];
 
-function defaultRuleFor(field: FilterField): Rule {
-  switch (field) {
-    case "list":
-    case "tag":
-    case "assignee":
-    case "priority":
-    case "status":
-      return { field, operator: "in", value: [] };
-    case "due_at":
-      return { field, operator: "before", value: "" };
-    case "keyword":
-      return { field, operator: "contains", value: "" };
-    case "done":
-      return { field, operator: "is", value: false };
-  }
-}
+const MULTI_OPERATORS = [
+  { name: "in", label: "em" },
+  { name: "notIn", label: "não em" },
+  { name: "null", label: "está vazio" },
+  { name: "notNull", label: "não está vazio" },
+];
+
+const NUMBER_OPERATORS = [
+  { name: "=", label: "=" },
+  { name: "!=", label: "≠" },
+  { name: "<", label: "<" },
+  { name: ">", label: ">" },
+  { name: "<=", label: "≤" },
+  { name: ">=", label: "≥" },
+  { name: "between", label: "entre" },
+  { name: "notBetween", label: "fora de" },
+  { name: "null", label: "está vazio" },
+  { name: "notNull", label: "não está vazio" },
+];
+
+const DATE_OPERATORS = [
+  { name: "<", label: "antes de" },
+  { name: ">", label: "depois de" },
+  { name: "<=", label: "até" },
+  { name: ">=", label: "a partir de" },
+  { name: "=", label: "igual a" },
+  { name: "between", label: "entre" },
+  { name: "notBetween", label: "fora de" },
+  { name: "null", label: "sem data" },
+  { name: "notNull", label: "tem data" },
+];
+
+const BOOLEAN_OPERATORS = [{ name: "=", label: "é" }];
+
+const COMBINATORS = [
+  { name: "and", label: "E" },
+  { name: "or", label: "OU" },
+];
+
+const TRANSLATIONS = {
+  fields: { title: "Campos", placeholderName: "—", placeholderLabel: "—" },
+  operators: { title: "Operadores" },
+  value: { title: "Valor", editorPlaceholder: "" },
+  removeRule: { label: "✕", title: "Remover condição" },
+  removeGroup: { label: "✕", title: "Remover grupo" },
+  addRule: { label: "+ Condição", title: "Adicionar condição" },
+  addGroup: { label: "+ Grupo", title: "Adicionar grupo aninhado" },
+  combinators: { title: "Combinador" },
+  notToggle: { label: "Não", title: "Inverter este grupo (NOT)" },
+  cloneRule: { label: "⎘", title: "Duplicar condição" },
+  cloneRuleGroup: { label: "⎘", title: "Duplicar grupo" },
+  shiftActionUp: { label: "↑", title: "Mover para cima" },
+  shiftActionDown: { label: "↓", title: "Mover para baixo" },
+  dragHandle: { label: "⋮⋮", title: "Arrastar" },
+  lockRule: { label: "🔒", title: "Travar" },
+  lockGroup: { label: "🔒", title: "Travar grupo" },
+  lockRuleDisabled: { label: "🔓", title: "Destravar" },
+  lockGroupDisabled: { label: "🔓", title: "Destravar grupo" },
+  valueSourceSelector: { title: "Fonte do valor" },
+};
 
 export interface SmartListBuilderProps {
   initial?: RuleGroup;
@@ -74,14 +130,21 @@ export function SmartListBuilder({
   initialName,
 }: SmartListBuilderProps) {
   const [name, setName] = useState(initialName ?? "");
-  const [group, setGroup] = useState<RuleGroup>(
-    initial ?? { combinator: "and", rules: [] },
+  const [query, setQuery] = useState<RuleGroupType>(
+    () =>
+      (initial as unknown as RuleGroupType) ?? {
+        combinator: "and",
+        rules: [],
+      },
   );
+  const fields = useFieldsConfig();
 
   const handleSave = async () => {
     if (!name.trim()) return;
-    await onSubmit(group, name.trim());
+    await onSubmit(query as unknown as RuleGroup, name.trim());
   };
+
+  const total = countLeafRules(query as unknown as RuleGroup);
 
   return (
     <div className="space-y-4">
@@ -95,377 +158,163 @@ export function SmartListBuilder({
         />
       </div>
 
-      <div className="rounded-lg border bg-muted/20 p-3">
-        <RuleGroupEditor group={group} onChange={setGroup} depth={0} />
+      <div className="rounded-lg border bg-muted/20 p-3 smart-list-qb">
+        <QueryBuilder
+          fields={fields}
+          query={query}
+          onQueryChange={setQuery}
+          combinators={COMBINATORS}
+          translations={TRANSLATIONS}
+          showCombinatorsBetweenRules={false}
+          showNotToggle
+          showCloneButtons
+          showShiftActions
+          resetOnFieldChange
+          resetOnOperatorChange
+          controlClassnames={{
+            queryBuilder: "qb-root",
+            ruleGroup: "qb-group",
+            combinators: "qb-combinator",
+            addRule: "qb-add-rule",
+            addGroup: "qb-add-group",
+            removeRule: "qb-remove",
+            removeGroup: "qb-remove",
+            rule: "qb-rule",
+            fields: "qb-field",
+            operators: "qb-operator",
+            value: "qb-value",
+            notToggle: "qb-not",
+            cloneRule: "qb-clone",
+            cloneGroup: "qb-clone",
+            shiftActions: "qb-shift",
+          }}
+        />
       </div>
 
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button variant="outline" onClick={onCancel}>
-            Cancelar
+      <PreviewMatches query={query as unknown as RuleGroup} />
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-2">
+          <ImportJsonButton onImport={(g) => setQuery(g as unknown as RuleGroupType)} />
+          <ExportJsonButton query={query} />
+        </div>
+        <div className="flex items-center gap-2">
+          {onCancel && (
+            <Button variant="outline" onClick={onCancel}>
+              Cancelar
+            </Button>
+          )}
+          <Button onClick={handleSave} disabled={!name.trim() || total === 0}>
+            Salvar smart list
           </Button>
-        )}
-        <Button onClick={handleSave} disabled={!name.trim() || group.rules.length === 0}>
-          Salvar smart list
-        </Button>
+        </div>
       </div>
+
+      <SmartListBuilderStyles />
     </div>
   );
 }
 
-function RuleGroupEditor({
-  group,
-  onChange,
-  depth,
-}: {
-  group: RuleGroup;
-  onChange: (g: RuleGroup) => void;
-  depth: number;
-}) {
-  const update = (patch: Partial<RuleGroup>) => onChange({ ...group, ...patch });
-
-  const addRule = (combinator: "and" | "or") => {
-    if (combinator !== group.combinator && group.rules.length > 0) {
-      // Quando misturar combinators no mesmo grupo, encapsula tudo em
-      // sub-grupo do combinator atual e troca o externo.
-      const wrapped: RuleGroup = { combinator: group.combinator, rules: group.rules };
-      onChange({
-        combinator,
-        rules: [wrapped, defaultRuleFor("priority")],
-      });
-      return;
-    }
-    update({ combinator, rules: [...group.rules, defaultRuleFor("priority")] });
-  };
-
-  const updateRule = (idx: number, next: Rule | RuleGroup) => {
-    const copy = [...group.rules];
-    copy[idx] = next;
-    update({ rules: copy });
-  };
-
-  const removeRule = (idx: number) => {
-    update({ rules: group.rules.filter((_, i) => i !== idx) });
-  };
-
+/**
+ * Estilos isolados para casar o react-querybuilder com o tema shadcn.
+ * Mantemos `<style>` inline pra evitar tocar em `src/components/ui/`.
+ */
+function SmartListBuilderStyles() {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Badge variant="secondary" className="uppercase">
-          {group.combinator === "and" ? "E (todas)" : "OU (qualquer)"}
-        </Badge>
-        {depth > 0 && (
-          <span className="text-xs text-muted-foreground">subgrupo nível {depth}</span>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        {group.rules.map((r, idx) => {
-          if ((r as RuleGroup).combinator !== undefined) {
-            return (
-              <div key={idx} className="rounded border border-dashed bg-background p-2">
-                <div className="mb-1 flex justify-end">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => removeRule(idx)}
-                    aria-label="Remover subgrupo"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-                <RuleGroupEditor
-                  group={r as RuleGroup}
-                  onChange={(g) => updateRule(idx, g)}
-                  depth={depth + 1}
-                />
-              </div>
-            );
-          }
-          return (
-            <RuleEditor
-              key={idx}
-              rule={r as Rule}
-              onChange={(next) => updateRule(idx, next)}
-              onRemove={() => removeRule(idx)}
-            />
-          );
-        })}
-      </div>
-
-      <div className="flex gap-2 pt-1">
-        <Button variant="outline" size="sm" onClick={() => addRule("and")}>
-          <Plus className="mr-1 h-3 w-3" /> E (AND)
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => addRule("or")}>
-          <Plus className="mr-1 h-3 w-3" /> OU (OR)
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function RuleEditor({
-  rule,
-  onChange,
-  onRemove,
-}: {
-  rule: Rule;
-  onChange: (r: Rule) => void;
-  onRemove: () => void;
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-2 rounded border bg-background p-2">
-      <Select
-        value={rule.field}
-        onValueChange={(v) => onChange(defaultRuleFor(v as FilterField))}
-      >
-        <SelectTrigger className="h-8 w-[140px] text-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {FIELDS.map((f) => (
-            <SelectItem key={f.value} value={f.value} className="text-xs">
-              {f.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <OperatorSelect rule={rule} onChange={onChange} />
-      <ValueEditor rule={rule} onChange={onChange} />
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="ml-auto h-7 w-7"
-        onClick={onRemove}
-        aria-label="Remover condição"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </Button>
-    </div>
-  );
-}
-
-function OperatorSelect({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void }) {
-  const ops = operatorsFor(rule.field);
-  if (ops.length <= 1) {
-    return <span className="text-xs text-muted-foreground">{ops[0]?.label ?? ""}</span>;
-  }
-  return (
-    <Select
-      value={rule.operator}
-      onValueChange={(v) => onChange({ ...rule, operator: v as Operator })}
-    >
-      <SelectTrigger className="h-8 w-[120px] text-xs">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {ops.map((o) => (
-          <SelectItem key={o.value} value={o.value} className="text-xs">
-            {o.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-function operatorsFor(field: FilterField): { value: Operator; label: string }[] {
-  switch (field) {
-    case "due_at":
-      return [
-        { value: "before", label: "antes de" },
-        { value: "after", label: "depois de" },
-        { value: "between", label: "entre" },
-      ];
-    case "keyword":
-      return [{ value: "contains", label: "contém" }];
-    case "done":
-      return [{ value: "is", label: "é" }];
-    default:
-      return [{ value: "in", label: "em" }];
-  }
-}
-
-function ValueEditor({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void }) {
-  switch (rule.field) {
-    case "priority":
-      return (
-        <MultiPicker
-          value={(rule.value as string[]) ?? []}
-          options={PRIORITIES}
-          onChange={(vs) => onChange({ ...rule, value: vs })}
-          placeholder="Prioridades"
-        />
-      );
-    case "status":
-      return <StatusPicker rule={rule} onChange={onChange} />;
-    case "list":
-      return <ProjectPicker rule={rule} onChange={onChange} />;
-    case "assignee":
-      return <AssigneePicker rule={rule} onChange={onChange} />;
-    case "tag":
-      return <TagPicker rule={rule} onChange={onChange} />;
-    case "keyword":
-      return (
-        <Input
-          value={String(rule.value ?? "")}
-          onChange={(e) => onChange({ ...rule, value: e.target.value })}
-          placeholder="termo"
-          className="h-8 w-[200px] text-xs"
-        />
-      );
-    case "due_at":
-      if (rule.operator === "between") {
-        const v = (Array.isArray(rule.value) ? rule.value : ["", ""]) as [string, string];
-        return (
-          <div className="flex gap-1">
-            <Input
-              type="date"
-              value={v[0] ?? ""}
-              onChange={(e) => onChange({ ...rule, value: [e.target.value, v[1]] })}
-              className="h-8 w-[140px] text-xs"
-            />
-            <Input
-              type="date"
-              value={v[1] ?? ""}
-              onChange={(e) => onChange({ ...rule, value: [v[0], e.target.value] })}
-              className="h-8 w-[140px] text-xs"
-            />
-          </div>
-        );
+    <style>{`
+      .smart-list-qb .qb-root { font-family: inherit; }
+      .smart-list-qb .qb-group {
+        border: 1px solid hsl(var(--border));
+        border-radius: 0.5rem;
+        background: hsl(var(--background));
+        padding: 0.5rem;
+        margin-bottom: 0.25rem;
       }
-      return (
-        <Input
-          type="date"
-          value={String(rule.value ?? "")}
-          onChange={(e) => onChange({ ...rule, value: e.target.value })}
-          className="h-8 w-[140px] text-xs"
-        />
-      );
-    case "done":
-      return (
-        <Select
-          value={String(rule.value ?? false)}
-          onValueChange={(v) => onChange({ ...rule, value: v === "true" })}
-        >
-          <SelectTrigger className="h-8 w-[120px] text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="true" className="text-xs">Sim</SelectItem>
-            <SelectItem value="false" className="text-xs">Não</SelectItem>
-          </SelectContent>
-        </Select>
-      );
-    default:
-      return null;
-  }
-}
-
-function MultiPicker({
-  value,
-  options,
-  onChange,
-  placeholder,
-}: {
-  value: string[];
-  options: { value: string; label: string }[];
-  onChange: (v: string[]) => void;
-  placeholder: string;
-}) {
-  const toggle = (id: string) => {
-    if (value.includes(id)) onChange(value.filter((v) => v !== id));
-    else onChange([...value, id]);
-  };
-  const labelText = value.length
-    ? options
-        .filter((o) => value.includes(o.value))
-        .map((o) => o.label)
-        .join(", ")
-    : placeholder;
-
-  return (
-    <div className="flex flex-wrap items-center gap-1">
-      {options.map((o) => {
-        const active = value.includes(o.value);
-        return (
-          <button
-            key={o.value}
-            type="button"
-            onClick={() => toggle(o.value)}
-            className={`rounded border px-2 py-0.5 text-[11px] transition-colors ${
-              active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"
-            }`}
-            aria-pressed={active}
-          >
-            {o.label}
-          </button>
-        );
-      })}
-      <span className="sr-only">{labelText}</span>
-    </div>
+      .smart-list-qb .qb-group .qb-group { background: hsl(var(--muted) / 0.3); }
+      .smart-list-qb .qb-rule {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.25rem 0;
+      }
+      .smart-list-qb select,
+      .smart-list-qb input[type="text"],
+      .smart-list-qb input[type="number"],
+      .smart-list-qb input[type="date"],
+      .smart-list-qb .qb-field,
+      .smart-list-qb .qb-operator,
+      .smart-list-qb .qb-value,
+      .smart-list-qb .qb-combinator {
+        height: 2rem;
+        border: 1px solid hsl(var(--border));
+        background: hsl(var(--background));
+        color: hsl(var(--foreground));
+        border-radius: 0.375rem;
+        padding: 0 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1;
+      }
+      .smart-list-qb button {
+        height: 1.75rem;
+        border: 1px solid hsl(var(--border));
+        background: hsl(var(--background));
+        color: hsl(var(--foreground));
+        border-radius: 0.375rem;
+        padding: 0 0.5rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+      .smart-list-qb button:hover { background: hsl(var(--muted)); }
+      .smart-list-qb .qb-add-rule,
+      .smart-list-qb .qb-add-group {
+        background: hsl(var(--primary) / 0.1);
+        color: hsl(var(--primary));
+        border-color: hsl(var(--primary) / 0.3);
+      }
+      .smart-list-qb .qb-remove {
+        background: transparent;
+        border-color: transparent;
+        color: hsl(var(--destructive));
+        padding: 0 0.375rem;
+      }
+      .smart-list-qb .qb-remove:hover { background: hsl(var(--destructive) / 0.1); }
+      .smart-list-qb .ruleGroup-header,
+      .smart-list-qb .rule-header {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        flex-wrap: wrap;
+      }
+      .smart-list-qb .queryBuilder-invalid > .qb-group {
+        border-color: hsl(var(--destructive) / 0.5);
+      }
+      .smart-list-qb .qb-not {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.7rem;
+      }
+      .smart-list-qb .ruleGroup-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+      }
+    `}</style>
   );
 }
 
-function ProjectPicker({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void }) {
-  const { data } = useProjects();
-  const opts = useMemo(
-    () => (data ?? []).map((p) => ({ value: p.id, label: p.name })),
-    [data],
-  );
-  return (
-    <MultiPicker
-      value={(rule.value as string[]) ?? []}
-      options={opts}
-      onChange={(vs) => onChange({ ...rule, value: vs })}
-      placeholder="Projetos"
-    />
-  );
-}
-
-function AssigneePicker({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void }) {
-  const { data } = useTenantMembers();
-  const opts = useMemo(
-    () =>
-      (data ?? []).map((m) => ({
-        value: m.id,
-        label: m.display_name || m.full_name || m.email || m.id.slice(0, 6),
-      })),
-    [data],
-  );
-  return (
-    <MultiPicker
-      value={(rule.value as string[]) ?? []}
-      options={opts}
-      onChange={(vs) => onChange({ ...rule, value: vs })}
-      placeholder="Responsáveis"
-    />
-  );
-}
-
-function StatusPicker({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void }) {
-  const { data } = useTaskStatuses();
-  const opts = useMemo(
-    () => (data ?? []).map((s) => ({ value: s.id, label: s.name })),
-    [data],
-  );
-  return (
-    <MultiPicker
-      value={(rule.value as string[]) ?? []}
-      options={opts}
-      onChange={(vs) => onChange({ ...rule, value: vs })}
-      placeholder="Status"
-    />
-  );
-}
-
-function TagPicker({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void }) {
+/**
+ * Configuração dos campos. Cada campo declara seu valueEditorType + operadores
+ * permitidos. Para multi-select usamos `multiselect` nativo do react-querybuilder.
+ */
+function useFieldsConfig(): Field[] {
+  const { data: projects } = useProjects();
+  const { data: members } = useTenantMembers();
+  const { data: statuses } = useTaskStatuses();
   const { tenantId } = useWorkspace();
-  const { data } = useQuery({
+  const { data: tags } = useQuery({
     queryKey: ["tags-list", tenantId],
     enabled: !!tenantId,
     queryFn: async () => {
@@ -477,16 +326,258 @@ function TagPicker({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void
       return data ?? [];
     },
   });
-  const opts = useMemo(
-    () => (data ?? []).map((t) => ({ value: t.id, label: t.name })),
-    [data],
+
+  return useMemo<Field[]>(
+    () => [
+      {
+        name: "priority",
+        label: "Prioridade",
+        valueEditorType: "multiselect",
+        values: PRIORITIES,
+        operators: MULTI_OPERATORS,
+        defaultOperator: "in",
+        defaultValue: [],
+      },
+      {
+        name: "status",
+        label: "Status",
+        valueEditorType: "multiselect",
+        values: (statuses ?? []).map((s) => ({ name: s.id, label: s.name })),
+        operators: MULTI_OPERATORS,
+        defaultOperator: "in",
+        defaultValue: [],
+      },
+      {
+        name: "project_id",
+        label: "Projeto",
+        valueEditorType: "multiselect",
+        values: (projects ?? []).map((p) => ({ name: p.id, label: p.name })),
+        operators: MULTI_OPERATORS,
+        defaultOperator: "in",
+        defaultValue: [],
+      },
+      {
+        name: "assignee_id",
+        label: "Responsável",
+        valueEditorType: "multiselect",
+        values: (members ?? []).map((m) => ({
+          name: m.id,
+          label:
+            m.display_name || m.full_name || m.email || m.id.slice(0, 6),
+        })),
+        operators: MULTI_OPERATORS,
+        defaultOperator: "in",
+        defaultValue: [],
+      },
+      {
+        name: "tag_id",
+        label: "Tag",
+        valueEditorType: "multiselect",
+        values: (tags ?? []).map((t) => ({ name: t.id, label: t.name })),
+        operators: MULTI_OPERATORS,
+        defaultOperator: "in",
+        defaultValue: [],
+      },
+      {
+        name: "due_at",
+        label: "Data limite",
+        inputType: "date",
+        operators: DATE_OPERATORS,
+        defaultOperator: "<",
+        defaultValue: "",
+      },
+      {
+        name: "created_at",
+        label: "Criada em",
+        inputType: "date",
+        operators: DATE_OPERATORS,
+        defaultOperator: ">=",
+        defaultValue: "",
+      },
+      {
+        name: "priority_score",
+        label: "Score de prioridade",
+        inputType: "number",
+        operators: NUMBER_OPERATORS,
+        defaultOperator: ">=",
+        defaultValue: 0,
+      },
+      {
+        name: "done",
+        label: "Concluída",
+        valueEditorType: "select",
+        values: [
+          { name: "true", label: "Sim" },
+          { name: "false", label: "Não" },
+        ],
+        operators: BOOLEAN_OPERATORS,
+        defaultOperator: "=",
+        defaultValue: "false",
+      },
+      {
+        name: "keyword",
+        label: "Palavra-chave",
+        inputType: "text",
+        operators: STRING_OPERATORS,
+        defaultOperator: "contains",
+        defaultValue: "",
+      },
+    ],
+    [projects, members, statuses, tags],
   );
+}
+
+/**
+ * Preview "X tarefas correspondem" debounced (500ms). Reexecuta a query real
+ * contra Supabase com `applySmartListFilters`.
+ */
+function PreviewMatches({ query }: { query: RuleGroup }) {
+  const { tenantId } = useWorkspace();
+  const [debounced, setDebounced] = useState<RuleGroup>(query);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query), 500);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const totalLeaves = countLeafRules(debounced);
+  const { data, isFetching } = useQuery({
+    queryKey: ["smart-list-preview", tenantId, JSON.stringify(debounced)],
+    enabled: !!tenantId && totalLeaves > 0,
+    queryFn: async () => {
+      const tagIds = collectTagIds(debounced);
+      let tagFilteredTaskIds: string[] | undefined;
+      if (tagIds.length) {
+        const { data: tt } = await supabase
+          .from("task_tags")
+          .select("task_id")
+          .in("tag_id", tagIds);
+        tagFilteredTaskIds = Array.from(
+          new Set((tt ?? []).map((r) => r.task_id)),
+        );
+      }
+      const baseQuery = supabase
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenantId!)
+        .eq("archived", false);
+      const filtered = applySmartListFilters(
+        baseQuery as never,
+        debounced,
+        tagFilteredTaskIds,
+      ) as typeof baseQuery;
+      const { count, error } = await filtered;
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  if (totalLeaves === 0) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Adicione pelo menos uma condição para visualizar tarefas correspondentes.
+      </p>
+    );
+  }
+
   return (
-    <MultiPicker
-      value={(rule.value as string[]) ?? []}
-      options={opts}
-      onChange={(vs) => onChange({ ...rule, value: vs })}
-      placeholder="Tags"
-    />
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <Badge variant="secondary">
+        {isFetching ? "Calculando…" : `${data ?? 0} tarefas correspondem`}
+      </Badge>
+      <span>
+        {totalLeaves} {totalLeaves === 1 ? "condição" : "condições"} ativa
+        {totalLeaves === 1 ? "" : "s"}
+      </span>
+    </div>
+  );
+}
+
+function ExportJsonButton({ query }: { query: RuleGroupType }) {
+  const json = useMemo(() => formatQuery(query, { format: "json" }), [query]);
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(json);
+      toast.success("JSON copiado");
+    } catch {
+      toast.error("Não foi possível copiar");
+    }
+  };
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Download className="mr-1 h-3 w-3" /> Exportar JSON
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>JSON da smart list</DialogTitle>
+        </DialogHeader>
+        <Textarea readOnly value={json} className="h-64 font-mono text-xs" />
+        <DialogFooter>
+          <Button variant="outline" onClick={onCopy}>
+            Copiar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ImportJsonButton({
+  onImport,
+}: {
+  onImport: (g: RuleGroupType) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const handleImport = () => {
+    try {
+      const parsed = JSON.parse(text);
+      if (
+        !parsed ||
+        typeof parsed !== "object" ||
+        !Array.isArray(parsed.rules) ||
+        typeof parsed.combinator !== "string"
+      ) {
+        toast.error("JSON inválido — falta combinator/rules");
+        return;
+      }
+      onImport(parsed);
+      toast.success("JSON importado");
+      setOpen(false);
+      setText("");
+    } catch {
+      toast.error("Não foi possível parsear o JSON");
+    }
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Upload className="mr-1 h-3 w-3" /> Importar JSON
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Importar smart list de JSON</DialogTitle>
+        </DialogHeader>
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder='{"combinator":"and","rules":[]}'
+          className="h-64 font-mono text-xs"
+        />
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={handleImport} disabled={!text.trim()}>
+            Importar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

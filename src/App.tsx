@@ -22,6 +22,7 @@ import SmartListPage from "./pages/app/SmartListPage.tsx";
 const KanbanPage = lazy(() => import("./pages/app/KanbanPage.tsx"));
 const CalendarPage = lazy(() => import("./pages/app/CalendarPage.tsx"));
 const TaskTypesPage = lazy(() => import("./pages/app/TaskTypesPage.tsx"));
+const CustomFieldsPage = lazy(() => import("./pages/app/CustomFieldsPage.tsx"));
 const FocusPage = lazy(() => import("./pages/app/FocusPage.tsx"));
 const WorkloadPage = lazy(() => import("./pages/app/WorkloadPage.tsx"));
 const DemandsPage = lazy(() => import("./pages/app/DemandsPage.tsx"));
@@ -99,6 +100,9 @@ const ConhecimentoPage = lazy(() => import("./pages/app/ConhecimentoPage.tsx"));
 const PersonasPage = lazy(() => import("./pages/app/PersonasPage.tsx"));
 const AtendimentoPage = lazy(() => import("./pages/app/AtendimentoPage.tsx"));
 const AtendimentoTicketPage = lazy(() => import("./pages/app/AtendimentoTicketPage.tsx"));
+const TimesheetPage = lazy(() => import("./pages/app/TimesheetPage.tsx"));
+const WhiteboardsPage = lazy(() => import("./pages/app/WhiteboardsPage.tsx"));
+const WhiteboardDetailPage = lazy(() => import("./pages/app/WhiteboardDetailPage.tsx"));
 import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
 
 const queryClient = new QueryClient(DEFAULT_QUERY_CLIENT_CONFIG);
@@ -218,9 +222,12 @@ const App = () => (
                 <Route path="templates" element={<TemplatesPage />} />
                 <Route path="modelos" element={<ModelosPage />} />
                 <Route path="audit" element={<AuditLogPage />} />
+                <Route path="whiteboards" element={<WhiteboardsPage />} />
+                <Route path="whiteboards/:id" element={<WhiteboardDetailPage />} />
                 <Route path="squads" element={<SquadsPage />} />
                 <Route path="demandas" element={<DemandsPage />} />
                 <Route path="workload" element={<WorkloadPage />} />
+                <Route path="timesheet" element={<TimesheetPage />} />
                 <Route path="midias" element={<MediaPage />} />
                 <Route path="social" element={<SocialCalendarPage />} />
                 <Route path="campanhas" element={<CampaignsPage />} />
@@ -279,6 +286,7 @@ const App = () => (
                   element={<SettingsPage />}
                 />
                 <Route path="configuracoes/tipos" element={<TaskTypesPage />} />
+                <Route path="configuracoes/custom-fields" element={<CustomFieldsPage />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

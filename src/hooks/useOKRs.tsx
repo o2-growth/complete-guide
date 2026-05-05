@@ -9,11 +9,22 @@ export interface Goal {
   period_start: string; period_end: string; owner_id: string | null;
   status: "active" | "done" | "at_risk" | "dropped"; created_at: string;
 }
+export type KrTargetType = "numeric" | "monetary" | "tasks" | "boolean" | "percentage";
+
+export interface KrLinkedTaskFilter {
+  project_id?: string | null;
+  tag_id?: string | null;
+}
+
 export interface KeyResult {
   id: string; tenant_id: string; goal_id: string; title: string;
   source: "tasks" | "posts" | "manual"; metric: string;
   baseline: number; target: number; current_value: number;
   unit: string | null; direction: "up" | "down"; manual_value: number | null;
+  // 7D — pode não vir até o patch SQL ser aplicado no Lovable.
+  target_type?: KrTargetType;
+  auto_update?: boolean;
+  linked_task_filter?: KrLinkedTaskFilter | null;
 }
 
 export function useGoals() {
@@ -140,6 +151,32 @@ export function useRecalcKRs() {
       qc.invalidateQueries({ queryKey: ["goals"] });
       qc.invalidateQueries({ queryKey: ["key_results"] });
       toast.success("Progresso recalculado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+/**
+ * Atualiza progresso dos KRs com `auto_update=true` baseado no
+ * `linked_task_filter`. Requer patch SQL 7D aplicado no Lovable.
+ */
+export function useRefreshKrProgress() {
+  const qc = useQueryClient();
+  const { tenantId } = useWorkspace();
+  return useMutation({
+    mutationFn: async () => {
+      if (!tenantId) throw new Error("Workspace");
+      // Cast: RPC só existe após patch 7D ser aplicado no backend.
+      const client = supabase as unknown as {
+        rpc: (name: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+      };
+      const { error } = await client.rpc("refresh_kr_progress", { _tenant: tenantId });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["key_results"] });
+      toast.success("Progresso automático atualizado");
     },
     onError: (e: Error) => toast.error(e.message),
   });

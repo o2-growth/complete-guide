@@ -11,6 +11,7 @@ import type { TaskRow } from "@/hooks/useTasks";
 import type { KanbanStatus } from "./KanbanColumn";
 import { DueDateLabel } from "@/components/tasks/DueDateLabel";
 import { ProgressBar } from "@/components/tasks/ProgressBar";
+import { TaskHoursChip } from "@/components/timer/TaskHoursChip";
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "text-[hsl(var(--prio-urgent))]",
@@ -217,6 +218,7 @@ export function KanbanCard({ task, allStatuses, onOpen, onMoveToStatus, isOverla
                 <TooltipContent>Sincronizada com Google Calendar</TooltipContent>
               </Tooltip>
             )}
+            <TaskHoursChip taskId={task.id} />
           </div>
         </div>
       </div>

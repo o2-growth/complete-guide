@@ -110,6 +110,15 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
     command: ({ editor, range }) =>
       dispatchSlashCommand({ kind: "linked", editor, range }),
   },
+  {
+    id: "database",
+    title: "Database",
+    description: "Inserir lista/galeria/gráfico de tarefas",
+    keywords: ["database", "tabela", "tarefas", "lista", "galeria", "grafico", "view"],
+    icon: "Database",
+    command: ({ editor, range }) =>
+      dispatchSlashCommand({ kind: "database", editor, range }),
+  },
 ];
 
 export function filterSlashCommands(query: string): SlashCommandItem[] {

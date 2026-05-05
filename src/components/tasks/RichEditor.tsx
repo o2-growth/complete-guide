@@ -10,6 +10,7 @@ import { createMentionExtension } from "./RichEditor/mention";
 import { useTenantMembers, type TenantMember } from "@/hooks/useTenantMembers";
 import { RichEditorContextProvider } from "./RichEditor/commands/RichEditorContext";
 import { SlashCommandHost } from "./RichEditor/commands/SlashCommandHost";
+import { InlineDatabaseExtension } from "@/components/wiki/extensions/InlineDatabase";
 import type { TaskRow } from "@/hooks/useTasks";
 
 interface RichEditorProps {
@@ -29,6 +30,11 @@ interface RichEditorProps {
    * Necessária para os comandos /anexo, /subtarefa e /tag funcionarem.
    */
   task?: TaskRow | null;
+  /**
+   * Habilita inline databases (slash command /database). Use só dentro do
+   * Wiki — em comentários/descrições normais não faz sentido.
+   */
+  enableInlineDatabase?: boolean;
 }
 
 export function RichEditor({
@@ -40,6 +46,7 @@ export function RichEditor({
   editable = true,
   enableMentions = false,
   task = null,
+  enableInlineDatabase = false,
 }: RichEditorProps) {
   const { data: members } = useTenantMembers();
   const membersRef = useRef<TenantMember[]>([]);
@@ -56,8 +63,11 @@ export function RichEditor({
     if (enableMentions) {
       exts.push(createMentionExtension(() => membersRef.current));
     }
+    if (enableInlineDatabase) {
+      exts.push(InlineDatabaseExtension);
+    }
     return exts;
-  }, [placeholder, enableMentions]);
+  }, [placeholder, enableMentions, enableInlineDatabase]);
 
   const editor = useEditor({
     extensions,

@@ -112,6 +112,7 @@ const trabalho = [
   { title: "Squads", url: "/app/squads", icon: Users },
   { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
   { title: "Workload", url: "/app/workload", icon: BarChart3 },
+  { title: "Timesheet", url: "/app/timesheet", icon: Clock },
   { title: "Skills", url: "/app/skills", icon: Award },
   { title: "Capacity", url: "/app/capacity", icon: CalendarRange },
   { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
@@ -119,6 +120,7 @@ const trabalho = [
   { title: "Modelos", url: "/app/modelos", icon: FileStack },
   { title: "Templates", url: "/app/templates", icon: ListTodo },
   { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
+  { title: "Whiteboards", url: "/app/whiteboards", icon: Palette },
   { title: "Audit log", url: "/app/audit", icon: History },
 ];
 

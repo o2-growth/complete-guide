@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ListTodo, KanbanSquare, Loader2, FileStack } from "lucide-react";
+import { ArrowLeft, BarChart3, FileStack, KanbanSquare, LayoutGrid, ListTodo, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +15,31 @@ import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskRow as TaskRowItem } from "@/components/tasks/TaskRow";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
+import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
+import { TaskChartView } from "@/components/tasks/views/TaskChartView";
 import type { TaskRow } from "@/hooks/useTasks";
+
+const PROJECT_VIEW_KEY = "oxy:project-view";
+
+function getStoredProjectView(projectId: string | undefined) {
+  if (typeof window === "undefined" || !projectId) return "list";
+  try {
+    const raw = window.localStorage.getItem(`${PROJECT_VIEW_KEY}:${projectId}`);
+    if (raw === "list" || raw === "kanban" || raw === "gallery" || raw === "chart") return raw;
+  } catch {
+    // ignore
+  }
+  return "list";
+}
+
+function setStoredProjectView(projectId: string | undefined, value: string) {
+  if (typeof window === "undefined" || !projectId) return;
+  try {
+    window.localStorage.setItem(`${PROJECT_VIEW_KEY}:${projectId}`, value);
+  } catch {
+    // ignore
+  }
+}
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +49,11 @@ export default function ProjectDetailPage() {
   const [tplOpen, setTplOpen] = useState(false);
   const [tplName, setTplName] = useState("");
   const saveTpl = useSaveProjectAsTemplate();
+  const [view, setView] = useState<string>(() => getStoredProjectView(id));
+  const handleViewChange = (v: string) => {
+    setView(v);
+    setStoredProjectView(id, v);
+  };
 
   if (isLoading) {
     return (
@@ -93,10 +122,12 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="list">
+      <Tabs value={view} onValueChange={handleViewChange}>
         <TabsList>
           <TabsTrigger value="list"><ListTodo className="mr-1.5 h-3.5 w-3.5" /> Lista</TabsTrigger>
           <TabsTrigger value="kanban"><KanbanSquare className="mr-1.5 h-3.5 w-3.5" /> Kanban</TabsTrigger>
+          <TabsTrigger value="gallery"><LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria</TabsTrigger>
+          <TabsTrigger value="chart"><BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="mt-4">
@@ -115,6 +146,19 @@ export default function ProjectDetailPage() {
           <div className="min-h-[60vh]">
             <KanbanBoard projectId={id} />
           </div>
+        </TabsContent>
+
+        <TabsContent value="gallery" className="mt-4">
+          <TaskGalleryView
+            tasks={allTasks}
+            isLoading={lt}
+            emptyTitle="Nenhuma tarefa neste projeto"
+            emptyDescription="Crie a primeira pra ver os cards aqui."
+          />
+        </TabsContent>
+
+        <TabsContent value="chart" className="mt-4">
+          <TaskChartView tasks={allTasks} isLoading={lt} />
         </TabsContent>
       </Tabs>
 

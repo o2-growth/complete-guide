@@ -1,6 +1,6 @@
 import type { Editor, Range } from "@tiptap/core";
 
-export type SlashCommandKind = "attachment" | "subtask" | "tag" | "linked";
+export type SlashCommandKind = "attachment" | "subtask" | "tag" | "linked" | "database";
 
 export interface SlashCommandEventDetail {
   kind: SlashCommandKind;

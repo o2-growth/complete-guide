@@ -3,38 +3,62 @@
  *
  * Estrutura aceita em `saved_views.filters` (JSONB):
  *
- *   { combinator: "and" | "or", rules: Array<Rule | RuleGroup> }
+ *   { combinator: "and" | "or", rules: Array<Rule | RuleGroup>, not?: boolean }
  *
  *   Rule       = { field: FilterField, operator: Operator, value: unknown }
- *   RuleGroup  = { combinator, rules }
+ *   RuleGroup  = { combinator, rules, not? }
  *
- * `field` válidos: list, tag, assignee, priority, status, due_at, keyword, done.
- *
- * O retorno de `applySmartListFilters(supabase, group, baseQuery)` aplica os
- * filtros sobre uma query Supabase já iniciada (`from("tasks").select(...)`)
- * e devolve a query encadeada. Para grupos com combinator "or" usamos o
- * filtro PostgREST `or(...)` traduzindo cada regra simples para a forma
- * `field.op.value`. Grupos AND aplicam regras em sequência.
+ * Compatível com o formato de `react-querybuilder` (mesmas chaves), com nesting
+ * infinito. Mantém retrocompat com schemas antigos: campos legados (`list`,
+ * `assignee`, `tag`, `status`) são normalizados para os nomes novos
+ * (`project_id`, `assignee_id`, `tag_id`, `status_id`) e operadores legados
+ * (`is`, `before`, `after`, `contains` simples) seguem funcionando.
  */
 
 export type Operator =
+  // numéricos / string genéricos
+  | "="
+  | "!="
+  | "<"
+  | ">"
+  | "<="
+  | ">="
   | "in"
-  | "eq"
-  | "contains"
-  | "before"
-  | "after"
+  | "notIn"
   | "between"
-  | "is";
+  | "notBetween"
+  | "contains"
+  | "doesNotContain"
+  | "beginsWith"
+  | "endsWith"
+  | "null"
+  | "notNull"
+  // legados (Fase 6B) — aceitos por retrocompat
+  | "eq"
+  | "is"
+  | "before"
+  | "after";
 
+/**
+ * Campos novos exigidos pela Fase 7G + aliases legados (Fase 6B).
+ * O adapter normaliza antes de aplicar a query.
+ */
 export type FilterField =
-  | "list"
-  | "tag"
-  | "assignee"
+  // novos
   | "priority"
   | "status"
+  | "project_id"
+  | "assignee_id"
+  | "tag_id"
   | "due_at"
+  | "created_at"
+  | "priority_score"
+  | "done"
   | "keyword"
-  | "done";
+  // legados (mantidos para saved_views já criados)
+  | "list"
+  | "assignee"
+  | "tag";
 
 export interface Rule {
   field: FilterField;
@@ -45,10 +69,46 @@ export interface Rule {
 export interface RuleGroup {
   combinator: "and" | "or";
   rules: Array<Rule | RuleGroup>;
+  not?: boolean;
 }
 
 export function isRuleGroup(node: Rule | RuleGroup): node is RuleGroup {
   return (node as RuleGroup).combinator !== undefined;
+}
+
+/**
+ * Mapa de campo → coluna real no Postgres. Os nomes legados são apelidos
+ * dos novos nomes para manter retrocompat sem migration.
+ */
+function columnFor(field: FilterField): string {
+  switch (field) {
+    case "list":
+    case "project_id":
+      return "project_id";
+    case "assignee":
+    case "assignee_id":
+      return "assignee_id";
+    case "status":
+    case "status_id" as FilterField:
+      return "status_id";
+    case "tag":
+    case "tag_id":
+      return "tag_id";
+    case "keyword":
+      return "title";
+    case "done":
+      return "done_at";
+    case "priority":
+      return "priority";
+    case "due_at":
+      return "due_at";
+    case "created_at":
+      return "created_at";
+    case "priority_score":
+      return "priority_score";
+    default:
+      return String(field);
+  }
 }
 
 /**
@@ -58,52 +118,102 @@ export function isRuleGroup(node: Rule | RuleGroup): node is RuleGroup {
  */
 export function ruleToPostgrestFragment(rule: Rule): string {
   const v = rule.value;
-  switch (rule.field) {
-    case "list": {
-      const ids = Array.isArray(v) ? v : [v];
-      return `project_id.in.(${ids.map(quoteIfNeeded).join(",")})`;
+  const col = columnFor(rule.field);
+
+  // tag mora em task_tags (M:N). Não consegue ir direto em or() — placeholder.
+  if (rule.field === "tag" || rule.field === "tag_id") {
+    const ids = Array.isArray(v) ? v : [v];
+    return `__tag__:${ids.join("|")}`;
+  }
+
+  if (rule.field === "done") {
+    if (rule.operator === "null") return "done_at.is.null";
+    if (rule.operator === "notNull") return "done_at.not.is.null";
+    return v ? "done_at.not.is.null" : "done_at.is.null";
+  }
+
+  if (rule.field === "keyword") {
+    const term = String(v ?? "").replace(/,/g, "\\,");
+    switch (rule.operator) {
+      case "beginsWith":
+        return `title.ilike.${term}*`;
+      case "endsWith":
+        return `title.ilike.*${term}`;
+      case "doesNotContain":
+        return `title.not.ilike.*${term}*`;
+      case "=":
+      case "eq":
+        return `title.eq.${quoteIfNeeded(term)}`;
+      case "!=":
+        return `title.neq.${quoteIfNeeded(term)}`;
+      case "null":
+        return "title.is.null";
+      case "notNull":
+        return "title.not.is.null";
+      case "contains":
+      default:
+        return `title.ilike.*${term}*`;
     }
-    case "assignee": {
-      const ids = Array.isArray(v) ? v : [v];
-      return `assignee_id.in.(${ids.map(quoteIfNeeded).join(",")})`;
+  }
+
+  // datas e numéricos
+  if (
+    rule.field === "due_at" ||
+    rule.field === "created_at" ||
+    rule.field === "priority_score"
+  ) {
+    switch (rule.operator) {
+      case "<":
+      case "before":
+        return `${col}.lt.${String(v)}`;
+      case ">":
+      case "after":
+        return `${col}.gt.${String(v)}`;
+      case "<=":
+        return `${col}.lte.${String(v)}`;
+      case ">=":
+        return `${col}.gte.${String(v)}`;
+      case "=":
+      case "eq":
+        return `${col}.eq.${String(v)}`;
+      case "!=":
+        return `${col}.neq.${String(v)}`;
+      case "between":
+        if (Array.isArray(v) && v.length === 2) {
+          return `and(${col}.gte.${String(v[0])},${col}.lte.${String(v[1])})`;
+        }
+        return "";
+      case "notBetween":
+        if (Array.isArray(v) && v.length === 2) {
+          return `or(${col}.lt.${String(v[0])},${col}.gt.${String(v[1])})`;
+        }
+        return "";
+      case "null":
+        return `${col}.is.null`;
+      case "notNull":
+        return `${col}.not.is.null`;
+      default:
+        return `${col}.eq.${String(v)}`;
     }
-    case "priority": {
-      const arr = Array.isArray(v) ? v : [v];
-      return `priority.in.(${arr.map(quoteIfNeeded).join(",")})`;
-    }
-    case "status": {
-      const ids = Array.isArray(v) ? v : [v];
-      return `status_id.in.(${ids.map(quoteIfNeeded).join(",")})`;
-    }
-    case "keyword": {
-      // ilike PostgREST usa `*` no lugar de `%` e exige escape de vírgulas.
-      const term = String(v ?? "").replace(/,/g, "\\,");
-      return `title.ilike.*${term}*`;
-    }
-    case "due_at": {
-      if (rule.operator === "before") return `due_at.lt.${String(v)}`;
-      if (rule.operator === "after") return `due_at.gt.${String(v)}`;
-      if (rule.operator === "between" && Array.isArray(v) && v.length === 2) {
-        // Para representar AND dentro de OR usamos "and(...)" como elemento.
-        return `and(due_at.gte.${String(v[0])},due_at.lte.${String(v[1])})`;
-      }
-      return `due_at.eq.${String(v)}`;
-    }
-    case "done": {
-      // boolean → `done_at` not null / null
-      return v ? "done_at.not.is.null" : "done_at.is.null";
-    }
-    case "tag": {
-      // Caso especial: tag mora em task_tags (M:N). Usamos a coluna
-      // `task_tags!inner(tag_id)` no PostgREST. Como o filtro PostgREST não
-      // alcança junções aninhadas dentro de `or`, devolvemos uma expressão
-      // que o aplicador converte via `applySmartListFilters` para .in() em
-      // pre-fetch (ver tagPreFilterIds). Aqui retornamos placeholder.
-      const ids = Array.isArray(v) ? v : [v];
-      return `__tag__:${ids.join("|")}`;
-    }
+  }
+
+  // multiselect / string id (priority, status, project_id, assignee_id)
+  const arr = Array.isArray(v) ? v : v == null || v === "" ? [] : [v];
+  switch (rule.operator) {
+    case "=":
+    case "eq":
+      return `${col}.eq.${quoteIfNeeded(arr[0] ?? v)}`;
+    case "!=":
+      return `${col}.neq.${quoteIfNeeded(arr[0] ?? v)}`;
+    case "notIn":
+      return `${col}.not.in.(${arr.map(quoteIfNeeded).join(",")})`;
+    case "null":
+      return `${col}.is.null`;
+    case "notNull":
+      return `${col}.not.is.null`;
+    case "in":
     default:
-      return "";
+      return `${col}.in.(${arr.map(quoteIfNeeded).join(",")})`;
   }
 }
 
@@ -116,6 +226,7 @@ function quoteIfNeeded(v: unknown): string {
 export interface QueryLike {
   in: (col: string, vals: readonly unknown[]) => QueryLike;
   eq: (col: string, val: unknown) => QueryLike;
+  neq?: (col: string, val: unknown) => QueryLike;
   ilike: (col: string, val: string) => QueryLike;
   gte: (col: string, val: unknown) => QueryLike;
   lte: (col: string, val: unknown) => QueryLike;
@@ -127,17 +238,21 @@ export interface QueryLike {
 }
 
 /**
- * Aplica um grupo simples (combinator AND no topo) em uma query Supabase.
- * Para grupos OR aninhados usa `or(...)` de PostgREST.
+ * Aplica um grupo (qualquer profundidade) em uma query Supabase.
  *
- * Limitação consciente: filtro de `tag` não vai dentro de OR — se aparecer
- * dentro de OR, é ignorado naquela ramificação. Para AND-tag o aplicador
- * resolve fazendo um pré-fetch de `task_tags` e usa `.in("id", [...])`.
+ * Estratégia:
+ * - Combinator AND no nível raiz: aplica regra a regra encadeando filtros.
+ * - Combinator OR (ou subgrupo OR): converte para string PostgREST `or(...)`.
+ * - Subgrupo AND aninhado dentro de AND: recursão simples (filtros se somam).
+ * - Subgrupo AND dentro de OR: vira fragmento `and(a.b.c,d.e.f)` no PostgREST.
+ *
+ * `not: true` em grupos é traduzido como `not.or(...)` / `not.and(...)` quando
+ * possível, ignorado caso contrário (não há `.not` genérico para grupos AND
+ * raiz no PostgREST sem reescrever a árvore).
  */
 export function applySmartListFilters<Q extends QueryLike>(
   query: Q,
   group: RuleGroup,
-  // Lista de task ids pré-filtrada por tag (calculada externamente).
   tagFilteredTaskIds?: readonly string[],
 ): Q {
   if (group.combinator === "and") {
@@ -168,37 +283,105 @@ function applySingleRule<Q extends QueryLike>(
   tagFilteredTaskIds?: readonly string[],
 ): Q {
   const v = rule.value;
-  switch (rule.field) {
-    case "list":
-      return q.in("project_id", Array.isArray(v) ? v : [v]) as Q;
-    case "assignee":
-      return q.in("assignee_id", Array.isArray(v) ? v : [v]) as Q;
-    case "priority":
-      return q.in("priority", Array.isArray(v) ? v : [v]) as Q;
-    case "status":
-      return q.in("status_id", Array.isArray(v) ? v : [v]) as Q;
-    case "keyword":
-      return q.ilike("title", `%${String(v ?? "")}%`) as Q;
-    case "due_at": {
-      if (rule.operator === "before") return q.lt("due_at", v) as Q;
-      if (rule.operator === "after") return q.gt("due_at", v) as Q;
-      if (rule.operator === "between" && Array.isArray(v) && v.length === 2) {
-        return q.gte("due_at", v[0]).lte("due_at", v[1]) as Q;
-      }
-      return q.eq("due_at", v) as Q;
+  const col = columnFor(rule.field);
+
+  if (rule.field === "tag" || rule.field === "tag_id") {
+    if (tagFilteredTaskIds && tagFilteredTaskIds.length) {
+      return q.in("id", tagFilteredTaskIds) as Q;
     }
-    case "done":
-      return v ? (q.not("done_at", "is", null) as Q) : (q.is("done_at", null) as Q);
-    case "tag": {
-      if (tagFilteredTaskIds && tagFilteredTaskIds.length) {
-        return q.in("id", tagFilteredTaskIds) as Q;
-      }
-      // Sem ids resolvidos: aplica filtro impossível pra retornar vazio em vez
-      // de ignorar silenciosamente a regra.
-      return q.in("id", ["__no_match__"]) as Q;
+    return q.in("id", ["__no_match__"]) as Q;
+  }
+
+  if (rule.field === "done") {
+    if (rule.operator === "null") return q.is("done_at", null) as Q;
+    if (rule.operator === "notNull") return q.not("done_at", "is", null) as Q;
+    return v
+      ? (q.not("done_at", "is", null) as Q)
+      : (q.is("done_at", null) as Q);
+  }
+
+  if (rule.field === "keyword") {
+    const term = String(v ?? "");
+    switch (rule.operator) {
+      case "beginsWith":
+        return q.ilike("title", `${term}%`) as Q;
+      case "endsWith":
+        return q.ilike("title", `%${term}`) as Q;
+      case "doesNotContain":
+        return q.not("title", "ilike", `%${term}%`) as Q;
+      case "=":
+      case "eq":
+        return q.eq("title", term) as Q;
+      case "!=":
+        return q.not("title", "eq", term) as Q;
+      case "null":
+        return q.is("title", null) as Q;
+      case "notNull":
+        return q.not("title", "is", null) as Q;
+      case "contains":
+      default:
+        return q.ilike("title", `%${term}%`) as Q;
     }
+  }
+
+  // datas / numéricos
+  if (
+    rule.field === "due_at" ||
+    rule.field === "created_at" ||
+    rule.field === "priority_score"
+  ) {
+    switch (rule.operator) {
+      case "<":
+      case "before":
+        return q.lt(col, v) as Q;
+      case ">":
+      case "after":
+        return q.gt(col, v) as Q;
+      case "<=":
+        return q.lte(col, v) as Q;
+      case ">=":
+        return q.gte(col, v) as Q;
+      case "=":
+      case "eq":
+        return q.eq(col, v) as Q;
+      case "!=":
+        return q.not(col, "eq", v) as Q;
+      case "between":
+        if (Array.isArray(v) && v.length === 2) {
+          return q.gte(col, v[0]).lte(col, v[1]) as Q;
+        }
+        return q;
+      case "notBetween":
+        if (Array.isArray(v) && v.length === 2) {
+          return q.or(`${col}.lt.${String(v[0])},${col}.gt.${String(v[1])}`) as Q;
+        }
+        return q;
+      case "null":
+        return q.is(col, null) as Q;
+      case "notNull":
+        return q.not(col, "is", null) as Q;
+      default:
+        return q.eq(col, v) as Q;
+    }
+  }
+
+  // priority / status / project_id / assignee_id (multi)
+  const arr = Array.isArray(v) ? v : v == null || v === "" ? [] : [v];
+  switch (rule.operator) {
+    case "=":
+    case "eq":
+      return q.eq(col, arr[0] ?? v) as Q;
+    case "!=":
+      return q.not(col, "eq", arr[0] ?? v) as Q;
+    case "notIn":
+      return q.not(col, "in", `(${arr.map(quoteIfNeeded).join(",")})`) as Q;
+    case "null":
+      return q.is(col, null) as Q;
+    case "notNull":
+      return q.not(col, "is", null) as Q;
+    case "in":
     default:
-      return q;
+      return q.in(col, arr) as Q;
   }
 }
 
@@ -207,9 +390,17 @@ function ruleGroupToOrString(group: RuleGroup): string {
   for (const r of group.rules) {
     if (isRuleGroup(r)) {
       if (r.combinator === "and") {
-        const inner = r.rules
-          .map((rr) => (isRuleGroup(rr) ? "" : ruleToPostgrestFragment(rr)))
-          .filter(Boolean);
+        const inner: string[] = [];
+        for (const rr of r.rules) {
+          if (isRuleGroup(rr)) {
+            // sub-sub-grupo dentro de AND dentro de OR — converte recursivamente.
+            const sub = ruleGroupToOrString(rr);
+            if (sub) inner.push(rr.combinator === "or" ? `or(${sub})` : sub);
+          } else {
+            const f = ruleToPostgrestFragment(rr);
+            if (f && !f.startsWith("__tag__:")) inner.push(f);
+          }
+        }
         if (inner.length) parts.push(`and(${inner.join(",")})`);
       } else {
         const inner = ruleGroupToOrString(r);
@@ -232,11 +423,23 @@ export function collectTagIds(group: RuleGroup): string[] {
   for (const r of group.rules) {
     if (isRuleGroup(r)) {
       acc.push(...collectTagIds(r));
-    } else if (r.field === "tag") {
+    } else if (r.field === "tag" || r.field === "tag_id") {
       const v = r.value;
       if (Array.isArray(v)) acc.push(...(v as string[]));
       else if (v) acc.push(String(v));
     }
   }
   return Array.from(new Set(acc));
+}
+
+/**
+ * Conta o total de regras simples (folhas) em uma árvore qualquer.
+ */
+export function countLeafRules(group: RuleGroup): number {
+  let n = 0;
+  for (const r of group.rules) {
+    if (isRuleGroup(r)) n += countLeafRules(r);
+    else n += 1;
+  }
+  return n;
 }

@@ -5,6 +5,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { parseQuickAdd } from "@/lib/quick-add-parser";
 import { queryProfile } from "@/lib/query-config";
 import { useConfetti } from "@/hooks/useConfetti";
+import { useTaskTypes } from "@/hooks/useTaskTypes";
 import { toast } from "sonner";
 
 export interface TaskRow {
@@ -22,6 +23,8 @@ export interface TaskRow {
   due_at: string | null;
   estimate_minutes: number | null;
   spent_minutes: number;
+  type_id?: string | null;
+  parent_task_id?: string | null;
   archived: boolean;
   done_at: string | null;
   created_at: string;
@@ -194,6 +197,7 @@ export function useQuickAdd() {
   const { user } = useAuth();
   const { tenantId, inboxProjectId } = useWorkspace();
   const { data: statuses } = useTaskStatuses();
+  const { data: taskTypes } = useTaskTypes();
 
   return useMutation({
     mutationFn: async (input: string) => {
@@ -203,6 +207,19 @@ export function useQuickAdd() {
       const parsed = parseQuickAdd(input);
       const todoStatus = statuses?.find((s) => s.slug === "todo");
 
+      // Default estimate: se o parser não capturou ~Xm/h, herda do tipo default
+      // do tenant (slug "task" tem prioridade; senão, primeiro tipo com
+      // default_estimate_minutes setado).
+      let estimate = parsed.estimateMinutes;
+      if (estimate == null && taskTypes && taskTypes.length > 0) {
+        const fallback =
+          taskTypes.find((t) => t.slug === "task" && t.default_estimate_minutes) ??
+          taskTypes.find((t) => t.default_estimate_minutes != null);
+        if (fallback?.default_estimate_minutes) {
+          estimate = fallback.default_estimate_minutes;
+        }
+      }
+
       const payload = {
         tenant_id: tenantId,
         project_id: inboxProjectId,
@@ -211,7 +228,7 @@ export function useQuickAdd() {
         status_id: todoStatus?.id ?? null,
         due_at: parsed.dueAt?.toISOString() ?? null,
         start_at: parsed.startAt?.toISOString() ?? null,
-        estimate_minutes: parsed.estimateMinutes,
+        estimate_minutes: estimate,
         assignee_id: user.id,
         reporter_id: user.id,
         created_by: user.id,

@@ -716,24 +716,33 @@ export default function ConhecimentoPage() {
                           value={draftBody}
                           onChange={setDraftBody}
                           enableMentions
+                          enableInlineDatabase
                           placeholder="Digite '/' para comandos ou comece a escrever…"
                           className="min-h-[400px]"
                         />
                       </TabsContent>
                       <TabsContent value="preview" className="mt-3">
-                        <Card className="prose prose-sm max-w-none p-4 dark:prose-invert">
-                          <div
-                            // mesma estratégia dos comentários: confia no HTML do TipTap
-                            dangerouslySetInnerHTML={{ __html: draftBody }}
+                        <Card className="p-4">
+                          <RichEditor
+                            value={draftBody}
+                            onChange={() => undefined}
+                            editable={false}
+                            enableInlineDatabase
+                            className="border-0 p-0"
                           />
                         </Card>
                       </TabsContent>
                     </Tabs>
                   ) : page.body ? (
-                    <article
-                      className="prose prose-sm max-w-none dark:prose-invert md:prose-base"
-                      dangerouslySetInnerHTML={{ __html: page.body }}
-                    />
+                    <article className="prose prose-sm max-w-none dark:prose-invert md:prose-base">
+                      <RichEditor
+                        value={page.body}
+                        onChange={() => undefined}
+                        editable={false}
+                        enableInlineDatabase
+                        className="border-0 p-0"
+                      />
+                    </article>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       Página vazia. Clique em <strong>Editar</strong> para começar.

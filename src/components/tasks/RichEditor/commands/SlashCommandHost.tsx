@@ -6,6 +6,7 @@ import { AttachmentCommand } from "./AttachmentCommand";
 import { SubtaskCommand } from "./SubtaskCommand";
 import { TagCommand } from "./TagCommand";
 import { LinkedItemCommand } from "./LinkedItemCommand";
+import { DatabaseCommand } from "./DatabaseCommand";
 
 interface ActiveCommand {
   kind: SlashCommandKind;
@@ -72,6 +73,15 @@ export function SlashCommandHost({ editor }: Props) {
     case "linked":
       return (
         <LinkedItemCommand
+          key={active.key}
+          editor={active.editor}
+          range={active.range}
+          onDone={close}
+        />
+      );
+    case "database":
+      return (
+        <DatabaseCommand
           key={active.key}
           editor={active.editor}
           range={active.range}

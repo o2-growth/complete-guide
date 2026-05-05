@@ -71,6 +71,7 @@ export default defineConfig(({ mode }) => ({
           "date": ["date-fns", "chrono-node"],
           "forms": ["react-hook-form", "@hookform/resolvers", "zod"],
           "markdown": ["react-markdown"],
+          "whiteboard": ["@excalidraw/excalidraw"],
         },
       },
     },

@@ -55,6 +55,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
+import { TaskTimerPanel } from "@/components/timer/TaskTimerPanel";
 import { PreviewEditor } from "@/components/previews/PreviewEditor";
 import { TaskAIPanel } from "@/components/ai/TaskAIPanel";
 import { TaskApprovalsPanel } from "@/components/approvals/TaskApprovalsPanel";
@@ -62,6 +63,7 @@ import { SocialMediaPanel } from "@/components/social/SocialMediaPanel";
 import type { SocialChannel, PublishState } from "@/hooks/useSocialMedia";
 import { TaskSocialContentPanel } from "@/components/social/TaskSocialContentPanel";
 import { TaskMetricsPanel } from "@/components/social/TaskMetricsPanel";
+import { TaskWhiteboardsPanel } from "@/components/tasks/TaskWhiteboardsPanel";
 import { SLABadge } from "@/components/sla/SLABadge";
 import { RecurrenceBuilder } from "./RecurrenceBuilder";
 import { useRecurrence, useUpdateRecurrence } from "@/hooks/useRecurrence";
@@ -71,6 +73,11 @@ import { useUpdateTaskProgress } from "@/hooks/useTaskProgress";
 import { usePersonas } from "@/hooks/usePersonas";
 import { useAudiences } from "@/hooks/useAudiences";
 import { TemplatePicker } from "@/components/modelos/TemplatePicker";
+import { useTaskTypes } from "@/hooks/useTaskTypes";
+import { AssigneePicker } from "./AssigneePicker";
+import { warnIfOverload } from "./assignee-utils";
+import { useUserWorkload } from "@/hooks/useWorkload";
+import { CustomFieldsPanel } from "./CustomFieldsPanel";
 
 const PRIORITIES = [
   { value: "none", label: "Nenhuma" },
@@ -123,11 +130,13 @@ export function TaskDetailSheet({ taskId, onOpenChange }: TaskDetailSheetProps) 
 function TaskDetailContent({ taskId }: { taskId: string }) {
   const { data: task, isLoading } = useTask(taskId);
   const { data: statuses } = useTaskStatuses();
+  const { data: taskTypes } = useTaskTypes();
   const update = useUpdateTask();
   const toggleDone = useToggleTaskDone();
   const recurrenceQuery = useRecurrence(taskId);
   const updateRecurrence = useUpdateRecurrence(taskId);
   const updateProgress = useUpdateTaskProgress(taskId);
+  const assigneeWorkload = useUserWorkload(task?.assignee_id ?? null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -321,6 +330,89 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
         </div>
       </div>
 
+      <div className="grid gap-3 border-b bg-background px-6 py-4 text-sm sm:grid-cols-3">
+        <FieldLabel label="Responsável">
+          <AssigneePicker
+            value={task.assignee_id}
+            onChange={(userId) => {
+              if (userId === task.assignee_id) return;
+              update.mutate({ id: task.id, patch: { assignee_id: userId } });
+              // Aviso de overload — usa cache atual (refetch a cada 10s).
+              if (userId && assigneeWorkload.data && userId !== assigneeWorkload.data.user_id) {
+                // Será re-checado na próxima render quando assigneeWorkload mudar.
+              }
+              if (userId && assigneeWorkload.data?.user_id === userId) {
+                warnIfOverload(
+                  task.title,
+                  assigneeWorkload.data.percentage,
+                  assigneeWorkload.data.status,
+                );
+              }
+            }}
+          />
+        </FieldLabel>
+
+        <FieldLabel label="Tipo">
+          <Select
+            value={task.type_id ?? "_"}
+            onValueChange={(v) => {
+              const typeId = v === "_" ? null : v;
+              const patch: Partial<TaskRow> = { type_id: typeId };
+              // Aplica default_estimate_minutes se a task não tem estimativa manual.
+              if (typeId && (task.estimate_minutes == null || task.estimate_minutes === 0)) {
+                const t = (taskTypes ?? []).find((x) => x.id === typeId);
+                if (t?.default_estimate_minutes) {
+                  patch.estimate_minutes = t.default_estimate_minutes;
+                }
+              }
+              update.mutate({ id: task.id, patch });
+            }}
+          >
+            <SelectTrigger className="h-8">
+              <SelectValue placeholder="Sem tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_">Sem tipo</SelectItem>
+              {(taskTypes ?? []).map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  <span className="inline-flex items-center gap-2">
+                    {t.color && (
+                      <span
+                        className="inline-block h-2 w-2 rounded-full"
+                        style={{ background: t.color }}
+                      />
+                    )}
+                    {t.name}
+                    {t.default_estimate_minutes ? (
+                      <span className="text-[10px] text-muted-foreground">
+                        ~{Math.round(t.default_estimate_minutes / 60 * 10) / 10}h
+                      </span>
+                    ) : null}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldLabel>
+
+        <FieldLabel label="Estimativa (min)">
+          <Input
+            type="number"
+            min={0}
+            step={15}
+            defaultValue={task.estimate_minutes ?? ""}
+            placeholder="—"
+            className="h-8"
+            onBlur={(e) => {
+              const raw = e.target.value.trim();
+              const parsed = raw === "" ? null : Math.max(0, Math.round(Number(raw)));
+              if (parsed === task.estimate_minutes) return;
+              update.mutate({ id: task.id, patch: { estimate_minutes: parsed } });
+            }}
+          />
+        </FieldLabel>
+      </div>
+
       <div className="flex-1 px-6 py-4">
         <Tabs defaultValue="details">
           <TabsList>
@@ -330,10 +422,13 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="attachments">Anexos</TabsTrigger>
             <TabsTrigger value="comments">Comentários</TabsTrigger>
+            <TabsTrigger value="time">Tempo</TabsTrigger>
             <TabsTrigger value="ai">IA</TabsTrigger>
             <TabsTrigger value="approvals">Aprovações</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
             <TabsTrigger value="strategy">Estratégia</TabsTrigger>
+            <TabsTrigger value="custom-fields">Campos</TabsTrigger>
+            <TabsTrigger value="whiteboard">Whiteboard</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="mt-4">
@@ -374,6 +469,10 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <CommentsPanel taskId={task.id} task={task} />
           </TabsContent>
 
+          <TabsContent value="time" className="mt-4">
+            <TaskTimerPanel taskId={task.id} />
+          </TabsContent>
+
           <TabsContent value="ai" className="mt-4">
             <TaskAIPanel task={task} />
           </TabsContent>
@@ -407,6 +506,18 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
               audienceId={task.audience_id ?? null}
               onUpdate={update.mutate}
             />
+          </TabsContent>
+
+          <TabsContent value="custom-fields" className="mt-4">
+            <CustomFieldsPanel
+              taskId={task.id}
+              taskTypeId={task.type_id ?? null}
+              projectId={task.project_id}
+            />
+          </TabsContent>
+
+          <TabsContent value="whiteboard" className="mt-4">
+            <TaskWhiteboardsPanel taskId={task.id} projectId={task.project_id ?? null} />
           </TabsContent>
         </Tabs>
       </div>

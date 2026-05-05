@@ -1,4 +1,4 @@
-import { Calendar, Clock, MoreHorizontal, Trash2, Flag } from "lucide-react";
+import { Calendar, Clock, MoreHorizontal, Trash2, Flag, Palette } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,12 @@ import {
 import { TaskRow as TTask, useDeleteTask, useToggleTaskDone } from "@/hooks/useTasks";
 import { cn } from "@/lib/utils";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
+import { TaskHoursChip } from "@/components/timer/TaskHoursChip";
 import { SLABadge } from "@/components/sla/SLABadge";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { DueDateLabel } from "@/components/tasks/DueDateLabel";
 import { ProgressBar } from "@/components/tasks/ProgressBar";
+import { useWhiteboardTaskIndex } from "@/hooks/useWhiteboards";
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "text-[hsl(var(--prio-urgent))]",
@@ -44,6 +46,8 @@ export function TaskRow({
 }) {
   const toggle = useToggleTaskDone();
   const remove = useDeleteTask();
+  const { data: wbIndex } = useWhiteboardTaskIndex();
+  const hasWhiteboard = !!wbIndex?.[task.id];
   const done = !!task.done_at;
   const handleToggle = () => toggle.mutate(task);
   const swipeRef = useSwipeGesture<HTMLDivElement>({
@@ -114,6 +118,20 @@ export function TaskRow({
               <TooltipContent>Sincronizada com Google Calendar</TooltipContent>
             </Tooltip>
           )}
+          {hasWhiteboard && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="shrink-0 text-muted-foreground"
+                  aria-label="Tem whiteboard vinculado"
+                  data-no-open
+                >
+                  <Palette className="h-3.5 w-3.5" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Whiteboard vinculado</TooltipContent>
+            </Tooltip>
+          )}
           <SLABadge task={task} compact />
         </div>
 
@@ -137,6 +155,7 @@ export function TaskRow({
               {PRIO_LABEL[task.priority]}
             </span>
           )}
+          <TaskHoursChip taskId={task.id} />
         </div>
         {progress > 0 && (
           <div className="mt-2">

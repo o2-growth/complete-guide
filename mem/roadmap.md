@@ -106,3 +106,25 @@ Fases agrupadas: 1-15 = Fase 1 (núcleo TickTick), 16-24 = Fase 2 (Ekyte), 25-29
 59. ✅ **Sub-fase 6G** — Frontend Google Calendar sync: hook `useGcalSync`, seção em `/app/configuracoes/integracoes-externas`, indicador visual em TaskRow/KanbanCard/Sheet quando `gcal_event_id` presente. Migration + Edges `gcal-sync-pull/push/list-calendars` `[lovable]`.
 
 **Roadmap 59/59 — Fase 6 completa. Frontend 100% entregue. 8 patches Lovable indexados em `.claude/reports/lovable-patches/INDEX.md`.**
+
+## Fase 7 — Coerência interna + Notion + ClickUp parity (2026-05-05)
+
+60. ✅ **Sub-fase 7A** — 5 gaps de coerência fechados: `useUserWorkload` consumindo `mv_workload_by_user`, `<WorkloadBadge>`, `<AssigneePicker>` no TaskDetailSheet com warning de overload, aplicação de `default_estimate_minutes` na criação, trigger `task_assigned` para notificações automáticas.
+
+61. ✅ **Sub-fase 7B** — Custom Fields em tasks: schema `custom_field_definitions` + `task_custom_field_values` com 17 tipos (text/textarea/number/date/datetime/select/multi_select/checkbox/url/email/phone/currency/rating/user/tag/file/formula), escopo global/task_type/project, builder visual em `/app/configuracoes/custom-fields`, renderizador genérico `<CustomFieldsPanel>` integrado ao TaskDetailSheet. 5 testes novos.
+
+62. ✅ **Sub-fase 7C** — Time Tracking nativo: `time_entries.billable/hourly_rate/tags`, RPC `user_timesheet` (agregado dia a dia com receita), `<TaskTimerPanel>` embedded no TaskDetailSheet, `/app/timesheet` com tabela/gráfico/CSV export, `<TaskHoursChip>` em TaskRow/Kanban.
+
+63. ✅ **Sub-fase 7D** — Workload view real (`/app/workload` refeita com tabs Time/Heatmap/Matriz, drag-drop pra realocar com warning de overload) + Goals upgrade com `target_type` (numeric/monetary/tasks/boolean/percentage), `auto_update`, `linked_task_filter`, RPC `refresh_kr_progress`.
+
+64. ✅ **Sub-fase 7E** — Whiteboard com **Excalidraw** (MIT — tldraw foi descartado por ter mudado pra licença proprietária). Tabela `whiteboards`, lazy chunk 373KB gzip, auto-save 2s, integração com tasks via aba dedicada.
+
+65. ✅ **Sub-fase 7F** — Dashboards customizáveis: schema `dashboards` + `dashboard_widgets` (12 kinds: kpi/chart_bar/chart_line/chart_donut/task_list/calendar_mini/timesheet_snippet/recent_activity/goals_progress/workload_heatmap/embed/markdown), canvas drag-drop com dnd-kit puro, modos visualização/edição.
+
+66. ✅ **Sub-fase 7G** — SmartListBuilder v2 com `react-querybuilder` (MIT): 18 operadores (=, !=, contains, beginsWith, endsWith, between, null, notNull, etc), nesting infinito AND/OR/NOT, 10 fields tipados, retrocompat com filtros antigos, preview "X tarefas correspondem" com debounce, import/export JSON. 6 testes novos (61/61 total).
+
+67. ✅ **Sub-fase 7H** — 3 views novas + Inline databases: `<TaskGalleryView>` (grid responsivo com cover image), `<TaskChartView>` (Bar/Line/Donut + group by priority/status/project/assignee/tag/task_type/weekday/month + métricas count/sum_estimate/sum_spent/avg_progress + custom fields numéricos), TipTap extension `InlineDatabase` para inserir databases dentro de wiki/comentários via slash command `/database`.
+
+68. ✅ **Sub-fase 7I** — Automations engine visual: layout 2-painéis (lista/templates esquerda + builder direita), 12 triggers (task.created/updated/completed/assigned/overdue, comment.added, attachment.added, anomaly.detected, goal.at_risk, wiki.updated, ticket.created, gcal.synced, manual), 9 action kinds (create_task/set_status/assign_to/notify/chat_notify/webhook/add_tag/remove_tag/update_field), galeria de 6 templates seeded, aba "Execuções" com histórico.
+
+**Roadmap 68/68 + Fase 6 + Fase 7. Frontend 100% entregue. 12 patches Lovable indexados.**
