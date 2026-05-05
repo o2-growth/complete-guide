@@ -853,14 +853,18 @@ export type Database = {
         Row: {
           actions: Json
           active: boolean
+          color: string | null
           conditions: Json
           created_at: string
           created_by: string | null
           description: string | null
+          icon: string | null
           id: string
+          is_template: boolean
           last_run_at: string | null
           name: string
           run_count: number
+          template_category: string | null
           tenant_id: string
           trigger_event: string
           updated_at: string
@@ -868,14 +872,18 @@ export type Database = {
         Insert: {
           actions?: Json
           active?: boolean
+          color?: string | null
           conditions?: Json
           created_at?: string
           created_by?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
+          is_template?: boolean
           last_run_at?: string | null
           name: string
           run_count?: number
+          template_category?: string | null
           tenant_id: string
           trigger_event: string
           updated_at?: string
@@ -883,14 +891,18 @@ export type Database = {
         Update: {
           actions?: Json
           active?: boolean
+          color?: string | null
           conditions?: Json
           created_at?: string
           created_by?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
+          is_template?: boolean
           last_run_at?: string | null
           name?: string
           run_count?: number
+          template_category?: string | null
           tenant_id?: string
           trigger_event?: string
           updated_at?: string
@@ -1785,6 +1797,193 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "creators_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_field_definitions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_value: Json | null
+          field_type: string
+          help_text: string | null
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          options: Json | null
+          position: number
+          project_id: string | null
+          required: boolean
+          scope: string
+          task_type_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_value?: Json | null
+          field_type: string
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          options?: Json | null
+          position?: number
+          project_id?: string | null
+          required?: boolean
+          scope: string
+          task_type_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_value?: Json | null
+          field_type?: string
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          options?: Json | null
+          position?: number
+          project_id?: string | null
+          required?: boolean
+          scope?: string
+          task_type_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_field_definitions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_field_definitions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_field_definitions_task_type_id_fkey"
+            columns: ["task_type_id"]
+            isOneToOne: false
+            referencedRelation: "task_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_field_definitions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboard_widgets: {
+        Row: {
+          config: Json
+          created_at: string
+          dashboard_id: string
+          height: number
+          id: string
+          kind: string
+          position: number
+          title: string
+          updated_at: string
+          width: number
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          dashboard_id: string
+          height?: number
+          id?: string
+          kind: string
+          position?: number
+          title: string
+          updated_at?: string
+          width?: number
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          dashboard_id?: string
+          height?: number
+          id?: string
+          kind?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_widgets_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "dashboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboards: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_public: boolean
+          layout: Json
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          layout?: Json
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          layout?: Json
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dashboards_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2777,6 +2976,7 @@ export type Database = {
       }
       key_results: {
         Row: {
+          auto_update: boolean
           baseline: number
           created_at: string
           current_value: number
@@ -2785,16 +2985,19 @@ export type Database = {
           direction: string
           goal_id: string
           id: string
+          linked_task_filter: Json | null
           manual_value: number | null
           metric: string
           source: string
           target: number
+          target_type: string
           tenant_id: string
           title: string
           unit: string | null
           updated_at: string
         }
         Insert: {
+          auto_update?: boolean
           baseline?: number
           created_at?: string
           current_value?: number
@@ -2803,16 +3006,19 @@ export type Database = {
           direction?: string
           goal_id: string
           id?: string
+          linked_task_filter?: Json | null
           manual_value?: number | null
           metric: string
           source: string
           target: number
+          target_type?: string
           tenant_id: string
           title: string
           unit?: string | null
           updated_at?: string
         }
         Update: {
+          auto_update?: boolean
           baseline?: number
           created_at?: string
           current_value?: number
@@ -2821,10 +3027,12 @@ export type Database = {
           direction?: string
           goal_id?: string
           id?: string
+          linked_task_filter?: Json | null
           manual_value?: number | null
           metric?: string
           source?: string
           target?: number
+          target_type?: string
           tenant_id?: string
           title?: string
           unit?: string | null
@@ -5123,6 +5331,42 @@ export type Database = {
           },
         ]
       }
+      task_custom_field_values: {
+        Row: {
+          field_definition_id: string
+          task_id: string
+          updated_at: string
+          value: Json | null
+        }
+        Insert: {
+          field_definition_id: string
+          task_id: string
+          updated_at?: string
+          value?: Json | null
+        }
+        Update: {
+          field_definition_id?: string
+          task_id?: string
+          updated_at?: string
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_custom_field_values_field_definition_id_fkey"
+            columns: ["field_definition_id"]
+            isOneToOne: false
+            referencedRelation: "custom_field_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_custom_field_values_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_embeddings: {
         Row: {
           content: string | null
@@ -5898,39 +6142,48 @@ export type Database = {
       }
       time_entries: {
         Row: {
+          billable: boolean
           created_at: string
           ended_at: string | null
+          hourly_rate: number | null
           id: string
           minutes: number | null
           note: string | null
           source: string | null
           started_at: string
+          tags: string[]
           task_id: string
           tenant_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          billable?: boolean
           created_at?: string
           ended_at?: string | null
+          hourly_rate?: number | null
           id?: string
           minutes?: number | null
           note?: string | null
           source?: string | null
           started_at?: string
+          tags?: string[]
           task_id: string
           tenant_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          billable?: boolean
           created_at?: string
           ended_at?: string | null
+          hourly_rate?: number | null
           id?: string
           minutes?: number | null
           note?: string | null
           source?: string | null
           started_at?: string
+          tags?: string[]
           task_id?: string
           tenant_id?: string
           updated_at?: string
@@ -6405,6 +6658,77 @@ export type Database = {
           },
         ]
       }
+      whiteboards: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          project_id: string | null
+          snapshot: Json
+          task_id: string | null
+          tenant_id: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          project_id?: string | null
+          snapshot?: Json
+          task_id?: string | null
+          tenant_id: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          project_id?: string | null
+          snapshot?: Json
+          task_id?: string | null
+          tenant_id?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whiteboards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whiteboards_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whiteboards_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whiteboards_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wiki_pages: {
         Row: {
           body: string
@@ -6867,6 +7191,7 @@ export type Database = {
           title: string
         }[]
       }
+      refresh_kr_progress: { Args: { _tenant: string }; Returns: undefined }
       refresh_warehouse: { Args: { _tenant: string }; Returns: Json }
       replay_webhook_delivery: {
         Args: { _delivery_id: string }
@@ -6968,13 +7293,16 @@ export type Database = {
       start_timer: {
         Args: { _note?: string; _task_id: string }
         Returns: {
+          billable: boolean
           created_at: string
           ended_at: string | null
+          hourly_rate: number | null
           id: string
           minutes: number | null
           note: string | null
           source: string | null
           started_at: string
+          tags: string[]
           task_id: string
           tenant_id: string
           updated_at: string
@@ -7016,13 +7344,16 @@ export type Database = {
       stop_timer: {
         Args: never
         Returns: {
+          billable: boolean
           created_at: string
           ended_at: string | null
+          hourly_rate: number | null
           id: string
           minutes: number | null
           note: string | null
           source: string | null
           started_at: string
+          tags: string[]
           task_id: string
           tenant_id: string
           updated_at: string
@@ -7045,6 +7376,16 @@ export type Database = {
         Returns: Database["public"]["Enums"]["tenant_role"]
       }
       user_tenant_ids: { Args: never; Returns: string[] }
+      user_timesheet: {
+        Args: { _end: string; _start: string; _tenant: string; _user: string }
+        Returns: {
+          billable_minutes: number
+          day: string
+          task_count: number
+          total_amount: number
+          total_minutes: number
+        }[]
+      }
       wiki_search: {
         Args: { _q: string; _tenant: string }
         Returns: {
