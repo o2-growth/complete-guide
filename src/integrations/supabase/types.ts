@@ -6136,6 +6136,131 @@ export type Database = {
           },
         ]
       }
+      wiki_pages: {
+        Row: {
+          body: string
+          body_search: unknown
+          cover_image: string | null
+          created_at: string
+          created_by: string | null
+          icon: string | null
+          id: string
+          is_published: boolean
+          parent_id: string | null
+          slug: string
+          sort_order: number
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body?: string
+          body_search?: unknown
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          parent_id?: string | null
+          slug: string
+          sort_order?: number
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body?: string
+          body_search?: unknown
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          parent_id?: string | null
+          slug?: string
+          sort_order?: number
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wiki_pages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wiki_pages_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "wiki_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wiki_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wiki_pages_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wiki_versions: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          page_id: string
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          page_id: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          page_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wiki_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wiki_versions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "wiki_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       xp_events: {
         Row: {
           created_at: string
@@ -6650,6 +6775,18 @@ export type Database = {
         Returns: Database["public"]["Enums"]["tenant_role"]
       }
       user_tenant_ids: { Args: never; Returns: string[] }
+      wiki_search: {
+        Args: { _q: string; _tenant: string }
+        Returns: {
+          icon: string
+          id: string
+          parent_id: string
+          rank: number
+          slug: string
+          snippet: string
+          title: string
+        }[]
+      }
     }
     Enums: {
       activity_kind:
