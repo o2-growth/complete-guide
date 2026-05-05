@@ -8,6 +8,7 @@ ALTER TABLE public.automation_rules
   ADD COLUMN IF NOT EXISTS template_category text;
 
 -- Índice pra dispatcher excluir templates da fila de processamento
+-- (coluna existente é `active`, não `is_active`)
 CREATE INDEX IF NOT EXISTS idx_automation_rules_active_no_template
   ON public.automation_rules(tenant_id, trigger_event)
-  WHERE is_active = true AND is_template = false;
+  WHERE active = true AND is_template = false;

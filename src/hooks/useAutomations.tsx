@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database, Json } from "@/integrations/supabase/types";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
+
+type AutomationRuleRow = Database["public"]["Tables"]["automation_rules"]["Row"];
+type AutomationRuleInsert = Database["public"]["Tables"]["automation_rules"]["Insert"];
+type AutomationRunRow = Database["public"]["Tables"]["automation_runs"]["Row"];
 
 export interface AutomationCondition {
   field: string;
@@ -113,6 +118,17 @@ function fromLegacyConditions(raw: unknown): AutomationConditions {
   return raw as AutomationConditions;
 }
 
+// Cast: Row do banco (com `conditions`/`actions` Json) -> tipo de domínio.
+// Parser de domínio é `fromLegacyConditions` para conditions; actions é
+// confiado no shape (validado em backend antes de gravar).
+function rowToRule(row: AutomationRuleRow): AutomationRule {
+  return {
+    ...row,
+    conditions: fromLegacyConditions(row.conditions),
+    actions: (row.actions ?? []) as unknown as AutomationAction[],
+  };
+}
+
 export function useAutomationRules() {
   const { tenantId } = useWorkspace();
   return useQuery({
@@ -125,8 +141,7 @@ export function useAutomationRules() {
         .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return ((data ?? []) as unknown as AutomationRule[])
-        .map((r) => ({ ...r, conditions: fromLegacyConditions(r.conditions) }));
+      return (data ?? []).map(rowToRule);
     },
     initialData: DEFAULT_RULE_LIST,
   });
@@ -144,7 +159,7 @@ export function useAutomationRule(id: string | null) {
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      return { ...(data as unknown as AutomationRule), conditions: fromLegacyConditions((data as { conditions: unknown }).conditions) };
+      return rowToRule(data);
     },
   });
 }
@@ -161,7 +176,11 @@ export function useAutomationRuns(ruleId: string | null) {
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
-      return (data ?? []) as unknown as AutomationRun[];
+      // Cast: payload é Json no banco; consumidores tratam como Record<string, unknown>.
+      return ((data ?? []) as AutomationRunRow[]).map((r) => ({
+        ...r,
+        payload: (r.payload ?? {}) as Record<string, unknown>,
+      })) as AutomationRun[];
     },
   });
 }
@@ -176,11 +195,10 @@ export function useAutomationTemplates() {
         .from("automation_rules")
         .select("*")
         .eq("tenant_id", tenantId!)
-        .eq("is_template" as never, true as never)
-        .order("template_category" as never, { ascending: true });
+        .eq("is_template", true)
+        .order("template_category", { ascending: true });
       if (error) throw error;
-      return ((data ?? []) as unknown as AutomationRule[])
-        .map((r) => ({ ...r, conditions: fromLegacyConditions(r.conditions) }));
+      return (data ?? []).map(rowToRule);
     },
   });
 }
@@ -191,27 +209,28 @@ export function useSaveRule() {
   return useMutation({
     mutationFn: async (rule: Partial<AutomationRule> & { name: string; trigger_event: string }) => {
       if (!tenantId) throw new Error("workspace");
-      const payload = {
+      // Cast: AutomationConditions/AutomationAction[] (domínio) -> Json.
+      const payload: AutomationRuleInsert = {
         tenant_id: tenantId,
         name: rule.name,
         description: rule.description ?? null,
         trigger_event: rule.trigger_event,
-        conditions: (rule.conditions ?? []) as unknown as never,
-        actions: (rule.actions ?? []) as unknown as never,
+        conditions: (rule.conditions ?? []) as unknown as Json,
+        actions: (rule.actions ?? []) as unknown as Json,
         active: rule.active ?? true,
-        icon: (rule.icon ?? "Zap") as unknown as never,
-        color: (rule.color ?? "#0EA5E9") as unknown as never,
-        is_template: (rule.is_template ?? false) as unknown as never,
-        template_category: (rule.template_category ?? null) as unknown as never,
+        icon: rule.icon ?? "Zap",
+        color: rule.color ?? "#0EA5E9",
+        is_template: rule.is_template ?? false,
+        template_category: rule.template_category ?? null,
       };
       if (rule.id) {
-        const { error } = await supabase.from("automation_rules").update(payload as never).eq("id", rule.id);
+        const { error } = await supabase.from("automation_rules").update(payload).eq("id", rule.id);
         if (error) throw error;
         return rule.id;
       }
-      const { data, error } = await supabase.from("automation_rules").insert(payload as never).select("id").maybeSingle();
+      const { data, error } = await supabase.from("automation_rules").insert(payload).select("id").maybeSingle();
       if (error) throw error;
-      return (data as { id?: string } | null)?.id ?? null;
+      return data?.id ?? null;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["automation_rules"] });
@@ -318,26 +337,27 @@ export function useApplyTemplate() {
   return useMutation({
     mutationFn: async (template: AutomationRule) => {
       if (!tenantId) throw new Error("workspace");
-      const payload = {
+      // Cast: AutomationConditions/AutomationAction[] (domínio) -> Json.
+      const payload: AutomationRuleInsert = {
         tenant_id: tenantId,
         name: template.name,
         description: template.description ?? null,
         trigger_event: template.trigger_event,
-        conditions: template.conditions as unknown as never,
-        actions: template.actions as unknown as never,
+        conditions: template.conditions as unknown as Json,
+        actions: template.actions as unknown as Json,
         active: false,
-        icon: (template.icon ?? "Zap") as unknown as never,
-        color: (template.color ?? "#0EA5E9") as unknown as never,
-        is_template: false as unknown as never,
-        template_category: null as unknown as never,
+        icon: template.icon ?? "Zap",
+        color: template.color ?? "#0EA5E9",
+        is_template: false,
+        template_category: null,
       };
       const { data, error } = await supabase
         .from("automation_rules")
-        .insert(payload as never)
+        .insert(payload)
         .select("id")
         .maybeSingle();
       if (error) throw error;
-      return (data as { id?: string } | null)?.id ?? null;
+      return data?.id ?? null;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["automation_rules"] });

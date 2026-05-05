@@ -1,15 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
 
+type DashboardUpdate = Database["public"]["Tables"]["dashboards"]["Update"];
+type DashboardWidgetInsert = Database["public"]["Tables"]["dashboard_widgets"]["Insert"];
+type DashboardWidgetUpdate = Database["public"]["Tables"]["dashboard_widgets"]["Update"];
+
 /**
  * Sub-fase 7F — Dashboards customizáveis.
- * Tabelas `dashboards` e `dashboard_widgets` são criadas via patch Lovable
- * (ver .claude/reports/lovable-patches/7F-dashboards.sql.md). Enquanto o type
- * generator não regenera src/integrations/supabase/types.ts, usamos cast pontual.
  */
 
 export type WidgetKind =
@@ -55,11 +57,6 @@ export interface DashboardWithWidgets extends Dashboard {
   widgets: DashboardWidget[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const dashboards = () => (supabase as any).from("dashboards");
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const widgets = () => (supabase as any).from("dashboard_widgets");
-
 export function useDashboards() {
   const { tenantId } = useWorkspace();
   return useQuery({
@@ -67,7 +64,8 @@ export function useDashboards() {
     queryKey: ["dashboards", tenantId],
     enabled: !!tenantId,
     queryFn: async (): Promise<Dashboard[]> => {
-      const { data, error } = await dashboards()
+      const { data, error } = await supabase
+        .from("dashboards")
         .select("id,tenant_id,name,description,is_public,layout,created_by,created_at,updated_at")
         .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: true });
@@ -85,21 +83,24 @@ export function useDashboard(id: string | null | undefined) {
     enabled: !!id && !!tenantId,
     queryFn: async (): Promise<DashboardWithWidgets | null> => {
       if (!id) return null;
-      const { data: dash, error: e1 } = await dashboards()
+      const { data: dash, error: e1 } = await supabase
+        .from("dashboards")
         .select("id,tenant_id,name,description,is_public,layout,created_by,created_at,updated_at")
         .eq("id", id)
         .maybeSingle();
       if (e1) throw e1;
       if (!dash) return null;
-      const { data: ws, error: e2 } = await widgets()
+      const { data: ws, error: e2 } = await supabase
+        .from("dashboard_widgets")
         .select("id,dashboard_id,kind,title,config,position,width,height,created_at,updated_at")
         .eq("dashboard_id", id)
         .order("position", { ascending: true });
       if (e2) throw e2;
       return {
         ...(dash as Dashboard),
-        widgets: ((ws ?? []) as DashboardWidget[]).map((w) => ({
-          ...w,
+        widgets: (ws ?? []).map((w) => ({
+          ...(w as unknown as DashboardWidget),
+          // Cast: parser JSON -> Record<string, unknown> de domínio.
           config: (w.config ?? {}) as Record<string, unknown>,
         })),
       };
@@ -114,7 +115,8 @@ export function useCreateDashboard() {
   return useMutation({
     mutationFn: async (input: { name: string; description?: string | null }) => {
       if (!tenantId) throw new Error("Tenant não carregado");
-      const { data, error } = await dashboards()
+      const { data, error } = await supabase
+        .from("dashboards")
         .insert({
           tenant_id: tenantId,
           name: input.name,
@@ -124,7 +126,7 @@ export function useCreateDashboard() {
         .select("id")
         .single();
       if (error) throw error;
-      return (data as { id: string }).id;
+      return data.id;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dashboards"] });
@@ -143,11 +145,11 @@ export function useUpdateDashboard() {
       description?: string | null;
       is_public?: boolean;
     }) => {
-      const patch: Record<string, unknown> = {};
+      const patch: DashboardUpdate = {};
       if (input.name !== undefined) patch.name = input.name;
       if (input.description !== undefined) patch.description = input.description;
       if (input.is_public !== undefined) patch.is_public = input.is_public;
-      const { error } = await dashboards().update(patch).eq("id", input.id);
+      const { error } = await supabase.from("dashboards").update(patch).eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
@@ -163,7 +165,7 @@ export function useDeleteDashboard() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await dashboards().delete().eq("id", id);
+      const { error } = await supabase.from("dashboards").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -186,20 +188,23 @@ export function useAddWidget() {
       height?: number;
       position?: number;
     }) => {
-      const { data, error } = await widgets()
-        .insert({
-          dashboard_id: input.dashboard_id,
-          kind: input.kind,
-          title: input.title,
-          config: input.config ?? {},
-          width: input.width ?? 1,
-          height: input.height ?? 1,
-          position: input.position ?? 0,
-        })
+      const insertPayload: DashboardWidgetInsert = {
+        dashboard_id: input.dashboard_id,
+        kind: input.kind,
+        title: input.title,
+        // Cast: Record<string, unknown> de domínio -> Json.
+        config: (input.config ?? {}) as DashboardWidgetInsert["config"],
+        width: input.width ?? 1,
+        height: input.height ?? 1,
+        position: input.position ?? 0,
+      };
+      const { data, error } = await supabase
+        .from("dashboard_widgets")
+        .insert(insertPayload)
         .select("id")
         .single();
       if (error) throw error;
-      return (data as { id: string }).id;
+      return data.id;
     },
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["dashboard", vars.dashboard_id] });
@@ -221,13 +226,14 @@ export function useUpdateWidget() {
       height?: number;
       position?: number;
     }) => {
-      const patch: Record<string, unknown> = {};
+      const patch: DashboardWidgetUpdate = {};
       if (input.title !== undefined) patch.title = input.title;
-      if (input.config !== undefined) patch.config = input.config;
+      // Cast: Record<string, unknown> de domínio -> Json.
+      if (input.config !== undefined) patch.config = input.config as DashboardWidgetUpdate["config"];
       if (input.width !== undefined) patch.width = input.width;
       if (input.height !== undefined) patch.height = input.height;
       if (input.position !== undefined) patch.position = input.position;
-      const { error } = await widgets().update(patch).eq("id", input.id);
+      const { error } = await supabase.from("dashboard_widgets").update(patch).eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
@@ -241,7 +247,7 @@ export function useRemoveWidget() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: { id: string; dashboard_id: string }) => {
-      const { error } = await widgets().delete().eq("id", input.id);
+      const { error } = await supabase.from("dashboard_widgets").delete().eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
@@ -261,7 +267,10 @@ export function useReorderWidgets() {
     }) => {
       // Update sequencial; volume é baixo (≤ ~30 widgets por dashboard).
       for (const w of input.order) {
-        const { error } = await widgets().update({ position: w.position }).eq("id", w.id);
+        const { error } = await supabase
+          .from("dashboard_widgets")
+          .update({ position: w.position })
+          .eq("id", w.id);
         if (error) throw error;
       }
     },

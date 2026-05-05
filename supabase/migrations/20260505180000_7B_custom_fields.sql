@@ -20,10 +20,17 @@ CREATE TABLE IF NOT EXISTS public.custom_field_definitions (
   is_active boolean NOT NULL DEFAULT true,
   created_by uuid REFERENCES public.profiles(id),
   created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (tenant_id, scope, COALESCE(task_type_id, '00000000-0000-0000-0000-000000000000'::uuid),
-    COALESCE(project_id, '00000000-0000-0000-0000-000000000000'::uuid), key)
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Postgres não aceita COALESCE em UNIQUE inline — usa unique index com expressão
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cfd_tenant_scope_key
+  ON public.custom_field_definitions(
+    tenant_id, scope,
+    COALESCE(task_type_id, '00000000-0000-0000-0000-000000000000'::uuid),
+    COALESCE(project_id, '00000000-0000-0000-0000-000000000000'::uuid),
+    key
+  );
 
 CREATE INDEX IF NOT EXISTS idx_cfd_tenant ON public.custom_field_definitions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_cfd_task_type ON public.custom_field_definitions(task_type_id) WHERE task_type_id IS NOT NULL;

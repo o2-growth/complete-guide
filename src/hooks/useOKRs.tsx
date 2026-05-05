@@ -1,8 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+
+type GoalUpdate = Database["public"]["Tables"]["goals"]["Update"];
+type KeyResultUpdate = Database["public"]["Tables"]["key_results"]["Update"];
 
 export interface Goal {
   id: string; tenant_id: string; title: string; description: string | null;
@@ -60,7 +64,7 @@ export function useUpsertGoal() {
       if (!tenantId) throw new Error("Workspace");
       if (input.id) {
         const { id, ...patch } = input;
-        const { error } = await supabase.from("goals").update(patch as never).eq("id", id);
+        const { error } = await supabase.from("goals").update(patch as GoalUpdate).eq("id", id);
         if (error) throw error;
         return id;
       }
@@ -90,7 +94,7 @@ export function useUpsertKR() {
       if (!tenantId) throw new Error("Workspace");
       if (input.id) {
         const { id, ...patch } = input;
-        const { error } = await supabase.from("key_results").update(patch as never).eq("id", id);
+        const { error } = await supabase.from("key_results").update(patch as KeyResultUpdate).eq("id", id);
         if (error) throw error;
         return id;
       }
@@ -158,7 +162,7 @@ export function useRecalcKRs() {
 
 /**
  * Atualiza progresso dos KRs com `auto_update=true` baseado no
- * `linked_task_filter`. Requer patch SQL 7D aplicado no Lovable.
+ * `linked_task_filter`.
  */
 export function useRefreshKrProgress() {
   const qc = useQueryClient();
@@ -166,11 +170,7 @@ export function useRefreshKrProgress() {
   return useMutation({
     mutationFn: async () => {
       if (!tenantId) throw new Error("Workspace");
-      // Cast: RPC só existe após patch 7D ser aplicado no backend.
-      const client = supabase as unknown as {
-        rpc: (name: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-      };
-      const { error } = await client.rpc("refresh_kr_progress", { _tenant: tenantId });
+      const { error } = await supabase.rpc("refresh_kr_progress", { _tenant: tenantId });
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {

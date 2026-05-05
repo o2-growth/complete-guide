@@ -1,9 +1,14 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
+
+type CustomFieldDefinitionInsert = Database["public"]["Tables"]["custom_field_definitions"]["Insert"];
+type CustomFieldDefinitionUpdate = Database["public"]["Tables"]["custom_field_definitions"]["Update"];
+type TaskCustomFieldValueInsert = Database["public"]["Tables"]["task_custom_field_values"]["Insert"];
 
 // ----------------------------------------------------------------------------
 // Tipos
@@ -117,10 +122,6 @@ function normalizeDefinition(row: Record<string, unknown>): CustomFieldDefinitio
   };
 }
 
-// Tabelas ainda não estão nos types gerados — usamos `as any`.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = supabase as any;
-
 // ----------------------------------------------------------------------------
 // Listagem de definitions
 // ----------------------------------------------------------------------------
@@ -140,7 +141,7 @@ export function useCustomFieldDefinitions(params: ListParams = {}) {
     queryKey: ["custom-field-definitions", tenantId, scope ?? "all", task_type_id ?? null, project_id ?? null],
     enabled: enabled && !loading && !!tenantId,
     queryFn: async (): Promise<CustomFieldDefinition[]> => {
-      let q = sb
+      let q = supabase
         .from("custom_field_definitions")
         .select("*")
         .eq("tenant_id", tenantId!)
@@ -183,7 +184,7 @@ export function useCustomFieldsForTask(
     queryKey: ["custom-field-definitions-for-task", tenantId, taskTypeId ?? null, projectId ?? null],
     enabled: !loading && !!tenantId,
     queryFn: async (): Promise<CustomFieldDefinition[]> => {
-      const { data, error } = await sb
+      const { data, error } = await supabase
         .from("custom_field_definitions")
         .select("*")
         .eq("tenant_id", tenantId!)
@@ -205,7 +206,7 @@ export function useCustomFieldsForTask(
     queryKey: ["custom-field-values", taskId],
     enabled: !!taskId,
     queryFn: async (): Promise<CustomFieldValue[]> => {
-      const { data, error } = await sb
+      const { data, error } = await supabase
         .from("task_custom_field_values")
         .select("*")
         .eq("task_id", taskId!);
@@ -242,7 +243,7 @@ export function useCreateFieldDefinition() {
   return useMutation({
     mutationFn: async (input: CustomFieldDefinitionInput) => {
       if (!tenantId) throw new Error("Workspace não pronto");
-      const payload = {
+      const payload: CustomFieldDefinitionInsert = {
         tenant_id: tenantId,
         scope: input.scope,
         task_type_id: input.scope === "task_type" ? input.task_type_id ?? null : null,
@@ -250,15 +251,16 @@ export function useCreateFieldDefinition() {
         key: input.key,
         label: input.label,
         field_type: input.field_type,
-        options: (input.options ?? []) as unknown,
+        // Cast: CustomFieldOption[]/unknown -> Json (parser de domínio na leitura).
+        options: (input.options ?? []) as unknown as CustomFieldDefinitionInsert["options"],
         required: input.required ?? false,
-        default_value: (input.default_value ?? null) as unknown,
+        default_value: (input.default_value ?? null) as CustomFieldDefinitionInsert["default_value"],
         position: input.position ?? 0,
         help_text: input.help_text ?? null,
         is_active: input.is_active ?? true,
         created_by: user?.id ?? null,
       };
-      const { data, error } = await sb
+      const { data, error } = await supabase
         .from("custom_field_definitions")
         .insert(payload)
         .select()
@@ -285,9 +287,11 @@ export function useUpdateFieldDefinition() {
       id: string;
       patch: Partial<CustomFieldDefinitionInput>;
     }) => {
-      const safePatch: Record<string, unknown> = { ...patch };
-      if ("options" in safePatch) safePatch.options = safePatch.options ?? [];
-      const { error } = await sb.from("custom_field_definitions").update(safePatch).eq("id", id);
+      const safePatch: CustomFieldDefinitionUpdate = { ...patch } as unknown as CustomFieldDefinitionUpdate;
+      if ("options" in safePatch) {
+        safePatch.options = (safePatch.options ?? []) as CustomFieldDefinitionUpdate["options"];
+      }
+      const { error } = await supabase.from("custom_field_definitions").update(safePatch).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -303,7 +307,7 @@ export function useDeleteFieldDefinition() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await sb.from("custom_field_definitions").delete().eq("id", id);
+      const { error } = await supabase.from("custom_field_definitions").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -322,7 +326,7 @@ export function useReorderFieldDefinitions() {
       // Sem RPC: faz N updates em paralelo (lista é pequena, OK)
       await Promise.all(
         items.map((it) =>
-          sb.from("custom_field_definitions").update({ position: it.position }).eq("id", it.id),
+          supabase.from("custom_field_definitions").update({ position: it.position }).eq("id", it.id),
         ),
       );
     },
@@ -358,7 +362,7 @@ export function useUpsertFieldValue() {
         (Array.isArray(value) && value.length === 0);
 
       if (isEmpty) {
-        const { error } = await sb
+        const { error } = await supabase
           .from("task_custom_field_values")
           .delete()
           .eq("task_id", taskId)
@@ -367,16 +371,15 @@ export function useUpsertFieldValue() {
         return;
       }
 
-      const { error } = await sb
+      const upsertPayload: TaskCustomFieldValueInsert = {
+        task_id: taskId,
+        field_definition_id: definitionId,
+        // Cast: valor de domínio (unknown) -> Json (parser na leitura).
+        value: value as TaskCustomFieldValueInsert["value"],
+      };
+      const { error } = await supabase
         .from("task_custom_field_values")
-        .upsert(
-          {
-            task_id: taskId,
-            field_definition_id: definitionId,
-            value: value as unknown,
-          },
-          { onConflict: "task_id,field_definition_id" },
-        );
+        .upsert(upsertPayload, { onConflict: "task_id,field_definition_id" });
       if (error) throw error;
     },
     onSuccess: (_, vars) => {

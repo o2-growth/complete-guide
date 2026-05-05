@@ -1,17 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 
+type TimeEntryInsert = Database["public"]["Tables"]["time_entries"]["Insert"];
+type TimeEntryUpdate = Database["public"]["Tables"]["time_entries"]["Update"];
+
 /**
  * Hooks de Time Tracking nativo (Sub-fase 7C).
- * Schema: time_entries com colunas billable, hourly_rate, tags (ver
- * .claude/reports/lovable-patches/7C-time-tracking.sql.md).
- *
- * Os campos billable/hourly_rate/tags ainda não estão no types.ts gerado
- * (pendente regenerar após Lovable aplicar). Por isso usamos cast pontual nos
- * payloads.
  */
 
 export interface TimeEntryRow {
@@ -202,7 +200,7 @@ export function useAddManualTimeEntry() {
       const minutes =
         input.minutes ?? Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
       if (minutes <= 0) throw new Error("Duração precisa ser maior que zero");
-      const payload = {
+      const payload: TimeEntryInsert = {
         tenant_id: tenantId,
         task_id: input.taskId,
         user_id: user.id,
@@ -214,12 +212,8 @@ export function useAddManualTimeEntry() {
         hourly_rate: input.hourlyRate ?? null,
         tags: input.tags ?? [],
         source: "manual",
-      } as unknown as Parameters<typeof supabase.from>[0] extends never
-        ? never
-        : Record<string, unknown>;
-      const { error } = await supabase
-        .from("time_entries")
-        .insert(payload as never);
+      };
+      const { error } = await supabase.from("time_entries").insert(payload);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
@@ -251,7 +245,7 @@ export function useUpdateTimeEntry() {
     mutationFn: async ({ id, patch }: UpdateEntryInput) => {
       const { error } = await supabase
         .from("time_entries")
-        .update(patch as never)
+        .update(patch as TimeEntryUpdate)
         .eq("id", id);
       if (error) throw error;
     },
@@ -306,16 +300,9 @@ export function useUserTimesheet(
     ],
     enabled: !!tenantId && !!userId && !!start && !!end,
     queryFn: async (): Promise<TimesheetDayRow[]> => {
-      // RPC user_timesheet ainda não está em types.ts; usamos cast.
-      const client = supabase as unknown as {
-        rpc: (
-          name: string,
-          args: Record<string, unknown>,
-        ) => Promise<{ data: TimesheetDayRow[] | null; error: Error | null }>;
-      };
-      const { data, error } = await client.rpc("user_timesheet", {
-        _tenant: tenantId,
-        _user: userId,
+      const { data, error } = await supabase.rpc("user_timesheet", {
+        _tenant: tenantId!,
+        _user: userId!,
         _start: start!.toISOString(),
         _end: end!.toISOString(),
       });

@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
+
+type WhiteboardRow = Database["public"]["Tables"]["whiteboards"]["Row"];
+type WhiteboardUpdate = Database["public"]["Tables"]["whiteboards"]["Update"];
 
 // Snapshot lib-agnostic; valores vindos do Excalidraw vivem aqui como JSON puro.
 export interface WhiteboardSnapshot {
@@ -28,11 +32,6 @@ export interface Whiteboard {
 
 const EMPTY_SNAPSHOT: WhiteboardSnapshot = { elements: [], appState: {}, files: {} };
 
-// Cliente Supabase usa cast pontual enquanto o type generator do Lovable não roda
-// a regenração para incluir whiteboards em src/integrations/supabase/types.ts.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const wb = () => (supabase as any).from("whiteboards");
-
 export function useWhiteboards(filter?: { taskId?: string | null; projectId?: string | null }) {
   const { tenantId } = useWorkspace();
   return useQuery({
@@ -40,7 +39,8 @@ export function useWhiteboards(filter?: { taskId?: string | null; projectId?: st
     queryKey: ["whiteboards", tenantId, filter?.taskId ?? null, filter?.projectId ?? null],
     enabled: !!tenantId,
     queryFn: async (): Promise<Whiteboard[]> => {
-      let q = wb()
+      let q = supabase
+        .from("whiteboards")
         .select("id,tenant_id,project_id,task_id,name,description,thumbnail_url,created_by,created_at,updated_at")
         .eq("tenant_id", tenantId!)
         .order("updated_at", { ascending: false });
@@ -49,7 +49,7 @@ export function useWhiteboards(filter?: { taskId?: string | null; projectId?: st
       const { data, error } = await q;
       if (error) throw error;
       // Lista não traz snapshot pra evitar tráfego pesado; preencher vazio.
-      return ((data ?? []) as Array<Omit<Whiteboard, "snapshot">>).map((row) => ({
+      return (data ?? []).map((row) => ({
         ...row,
         snapshot: EMPTY_SNAPSHOT,
       }));
@@ -64,15 +64,16 @@ export function useWhiteboard(id: string | null | undefined) {
     queryKey: ["whiteboard", tenantId, id],
     enabled: !!tenantId && !!id,
     queryFn: async (): Promise<Whiteboard | null> => {
-      const { data, error } = await wb()
+      const { data, error } = await supabase
+        .from("whiteboards")
         .select("*")
         .eq("tenant_id", tenantId!)
         .eq("id", id!)
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      const row = data as Whiteboard;
-      // Garante shape mesmo se snapshot vier null/parcial.
+      const row: WhiteboardRow = data;
+      // Cast: parser JSON -> tipo de domínio. Snapshot pode vir null/parcial.
       const raw = (row.snapshot ?? {}) as Partial<WhiteboardSnapshot>;
       return {
         ...row,
@@ -100,7 +101,8 @@ export function useCreateWhiteboard() {
       if (!tenantId) throw new Error("Sem workspace");
       if (!user) throw new Error("Sem sessão");
       const trimmed = input.name.trim() || "Sem título";
-      const { data, error } = await wb()
+      const { data, error } = await supabase
+        .from("whiteboards")
         .insert([
           {
             tenant_id: tenantId,
@@ -108,14 +110,15 @@ export function useCreateWhiteboard() {
             task_id: input.taskId ?? null,
             name: trimmed,
             description: input.description ?? null,
-            snapshot: EMPTY_SNAPSHOT,
+            // Cast: WhiteboardSnapshot (domínio) -> Json.
+            snapshot: EMPTY_SNAPSHOT as unknown as WhiteboardUpdate["snapshot"],
             created_by: user.id,
           },
         ])
         .select("*")
         .single();
       if (error) throw error;
-      return data as Whiteboard;
+      return data as unknown as Whiteboard;
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["whiteboards", tenantId] });
@@ -137,9 +140,12 @@ export function useUpdateWhiteboardSnapshot() {
       snapshot: WhiteboardSnapshot;
       name?: string;
     }) => {
-      const patch: Record<string, unknown> = { snapshot: input.snapshot };
+      const patch: WhiteboardUpdate = {
+        // Cast: WhiteboardSnapshot (domínio) -> Json.
+        snapshot: input.snapshot as unknown as WhiteboardUpdate["snapshot"],
+      };
       if (typeof input.name === "string") patch.name = input.name.trim() || "Sem título";
-      const { error } = await wb().update(patch).eq("id", input.id);
+      const { error } = await supabase.from("whiteboards").update(patch).eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: (_data, vars) => {
@@ -159,13 +165,14 @@ export function useWhiteboardTaskIndex() {
     queryKey: ["whiteboards-task-index", tenantId],
     enabled: !!tenantId,
     queryFn: async (): Promise<Record<string, number>> => {
-      const { data, error } = await wb()
+      const { data, error } = await supabase
+        .from("whiteboards")
         .select("task_id")
         .eq("tenant_id", tenantId!)
         .not("task_id", "is", null);
       if (error) throw error;
       const map: Record<string, number> = {};
-      for (const row of (data ?? []) as Array<{ task_id: string | null }>) {
+      for (const row of data ?? []) {
         if (row.task_id) map[row.task_id] = (map[row.task_id] ?? 0) + 1;
       }
       return map;
@@ -178,7 +185,7 @@ export function useDeleteWhiteboard() {
   const { tenantId } = useWorkspace();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await wb().delete().eq("id", id);
+      const { error } = await supabase.from("whiteboards").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
