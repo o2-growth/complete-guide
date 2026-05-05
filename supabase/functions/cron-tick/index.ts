@@ -38,6 +38,19 @@ Deno.serve(async (req) => {
         } else if (j === "notifications") {
           const { data } = await supabase.rpc("scan_notifications", { _tenant: t });
           log.push({ job: j, tenant: t, result: data });
+        } else if (j === "ai_suggest_daily") {
+          const { data: members } = await supabase
+            .from("tenant_members")
+            .select("user_id")
+            .eq("tenant_id", t)
+            .in("role", ["admin", "manager", "specialist"])
+            .limit(100);
+          for (const m of (members ?? []) as Array<{ user_id: string }>) {
+            const r = await supabase.functions.invoke("ai-suggest-daily", {
+              body: { tenant_id: t, user_id: m.user_id },
+            });
+            log.push({ job: j, tenant: t, user: m.user_id, result: r.error ? { error: r.error.message } : "ok" });
+          }
         }
       }
       if (j === "reports") {
