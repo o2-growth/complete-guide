@@ -5429,6 +5429,204 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          payload: Json
+          ticket_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          payload?: Json
+          ticket_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_events_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_messages: {
+        Row: {
+          attachments: Json
+          author_user_id: string | null
+          body: string
+          created_at: string
+          id: string
+          internal: boolean
+          ticket_id: string
+        }
+        Insert: {
+          attachments?: Json
+          author_user_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          internal?: boolean
+          ticket_id: string
+        }
+        Update: {
+          attachments?: Json
+          author_user_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          internal?: boolean
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          channel: string | null
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          first_response_at: string | null
+          id: string
+          number: number
+          owner_user_id: string | null
+          priority: string
+          requester_email: string | null
+          requester_name: string | null
+          requester_user_id: string | null
+          resolved_at: string | null
+          sla_resolution_minutes: number | null
+          sla_response_minutes: number | null
+          squad_id: string | null
+          status: string
+          tags: string[]
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          first_response_at?: string | null
+          id?: string
+          number: number
+          owner_user_id?: string | null
+          priority?: string
+          requester_email?: string | null
+          requester_name?: string | null
+          requester_user_id?: string | null
+          resolved_at?: string | null
+          sla_resolution_minutes?: number | null
+          sla_response_minutes?: number | null
+          squad_id?: string | null
+          status?: string
+          tags?: string[]
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          first_response_at?: string | null
+          id?: string
+          number?: number
+          owner_user_id?: string | null
+          priority?: string
+          requester_email?: string | null
+          requester_name?: string | null
+          requester_user_id?: string | null
+          resolved_at?: string | null
+          sla_resolution_minutes?: number | null
+          sla_response_minutes?: number | null
+          squad_id?: string | null
+          status?: string
+          tags?: string[]
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_owner_user_id_fkey"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_requester_user_id_fkey"
+            columns: ["requester_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       time_entries: {
         Row: {
           created_at: string
@@ -6024,6 +6222,10 @@ export type Database = {
       approval_start: {
         Args: { _notes?: string; _task_id: string; _workflow_id: string }
         Returns: string
+      }
+      assign_ticket_owner: {
+        Args: { _ticket_id: string; _user_id: string }
+        Returns: undefined
       }
       award_xp: {
         Args: {
