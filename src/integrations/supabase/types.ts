@@ -5429,6 +5429,69 @@ export type Database = {
           },
         ]
       }
+      templates_unified: {
+        Row: {
+          body: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_pinned: boolean
+          kind: string
+          last_used_at: string | null
+          name: string
+          tags: string[]
+          tenant_id: string
+          updated_at: string
+          use_count: number
+        }
+        Insert: {
+          body?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_pinned?: boolean
+          kind: string
+          last_used_at?: string | null
+          name: string
+          tags?: string[]
+          tenant_id: string
+          updated_at?: string
+          use_count?: number
+        }
+        Update: {
+          body?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_pinned?: boolean
+          kind?: string
+          last_used_at?: string | null
+          name?: string
+          tags?: string[]
+          tenant_id?: string
+          updated_at?: string
+          use_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "templates_unified_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "templates_unified_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_billing: {
         Row: {
           current_period_end: string | null
@@ -6910,6 +6973,7 @@ export type Database = {
         Args: { _comment_id: string; _emoji: string }
         Returns: boolean
       }
+      use_unified_template: { Args: { p_id: string }; Returns: Json }
       user_role_in_tenant: {
         Args: { _tenant_id: string }
         Returns: Database["public"]["Enums"]["tenant_role"]
