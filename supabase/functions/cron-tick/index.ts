@@ -53,6 +53,14 @@ Deno.serve(async (req) => {
           }
         }
       }
+      if (j === "gcal_pull") {
+        const r = await supabase.functions.invoke("gcal-sync-pull", { body: {} });
+        log.push({ job: j, result: r.error ? { error: r.error.message } : (r.data ?? "ok") });
+      }
+      if (j === "gcal_push") {
+        const r = await supabase.functions.invoke("gcal-sync-push", { body: {} });
+        log.push({ job: j, result: r.error ? { error: r.error.message } : (r.data ?? "ok") });
+      }
       if (j === "reports") {
         // delega à função existente
         const r = await supabase.functions.invoke("send-scheduled-reports", { body: {} });
@@ -66,6 +74,8 @@ Deno.serve(async (req) => {
       await run("anomalies");
       await run("notifications");
       await run("reports");
+      await run("gcal_pull");
+      await run("gcal_push");
     } else {
       await run(job);
     }
