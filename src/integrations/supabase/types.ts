@@ -2290,6 +2290,60 @@ export type Database = {
           },
         ]
       }
+      gcal_sync_config: {
+        Row: {
+          created_at: string
+          last_pull_sync_token: string | null
+          last_push_at: string | null
+          oauth_connection_id: string
+          sync_pull_enabled: boolean
+          sync_push_enabled: boolean
+          target_calendar_id: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_pull_sync_token?: string | null
+          last_push_at?: string | null
+          oauth_connection_id: string
+          sync_pull_enabled?: boolean
+          sync_push_enabled?: boolean
+          target_calendar_id?: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          last_pull_sync_token?: string | null
+          last_push_at?: string | null
+          oauth_connection_id?: string
+          sync_pull_enabled?: boolean
+          sync_push_enabled?: boolean
+          target_calendar_id?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gcal_sync_config_oauth_connection_id_fkey"
+            columns: ["oauth_connection_id"]
+            isOneToOne: false
+            referencedRelation: "oauth_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gcal_sync_config_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           created_at: string
@@ -5273,6 +5327,10 @@ export type Database = {
           done_at: string | null
           due_at: string | null
           estimate_minutes: number | null
+          gcal_calendar_id: string | null
+          gcal_etag: string | null
+          gcal_event_id: string | null
+          gcal_last_synced_at: string | null
           id: string
           number: number
           parent_task_id: string | null
@@ -5310,6 +5368,10 @@ export type Database = {
           done_at?: string | null
           due_at?: string | null
           estimate_minutes?: number | null
+          gcal_calendar_id?: string | null
+          gcal_etag?: string | null
+          gcal_event_id?: string | null
+          gcal_last_synced_at?: string | null
           id?: string
           number: number
           parent_task_id?: string | null
@@ -5347,6 +5409,10 @@ export type Database = {
           done_at?: string | null
           due_at?: string | null
           estimate_minutes?: number | null
+          gcal_calendar_id?: string | null
+          gcal_etag?: string | null
+          gcal_event_id?: string | null
+          gcal_last_synced_at?: string | null
           id?: string
           number?: number
           parent_task_id?: string | null
