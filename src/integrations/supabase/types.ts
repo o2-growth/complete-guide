@@ -3744,6 +3744,8 @@ export type Database = {
           id: string
           key: string
           name: string
+          parent_id: string | null
+          sort_order: number
           squad_id: string | null
           task_seq: number
           tenant_id: string
@@ -3759,6 +3761,8 @@ export type Database = {
           id?: string
           key: string
           name: string
+          parent_id?: string | null
+          sort_order?: number
           squad_id?: string | null
           task_seq?: number
           tenant_id: string
@@ -3774,12 +3778,21 @@ export type Database = {
           id?: string
           key?: string
           name?: string
+          parent_id?: string | null
+          sort_order?: number
           squad_id?: string | null
           task_seq?: number
           tenant_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_squad_id_fkey"
             columns: ["squad_id"]
@@ -5144,6 +5157,7 @@ export type Database = {
           parent_task_id: string | null
           position: number
           priority: Database["public"]["Enums"]["task_priority"]
+          progress_pct: number
           project_id: string
           publish_state: Database["public"]["Enums"]["publish_state"] | null
           published_at: string | null
@@ -5178,6 +5192,7 @@ export type Database = {
           parent_task_id?: string | null
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
+          progress_pct?: number
           project_id: string
           publish_state?: Database["public"]["Enums"]["publish_state"] | null
           published_at?: string | null
@@ -5212,6 +5227,7 @@ export type Database = {
           parent_task_id?: string | null
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
+          progress_pct?: number
           project_id?: string
           publish_state?: Database["public"]["Enums"]["publish_state"] | null
           published_at?: string | null
