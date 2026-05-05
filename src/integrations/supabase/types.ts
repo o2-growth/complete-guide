@@ -768,6 +768,60 @@ export type Database = {
           },
         ]
       }
+      audiences: {
+        Row: {
+          channels: string[]
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          persona_ids: string[]
+          size_estimate: number | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          persona_ids?: string[]
+          size_estimate?: number | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          persona_ids?: string[]
+          size_estimate?: number | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audiences_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audiences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       automation_events: {
         Row: {
           created_at: string
@@ -3340,6 +3394,72 @@ export type Database = {
           },
         ]
       }
+      personas: {
+        Row: {
+          age_range: string | null
+          avatar_url: string | null
+          bio: string | null
+          channels: string[]
+          color: string
+          created_at: string
+          created_by: string | null
+          goals: Json
+          id: string
+          name: string
+          occupation: string | null
+          pain_points: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          age_range?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          channels?: string[]
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          goals?: Json
+          id?: string
+          name: string
+          occupation?: string | null
+          pain_points?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          age_range?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          channels?: string[]
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          goals?: Json
+          id?: string
+          name?: string
+          occupation?: string | null
+          pain_points?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personas_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pomodoros: {
         Row: {
           ambient: string | null
@@ -5142,6 +5262,7 @@ export type Database = {
         Row: {
           archived: boolean
           assignee_id: string | null
+          audience_id: string | null
           campaign_id: string | null
           checklist: Json | null
           code: string | null
@@ -5155,6 +5276,7 @@ export type Database = {
           id: string
           number: number
           parent_task_id: string | null
+          persona_id: string | null
           position: number
           priority: Database["public"]["Enums"]["task_priority"]
           progress_pct: number
@@ -5177,6 +5299,7 @@ export type Database = {
         Insert: {
           archived?: boolean
           assignee_id?: string | null
+          audience_id?: string | null
           campaign_id?: string | null
           checklist?: Json | null
           code?: string | null
@@ -5190,6 +5313,7 @@ export type Database = {
           id?: string
           number: number
           parent_task_id?: string | null
+          persona_id?: string | null
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           progress_pct?: number
@@ -5212,6 +5336,7 @@ export type Database = {
         Update: {
           archived?: boolean
           assignee_id?: string | null
+          audience_id?: string | null
           campaign_id?: string | null
           checklist?: Json | null
           code?: string | null
@@ -5225,6 +5350,7 @@ export type Database = {
           id?: string
           number?: number
           parent_task_id?: string | null
+          persona_id?: string | null
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           progress_pct?: number
@@ -5246,6 +5372,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "tasks_audience_id_fkey"
+            columns: ["audience_id"]
+            isOneToOne: false
+            referencedRelation: "audiences"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tasks_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
@@ -5257,6 +5390,13 @@ export type Database = {
             columns: ["parent_task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
             referencedColumns: ["id"]
           },
           {
