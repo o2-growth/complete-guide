@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
-import type { Json } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 export type TemplateKind =
   | "project"
@@ -159,8 +159,9 @@ export function useUpdateTemplate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: UpdateInput) => {
-      const dbPatch: Record<string, unknown> = { ...patch };
-      if (patch.body !== undefined) dbPatch.body = patch.body as unknown as Json;
+      const { body, ...rest } = patch;
+      const dbPatch: Database["public"]["Tables"]["templates_unified"]["Update"] = { ...rest };
+      if (body !== undefined) dbPatch.body = body as unknown as Json;
       const { error } = await supabase
         .from("templates_unified")
         .update(dbPatch)

@@ -1,19 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
 
-export interface GcalSyncConfig {
-  id: string;
-  user_id: string;
-  oauth_connection_id: string;
-  target_calendar_id: string;
-  sync_pull_enabled: boolean;
-  sync_push_enabled: boolean;
+type GcalSyncConfigRow = Database["public"]["Tables"]["gcal_sync_config"]["Row"];
+
+// Domain type expõe `last_sync_at`/`last_error` como derivados — o schema real
+// tem só `last_push_at` e `last_pull_sync_token`, mas a UI quer um único
+// "última sync". `last_error` ainda não é persistido no banco; mantido como
+// campo opcional pra UI lidar com ausência sem quebrar.
+export interface GcalSyncConfig extends GcalSyncConfigRow {
   last_sync_at: string | null;
   last_error: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface GcalCalendar {
@@ -38,7 +38,13 @@ export function useGcalSyncConfig() {
         .eq("user_id", user!.id)
         .maybeSingle();
       if (error) throw error;
-      return (data ?? null) as GcalSyncConfig | null;
+      if (!data) return null;
+      const enriched: GcalSyncConfig = {
+        ...data,
+        last_sync_at: data.last_push_at ?? null,
+        last_error: null,
+      };
+      return enriched;
     },
   });
 }
@@ -84,11 +90,14 @@ export function useGcalGoogleConnection() {
 
 export function useGcalSyncEnable() {
   const { user } = useAuth();
+  const { tenantId } = useWorkspace();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: { oauth_connection_id: string; target_calendar_id: string }) => {
       if (!user?.id) throw new Error("Usuário não autenticado");
-      const payload = {
+      if (!tenantId) throw new Error("Tenant não selecionado");
+      const payload: Database["public"]["Tables"]["gcal_sync_config"]["Insert"] = {
+        tenant_id: tenantId,
         user_id: user.id,
         oauth_connection_id: input.oauth_connection_id,
         target_calendar_id: input.target_calendar_id,
@@ -134,7 +143,7 @@ export function useGcalToggle() {
   return useMutation({
     mutationFn: async (patch: { pull?: boolean; push?: boolean }) => {
       if (!user?.id) throw new Error("Usuário não autenticado");
-      const update: Record<string, boolean> = {};
+      const update: Database["public"]["Tables"]["gcal_sync_config"]["Update"] = {};
       if (typeof patch.pull === "boolean") update.sync_pull_enabled = patch.pull;
       if (typeof patch.push === "boolean") update.sync_push_enabled = patch.push;
       if (Object.keys(update).length === 0) return;

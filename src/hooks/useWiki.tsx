@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
 
 const MAX_DEPTH = 4;
 
@@ -205,7 +206,7 @@ export function useUpdateWikiPage() {
       is_published?: boolean;
     }) => {
       if (!user) throw new Error("Sem sessão");
-      const patch: Record<string, unknown> = { updated_by: user.id };
+      const patch: Database["public"]["Tables"]["wiki_pages"]["Update"] = { updated_by: user.id };
       if (typeof input.title === "string") patch.title = input.title.trim();
       if (typeof input.body === "string") patch.body = input.body;
       if (input.icon !== undefined) patch.icon = input.icon;

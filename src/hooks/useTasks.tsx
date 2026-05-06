@@ -7,6 +7,8 @@ import { queryProfile } from "@/lib/query-config";
 import { useConfetti } from "@/hooks/useConfetti";
 import { useTaskTypes } from "@/hooks/useTaskTypes";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export interface TaskRow {
   id: string;
@@ -244,7 +246,36 @@ export function useQuickAdd() {
       return data as TaskRow;
     },
     onSuccess: (task) => {
-      toast.success(`Tarefa criada: ${task.code ?? task.title}`);
+      // Quando o parser empurra a data pra D+1+ (ex: "amanhã"), avisamos onde
+      // a task foi parar — sem isso o usuário fica procurando em /hoje.
+      const startOfTomorrow = (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      })();
+      const dueDate = task.due_at ? new Date(task.due_at) : null;
+      const fallsInFuture = dueDate !== null && dueDate.getTime() >= startOfTomorrow.getTime();
+
+      if (fallsInFuture && dueDate) {
+        const relative = formatDistanceToNow(dueDate, {
+          locale: ptBR,
+          addSuffix: true,
+        });
+        toast.success(`Tarefa criada: ${task.code ?? task.title}`, {
+          description: `Vence ${relative}`,
+          action: {
+            label: "Ver em Próximos 7 dias",
+            onClick: () => {
+              if (typeof window !== "undefined") {
+                window.location.assign("/app/proximos");
+              }
+            },
+          },
+        });
+      } else {
+        toast.success(`Tarefa criada: ${task.code ?? task.title}`);
+      }
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: (err: Error) => toast.error("Erro ao criar tarefa: " + err.message),

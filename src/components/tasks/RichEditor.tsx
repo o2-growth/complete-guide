@@ -1,4 +1,5 @@
 import { useEditor, EditorContent } from "@tiptap/react";
+import type { Extensions } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import TaskList from "@tiptap/extension-task-list";
@@ -52,8 +53,10 @@ export function RichEditor({
   const membersRef = useRef<TenantMember[]>([]);
   membersRef.current = members ?? [];
 
-  const extensions = useMemo(() => {
-    const exts = [
+  const extensions = useMemo<Extensions>(() => {
+    // Extensions é union ampla; tipar explicitamente evita inferência ambígua
+    // que reclama de incompatibilidade entre Mention e TaskList.
+    const exts: Extensions = [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       Placeholder.configure({ placeholder }),
       TaskList,

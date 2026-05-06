@@ -29,13 +29,13 @@ export function useGlobalSearch(query: string) {
     const t = setTimeout(async () => {
       const q = `%${query.trim()}%`;
       const [tasks, projects] = await Promise.all([
-        supabase.from("tasks").select("id,title,status,publish_state").eq("tenant_id", tenantId).ilike("title", q).limit(8),
-        supabase.from("projects").select("id,name,archived_at").eq("tenant_id", tenantId).ilike("name", q).limit(6),
+        supabase.from("tasks").select("id,title,status_id,publish_state").eq("tenant_id", tenantId).ilike("title", q).limit(8),
+        supabase.from("projects").select("id,name,archived").eq("tenant_id", tenantId).ilike("name", q).limit(6),
       ]);
       if (cancelled) return;
 
-      type TaskRow = { id: string; title: string; status: string; publish_state: string | null };
-      type ProjectRow = { id: string; name: string; archived_at: string | null };
+      type TaskRow = { id: string; title: string; status_id: string | null; publish_state: string | null };
+      type ProjectRow = { id: string; name: string; archived: boolean };
 
       const out: SearchResult[] = [];
       ((tasks.data ?? []) as TaskRow[]).forEach((t) => {
@@ -44,7 +44,7 @@ export function useGlobalSearch(query: string) {
           kind: isPost ? "post" : "task",
           id: t.id,
           title: t.title,
-          subtitle: isPost ? `Post · ${t.publish_state}` : `Tarefa · ${t.status}`,
+          subtitle: isPost ? `Post · ${t.publish_state}` : "Tarefa",
           href: isPost ? "/app/social" : "/app",
         });
       });
@@ -52,7 +52,7 @@ export function useGlobalSearch(query: string) {
         kind: "project",
         id: p.id,
         title: p.name,
-        subtitle: p.archived_at ? "Projeto arquivado" : "Projeto",
+        subtitle: p.archived ? "Projeto arquivado" : "Projeto",
         href: `/app/projetos/${p.id}`,
       }));
       setResults(out);

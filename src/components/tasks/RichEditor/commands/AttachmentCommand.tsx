@@ -44,6 +44,17 @@ export function AttachmentCommand({ editor, range, task, onDone }: Props) {
     }
   }, [task, editor, range, onDone]);
 
+  // O evento 'cancel' do <input type=file> não está nos tipos React (DOM-only),
+  // então registramos via addEventListener para encerrar o comando se o usuário
+  // fechar o picker sem escolher arquivo.
+  useEffect(() => {
+    const node = inputRef.current;
+    if (!node) return;
+    const handleCancel = () => onDone();
+    node.addEventListener("cancel", handleCancel);
+    return () => node.removeEventListener("cancel", handleCancel);
+  }, [onDone]);
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !task || !user || !tenantId) {
@@ -117,7 +128,6 @@ export function AttachmentCommand({ editor, range, task, onDone }: Props) {
       accept="*/*"
       className="hidden"
       onChange={handleChange}
-      onCancel={() => onDone()}
     />
   );
 }

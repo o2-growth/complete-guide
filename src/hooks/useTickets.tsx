@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 export type TicketStatus = "open" | "in_progress" | "waiting" | "resolved" | "closed";
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
@@ -200,7 +201,7 @@ export function useUpdateTicket() {
   return useMutation({
     mutationFn: async ({ id, patch }: UpdateTicketInput) => {
       // Marca timestamps quando muda pra resolved/closed.
-      const enriched: Record<string, unknown> = { ...patch };
+      const enriched: Database["public"]["Tables"]["tickets"]["Update"] = { ...patch };
       if (patch.status === "resolved") enriched.resolved_at = new Date().toISOString();
       if (patch.status === "closed") enriched.closed_at = new Date().toISOString();
 
@@ -252,12 +253,12 @@ export function useAddTicketMessage() {
   return useMutation({
     mutationFn: async (input: AddTicketMessageInput) => {
       if (!user) throw new Error("Não autenticado");
-      const payload = {
+      const payload: Database["public"]["Tables"]["ticket_messages"]["Insert"] = {
         ticket_id: input.ticket_id,
         author_user_id: user.id,
         body: input.body,
         internal: input.internal ?? false,
-        attachments: input.attachments ?? [],
+        attachments: (input.attachments ?? []) as Json,
       };
       const { data, error } = await supabase
         .from("ticket_messages")

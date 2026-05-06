@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 import type { TaskRow } from "@/hooks/useTasks";
+import type { Database } from "@/integrations/supabase/types";
 
 export interface CommentRow {
   id: string;
@@ -46,7 +47,10 @@ export function useUpdateTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TaskRow> }) => {
-      const { error } = await supabase.from("tasks").update(patch).eq("id", id);
+      // TaskRow estende a Row gerada com helpers locais; o `Update` do schema é
+      // o tipo correto pra payload (evita conflitos em campos Json).
+      const update = patch as Database["public"]["Tables"]["tasks"]["Update"];
+      const { error } = await supabase.from("tasks").update(update).eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {

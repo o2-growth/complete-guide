@@ -19,8 +19,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Brand — azul Oxy #0EA5E9 */
-    --primary: 199 89% 48%;
+    /* Brand — azul Oxy #0EA5E9. L:48%→38% para que `text-primary` em
+       fundos transparentes (bg-primary/5, bg-primary/10) e em white passe
+       AA WCAG. O CTA principal continua usando bg-primary com texto branco,
+       que não depende deste delta. */
+    --primary: 199 89% 38%;
     --primary-foreground: 210 40% 98%;
     --primary-glow: 199 95% 65%;
 
@@ -33,13 +36,14 @@
     --secondary-foreground: 222 47% 11%;
 
     --muted: 210 30% 94%;
-    /* L: 47%→38% para passar contraste WCAG AA contra --background */
+    /* L: 47%→38% para passar contraste WCAG AA contra --background. */
     --muted-foreground: 215 16% 38%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --success: 142 71% 45%;
+    /* L:45%→32% — `text-success` aparecia falhando em fundos brancos. */
+    --success: 142 71% 32%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;

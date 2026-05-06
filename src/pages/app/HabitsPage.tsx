@@ -121,8 +121,8 @@ function HabitHeatmap({ habitId }: { habitId: string }) {
         blockMargin={3}
         blockRadius={2}
         fontSize={11}
-        hideTotalCount
-        hideColorLegend
+        showTotalCount={false}
+        showColorLegend={false}
         labels={{
           months: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
           weekdays: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],

@@ -44,6 +44,7 @@ import { useTenantMembers } from "@/hooks/useTenantMembers";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -130,12 +131,12 @@ export default function AtendimentoTicketPage() {
       return;
     }
     const desc = `Originado do ticket ATD-${ticket.number}.\n\n${ticket.description ?? ""}`.trim();
-    const payload = {
+    const payload: Database["public"]["Tables"]["tasks"]["Insert"] = {
       tenant_id: tenantId,
       project_id: inboxProjectId,
       title: ticket.title,
       description: desc,
-      priority: ticket.priority === "urgent" ? "urgent" : ticket.priority,
+      priority: ticket.priority as Database["public"]["Enums"]["task_priority"],
       assignee_id: ticket.owner_user_id ?? user.id,
       reporter_id: user.id,
       created_by: user.id,

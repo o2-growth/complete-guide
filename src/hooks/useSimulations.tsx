@@ -29,6 +29,7 @@ export interface SimScenario {
   kind: SimKind;
   inputs: Record<string, unknown>;
   result: SimResult["result"];
+  ai_narrative: string | null;
   created_at: string;
   [key: string]: unknown;
 }

@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import "@excalidraw/excalidraw/index.css";
@@ -189,7 +189,9 @@ export default function WhiteboardDetailPage() {
           {initialData && (
             <Excalidraw
               initialData={initialData}
-              onChange={handleChange}
+              // O onChange do Excalidraw expõe tipos internos (OrderedExcalidrawElement,
+              // AppState, BinaryFiles); usamos um shape genérico equivalente — cast OK.
+              onChange={handleChange as unknown as ComponentProps<typeof Excalidraw>["onChange"]}
               theme={theme === "dark" ? "dark" : "light"}
               langCode="pt-BR"
               name={board.name}

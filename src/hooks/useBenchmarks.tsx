@@ -41,7 +41,7 @@ export function useBenchmarks() {
     if (!tenantId) return;
     setLoading(true);
     const { data: r, error } = await supabase.rpc("benchmark_compare", { _tenant: tenantId });
-    if (error) toast.error(error.message); else setData(r as { industry: string; comparisons: BenchComparison[] } | null);
+    if (error) toast.error(error.message); else setData(r as unknown as { industry: string; comparisons: BenchComparison[] } | null);
     setLoading(false);
   }, [tenantId]);
 
@@ -49,7 +49,7 @@ export function useBenchmarks() {
     if (!tenantId) return;
     const { data: r } = await supabase.from("monthly_scorecards")
       .select("*").eq("tenant_id", tenantId).order("period_month", { ascending: false }).limit(12);
-    setScorecards((r ?? []) as Scorecard[]);
+    setScorecards((r ?? []) as unknown as Scorecard[]);
   }, [tenantId]);
 
   useEffect(() => { refresh(); loadScorecards(); }, [refresh, loadScorecards]);
