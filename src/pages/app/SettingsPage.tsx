@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useTheme } from "@/hooks/useTheme";
 import { useI18n } from "@/hooks/useI18n";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,11 +31,11 @@ export default function SettingsPage() {
   return (
     <div className="container max-w-3xl py-8">
       <div className="mb-8">
-        <Badge variant="outline" className="mb-3 border-primary/30 bg-primary/5 text-primary">
-          <SettingsIcon className="mr-1.5 h-3 w-3" /> {t("settings.title")}
-        </Badge>
-        <h1 className="text-3xl font-bold tracking-tight">{t("settings.title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("settings.description")}</p>
+        <PageHeader
+          icon={SettingsIcon}
+          title={t("settings.title")}
+          description={t("settings.description")}
+        />
       </div>
 
       <div className="space-y-6">

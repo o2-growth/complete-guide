@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import SEO from "@/components/SEO";
 import { toast } from "sonner";
@@ -201,29 +202,25 @@ export default function TimelinePage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-6 p-6">
       <SEO title="Timeline — Oxy" description="Linha do tempo Gantt das tarefas do tenant." />
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="flex items-center gap-2 text-3xl font-bold">
-            <GanttChartSquare className="h-7 w-7 text-primary" /> Timeline
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Visualize prazos, dependências e duração das tarefas em um Gantt interativo.
-            Arraste as barras para reagendar.
-          </p>
-        </div>
-        <Tabs
-          value={viewMode}
-          onValueChange={(v) => setViewMode(v as "Day" | "Week" | "Month")}
-        >
-          <TabsList aria-label="Modo de visualização">
-            {(["Day", "Week", "Month"] as const).map((m) => (
-              <TabsTrigger key={m} value={m} aria-label={VIEW_MODE_LABEL[m]}>
-                {VIEW_MODE_LABEL[m]}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </header>
+      <PageHeader
+        icon={GanttChartSquare}
+        title="Timeline"
+        description="Visualize prazos, dependências e duração das tarefas em um Gantt interativo. Arraste as barras para reagendar."
+        actions={
+          <Tabs
+            value={viewMode}
+            onValueChange={(v) => setViewMode(v as "Day" | "Week" | "Month")}
+          >
+            <TabsList aria-label="Modo de visualização">
+              {(["Day", "Week", "Month"] as const).map((m) => (
+                <TabsTrigger key={m} value={m} aria-label={VIEW_MODE_LABEL[m]}>
+                  {VIEW_MODE_LABEL[m]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       <Card className="overflow-hidden p-0" role="region" aria-label="Gantt de tarefas">
         {isLoading ? (

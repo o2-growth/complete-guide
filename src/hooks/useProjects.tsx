@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useAuth } from "@/hooks/useAuth";
 import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
 
@@ -16,6 +17,18 @@ export interface Project {
   archived: boolean;
   task_seq: number;
   created_at: string;
+  created_by?: string | null;
+}
+
+// Inboxes pessoais são auto-criadas com prefixo "Inbox de " pelo trigger handle_new_user.
+// Cada usuário só deve enxergar a própria inbox — escondemos as de outros membros do tenant
+// pra não poluir /projetos com signups de teste/QA. Heurística por nome até existir coluna `kind`.
+const INBOX_PREFIX = "Inbox de ";
+
+function isOtherUserInbox(project: { name: string; created_by?: string | null }, userId: string | undefined): boolean {
+  if (!project.name.startsWith(INBOX_PREFIX)) return false;
+  if (!project.created_by) return true;
+  return project.created_by !== userId;
 }
 
 export interface ProjectWithStats extends Project {
@@ -30,9 +43,10 @@ export interface ProjectWithStats extends Project {
 
 export function useProjects() {
   const { tenantId, loading } = useWorkspace();
+  const { user } = useAuth();
   return useQuery({
     ...queryProfile("structural"),
-    queryKey: ["projects-list", tenantId],
+    queryKey: ["projects-list", tenantId, user?.id],
     enabled: !loading && !!tenantId,
     queryFn: async (): Promise<ProjectWithStats[]> => {
       const nowIso = new Date().toISOString();
@@ -46,7 +60,11 @@ export function useProjects() {
       const squadMap = new Map((squadsRes.data ?? []).map((s) => [s.id, s]));
       const tasks = tasksRes.data ?? [];
 
-      return (projRes.data ?? []).map((p) => {
+      const visible = (projRes.data ?? []).filter(
+        (p) => !isOtherUserInbox(p as Project, user?.id),
+      );
+
+      return visible.map((p) => {
         const projectTasks = tasks.filter((t) => t.project_id === p.id && !t.archived);
         const total = projectTasks.length;
         const done = projectTasks.filter((t) => !!t.done_at).length;

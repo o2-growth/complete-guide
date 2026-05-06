@@ -2,6 +2,7 @@ import { Workflow, Play, RefreshCw, Database, Target, AlertOctagon, Bell, Mail }
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useRunCronJob } from "@/hooks/useExecBriefing";
 import { cn } from "@/lib/utils";
 
@@ -18,18 +19,17 @@ export default function AutomationsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Workflow className="h-6 w-6" /> Automações
-          </h1>
-          <p className="text-sm text-muted-foreground">Jobs agendados que mantêm seu workspace sempre atualizado.</p>
-        </div>
-        <Button onClick={() => run.mutate("all")} disabled={run.isPending}>
-          <RefreshCw className={cn("h-4 w-4 mr-2", run.isPending && "animate-spin")} />
-          Rodar tudo agora
-        </Button>
-      </div>
+      <PageHeader
+        icon={Workflow}
+        title="Automações"
+        description="Jobs agendados que mantêm seu workspace sempre atualizado."
+        actions={
+          <Button onClick={() => run.mutate("all")} disabled={run.isPending}>
+            <RefreshCw className={cn("h-4 w-4 mr-2", run.isPending && "animate-spin")} />
+            Rodar tudo agora
+          </Button>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
         {JOBS.map((j) => {

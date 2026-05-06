@@ -11,9 +11,11 @@ import {
   useSensors,
   closestCenter,
 } from "@dnd-kit/core";
-import { Loader2, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -107,7 +109,7 @@ interface QuadrantData {
 const EMPTY_QUADRANT: QuadrantData = { open: {}, done: [] };
 
 export default function EisenhowerPage() {
-  const { data, isLoading, error } = useTasksByPriorityGrouped();
+  const { data, isLoading, error, refetch } = useTasksByPriorityGrouped();
   const { data: projects = [] } = useProjects();
   const updatePriority = useUpdateTaskPriority();
   const updateTask = useUpdateTask();
@@ -233,30 +235,32 @@ export default function EisenhowerPage() {
         description="Organize tarefas por urgência e importância em quatro quadrantes."
       />
 
-      <header className="flex items-center justify-between gap-2">
-        <h1 className="text-lg font-semibold tracking-tight md:text-xl">
-          Matriz de Eisenhower
-        </h1>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              aria-label="Mais opções"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={toggleCompleted}>
-              {showCompleted ? "Ocultar concluídas" : "Mostrar concluídas"}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={goToToday}>Ir para hoje</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </header>
+      <PageHeader
+        icon={LayoutDashboard}
+        title="Matriz de Eisenhower"
+        description="Organize tarefas por urgência e importância em quatro quadrantes."
+        actions={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                aria-label="Mais opções"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={toggleCompleted}>
+                {showCompleted ? "Ocultar concluídas" : "Mostrar concluídas"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={goToToday}>Ir para hoje</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
 
       {showQuickAdd && (
         <div className="rounded-lg border bg-card p-2 shadow-soft">
@@ -264,15 +268,13 @@ export default function EisenhowerPage() {
         </div>
       )}
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-16 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" aria-label="Carregando" />
-        </div>
-      )}
+      {isLoading && <ListSkeleton rows={6} />}
       {error && (
-        <Card className="border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          Erro ao carregar tarefas: {error.message}
-        </Card>
+        <ErrorState
+          title="Não foi possível carregar tarefas"
+          description={error.message}
+          onRetry={() => refetch()}
+        />
       )}
 
       {!isLoading && !error && (

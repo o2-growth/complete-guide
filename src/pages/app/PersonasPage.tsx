@@ -3,6 +3,7 @@ import { Plus, Users, UserCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { SEO } from "@/components/SEO";
 import {
   usePersonas,
@@ -68,23 +69,22 @@ export default function PersonasPage() {
     <div className="space-y-6 p-4 sm:p-6">
       <SEO title="Personas | Oxy Growth OS" description="Personas e públicos do time de Growth" />
 
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Personas e Públicos</h1>
-          <p className="text-sm text-muted-foreground">
-            Camada estratégica que vincula tarefas, posts e campanhas ao seu perfil-alvo.
-          </p>
-        </div>
-        {tab === "personas" ? (
-          <Button onClick={openNewPersona}>
-            <Plus className="mr-2 h-4 w-4" /> Nova persona
-          </Button>
-        ) : (
-          <Button onClick={openNewAudience}>
-            <Plus className="mr-2 h-4 w-4" /> Novo público
-          </Button>
-        )}
-      </header>
+      <PageHeader
+        icon={UserCircle}
+        title="Personas e Públicos"
+        description="Camada estratégica que vincula tarefas, posts e campanhas ao seu perfil-alvo."
+        actions={
+          tab === "personas" ? (
+            <Button onClick={openNewPersona}>
+              <Plus className="mr-2 h-4 w-4" /> Nova persona
+            </Button>
+          ) : (
+            <Button onClick={openNewAudience}>
+              <Plus className="mr-2 h-4 w-4" /> Novo público
+            </Button>
+          )
+        }
+      />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as "personas" | "audiences")}>
         <TabsList>

@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { EmptyState } from "@/components/EmptyState";
+import { CardGridSkeleton } from "@/components/skeletons/ListSkeleton";
 import {
   useWhiteboards,
   useCreateWhiteboard,
@@ -109,9 +110,7 @@ export default function WhiteboardsPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
+        <CardGridSkeleton count={6} />
       ) : boards.length === 0 ? (
         <EmptyState
           icon={Palette}

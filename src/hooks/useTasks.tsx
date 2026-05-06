@@ -326,6 +326,47 @@ export function useToggleTaskDone() {
   });
 }
 
+/**
+ * Duplica uma tarefa preservando os campos principais (título recebe sufixo
+ * "(cópia)"). Não copia anexos, comentários, time_entries — apenas o registro
+ * raiz da task.
+ */
+export function useDuplicateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (task: TaskRow) => {
+      const payload = {
+        tenant_id: task.tenant_id,
+        project_id: task.project_id,
+        title: `${task.title} (cópia)`,
+        description: task.description,
+        priority: task.priority,
+        status_id: task.status_id,
+        assignee_id: task.assignee_id,
+        start_at: task.start_at,
+        due_at: task.due_at,
+        estimate_minutes: task.estimate_minutes,
+        type_id: task.type_id ?? null,
+        parent_task_id: task.parent_task_id ?? null,
+        custom_fields: (task.custom_fields ?? null) as never,
+        number: 0,
+      };
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert(payload)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as TaskRow;
+    },
+    onSuccess: (task) => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success(`Duplicada: ${task.code ?? task.title}`);
+    },
+    onError: (e: Error) => toast.error("Erro ao duplicar: " + e.message),
+  });
+}
+
 export function useDeleteTask() {
   const qc = useQueryClient();
   return useMutation({
@@ -432,6 +473,49 @@ export function useTasksInRange(from: Date | null, to: Date | null) {
       if (error) throw error;
       return (data ?? []) as TaskRow[];
     },
+  });
+}
+
+/**
+ * Atualiza um conjunto de tasks em batch — usado pela toolbar de bulk actions.
+ * Aceita patch parcial (priority, status_id, project_id, assignee_id, archived).
+ * Usa `.in("id", ids)` para mandar uma query só.
+ */
+export interface BulkTaskPatch {
+  priority?: TaskRow["priority"];
+  status_id?: string | null;
+  project_id?: string;
+  assignee_id?: string | null;
+  archived?: boolean;
+  done_at?: string | null;
+}
+
+export function useBulkUpdateTasks() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      ids,
+      patch,
+    }: {
+      ids: string[];
+      patch: BulkTaskPatch;
+    }) => {
+      if (!ids.length) return { count: 0 };
+      const { error, count } = await supabase
+        .from("tasks")
+        .update(patch, { count: "exact" })
+        .in("id", ids);
+      if (error) throw error;
+      return { count: count ?? ids.length };
+    },
+    onSuccess: ({ count }) => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["tasks-infinite"] });
+      qc.invalidateQueries({ queryKey: ["tasks-by-priority"] });
+      qc.invalidateQueries({ queryKey: ["tasks-by-priority-grouped"] });
+      toast.success(`${count} tarefa${count === 1 ? "" : "s"} atualizada${count === 1 ? "" : "s"}`);
+    },
+    onError: (e: Error) => toast.error("Erro no batch: " + e.message),
   });
 }
 

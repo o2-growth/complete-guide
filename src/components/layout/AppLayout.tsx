@@ -30,13 +30,27 @@ export default function AppLayout() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      const k = e.key.toLowerCase();
+      // Cmd+K / Ctrl+K — abre Command Palette
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && k === "k") {
         e.preventDefault();
         setPaletteOpen((v) => !v);
+        return;
+      }
+      // Cmd+Shift+P / Ctrl+Shift+P — Quick Switcher (mesma palette)
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && k === "p") {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
       }
     };
+    const onOpen = () => setPaletteOpen(true);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("oxy:open-palette", onOpen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("oxy:open-palette", onOpen);
+    };
   }, []);
 
   return (

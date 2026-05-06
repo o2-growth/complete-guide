@@ -18,9 +18,9 @@ const STORAGE_KEY = "oxy-locale";
 function getInitialLocale(): Locale {
   if (typeof window === "undefined") return "pt-BR";
   const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
-  if (stored === "pt-BR" || stored === "en-US") return stored;
-  const nav = navigator.language?.toLowerCase() ?? "";
-  return nav.startsWith("en") ? "en-US" : "pt-BR";
+  if (stored === "pt-BR" || stored === "en-US" || stored === "es-ES") return stored;
+  // Default fixo em pt-BR (idioma único do produto). Só troca via tela de Idioma.
+  return "pt-BR";
 }
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {

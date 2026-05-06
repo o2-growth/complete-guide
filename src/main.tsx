@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import { bootstrapDensity } from "./hooks/useDensity";
 import "./index.css";
+
+// Aplica densidade do localStorage antes do React montar — evita flash visual.
+bootstrapDensity();
 
 createRoot(document.getElementById("root")!).render(<App />);
 

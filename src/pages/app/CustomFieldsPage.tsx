@@ -28,6 +28,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/EmptyState";
 import {
   Select,
   SelectContent,
@@ -232,9 +233,11 @@ function ScopeSection({ scope, taskTypeId, projectId }: ScopeSectionProps) {
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-          Nenhum campo customizado neste escopo. Clique em <strong>Novo campo</strong> para começar.
-        </div>
+        <EmptyState
+          icon={Plus}
+          title="Sem campos customizados"
+          description='Adicione campos extras (texto, número, lista, etc.) específicos pra este escopo.'
+        />
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>

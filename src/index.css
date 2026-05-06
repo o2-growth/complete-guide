@@ -96,6 +96,31 @@
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 222 40% 18%;
     --sidebar-ring: 199 89% 48%;
+
+    /* Density tokens — controlam padding/gap/font-size de listas e cards.
+       Default = "cozy" (compatível com layout atual). Trocar via
+       data-density="compact|comfortable" no <html>. */
+    --density-row-pad-y: 0.625rem;
+    --density-row-pad-x: 0.75rem;
+    --density-row-gap: 0.5rem;
+    --density-card-pad: 1rem;
+    --density-text-base: 0.875rem;
+  }
+
+  [data-density="compact"] {
+    --density-row-pad-y: 0.375rem;
+    --density-row-pad-x: 0.5rem;
+    --density-row-gap: 0.25rem;
+    --density-card-pad: 0.625rem;
+    --density-text-base: 0.8125rem;
+  }
+
+  [data-density="comfortable"] {
+    --density-row-pad-y: 0.875rem;
+    --density-row-pad-x: 1rem;
+    --density-row-gap: 0.75rem;
+    --density-card-pad: 1.25rem;
+    --density-text-base: 0.9375rem;
   }
 
   .dark {
@@ -189,6 +214,23 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  /* Density utilities — aplique em rows/cards/sidebar items para herdar
+     o modo atual. */
+  .row-density {
+    padding: var(--density-row-pad-y) var(--density-row-pad-x);
+    gap: var(--density-row-gap);
+  }
+  .row-density-y {
+    padding-top: var(--density-row-pad-y);
+    padding-bottom: var(--density-row-pad-y);
+  }
+  .card-density {
+    padding: var(--density-card-pad);
+  }
+  .text-density {
+    font-size: var(--density-text-base);
   }
 }
 

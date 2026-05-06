@@ -56,6 +56,9 @@ import {
 import { SortableWidget } from "@/components/dashboard/widgets/SortableWidget";
 import { AddWidgetDialog } from "@/components/dashboard/widgets/AddWidgetDialog";
 import { WidgetConfigDialog } from "@/components/dashboard/widgets/WidgetConfigDialog";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
+import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
 
 const ACTIVE_KEY = "oxy.activeDashboardId";
 
@@ -138,8 +141,8 @@ export default function DashboardPage() {
 
   if (loadingList) {
     return (
-      <div className="p-6 flex items-center justify-center text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando dashboards…
+      <div className="p-6 max-w-[1400px] mx-auto space-y-4">
+        <ListSkeleton rows={4} />
       </div>
     );
   }
@@ -147,20 +150,22 @@ export default function DashboardPage() {
   // Empty state — sem nenhum dashboard ainda.
   if (!dashboards || dashboards.length === 0) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto">
-        <div className="border rounded-xl p-10 text-center space-y-4">
-          <BarChart3 className="h-10 w-10 text-primary mx-auto" />
-          <div>
-            <h2 className="text-xl font-semibold">Nenhum dashboard ainda</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Crie seu primeiro dashboard para visualizar KPIs, gráficos e listas no jeito do seu time.
-            </p>
-          </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo dashboard
-          </Button>
-        </div>
+      <div className="p-6 max-w-[1400px] mx-auto space-y-6">
+        <PageHeader
+          icon={BarChart3}
+          title="Dashboards"
+          description="Visualize KPIs, gráficos e listas no jeito do seu time."
+        />
+        <EmptyState
+          icon={BarChart3}
+          title="Sem dashboards ainda"
+          description="Crie seu primeiro dashboard pra visualizar KPIs, gráficos e listas."
+          action={{
+            label: "Novo dashboard",
+            onClick: () => setCreateOpen(true),
+            icon: Plus,
+          }}
+        />
         <CreateDashboardDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={(id) => handleSelectDashboard(id)} />
       </div>
     );
@@ -170,36 +175,34 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="h-6 w-6 text-primary" />
-          <Select value={activeId ?? undefined} onValueChange={handleSelectDashboard}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="Selecione um dashboard" />
-            </SelectTrigger>
-            <SelectContent>
-              {dashboards.map((d) => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo dashboard
-          </Button>
-          {dash && (
-            <>
-              {editing ? (
+      <PageHeader
+        icon={BarChart3}
+        title="Dashboards"
+        description={dash?.description ?? "Visualize KPIs, gráficos e listas no jeito do seu time."}
+        actions={
+          <>
+            <Select value={activeId ?? undefined} onValueChange={handleSelectDashboard}>
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder="Selecione um dashboard" />
+              </SelectTrigger>
+              <SelectContent>
+                {dashboards.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Novo
+            </Button>
+            {dash && (
+              editing ? (
                 <>
                   <Button size="sm" onClick={() => setAddOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Adicionar widget
+                    Widget
                   </Button>
                   <Button
                     variant="outline"
@@ -212,7 +215,7 @@ export default function DashboardPage() {
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
                     <X className="h-4 w-4 mr-2" />
-                    Sair da edição
+                    Sair
                   </Button>
                 </>
               ) : (
@@ -220,36 +223,25 @@ export default function DashboardPage() {
                   <Pencil className="h-4 w-4 mr-2" />
                   Editar
                 </Button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+              )
+            )}
+          </>
+        }
+      />
 
-      {dash?.description && (
-        <p className="text-sm text-muted-foreground">{dash.description}</p>
-      )}
-
-      {loadingDash && (
-        <div className="flex items-center justify-center py-20 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
-        </div>
-      )}
+      {loadingDash && <ListSkeleton rows={4} />}
 
       {!loadingDash && dash && localWidgets.length === 0 && (
-        <div className="border rounded-xl p-10 text-center space-y-4">
-          <BarChart3 className="h-10 w-10 text-primary mx-auto" />
-          <div>
-            <h3 className="text-lg font-semibold">Dashboard vazio</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Adicione widgets para começar.
-            </p>
-          </div>
-          <Button onClick={() => { setEditing(true); setAddOpen(true); }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar widget
-          </Button>
-        </div>
+        <EmptyState
+          icon={BarChart3}
+          title="Dashboard vazio"
+          description="Adicione widgets pra começar a visualizar dados."
+          action={{
+            label: "Adicionar widget",
+            onClick: () => { setEditing(true); setAddOpen(true); },
+            icon: Plus,
+          }}
+        />
       )}
 
       {!loadingDash && localWidgets.length > 0 && (

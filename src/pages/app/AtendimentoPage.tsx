@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react";
-import { Headphones, Loader2, Plus, Search } from "lucide-react";
+import { Headphones, Plus, Search } from "lucide-react";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { EmptyState } from "@/components/EmptyState";
+import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
 import {
   Select,
   SelectContent,
@@ -35,7 +38,7 @@ export default function AtendimentoPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
 
-  const { data, isLoading, error } = useTickets({
+  const { data, isLoading, error, refetch } = useTickets({
     status: statusTab,
     priority,
     search,
@@ -62,23 +65,17 @@ export default function AtendimentoPage() {
         description="Tickets de longo prazo com SLA próprio."
       />
 
-      <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand text-primary-foreground shadow-brand">
-            <Headphones className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Atendimento</h1>
-            <p className="text-sm text-muted-foreground">
-              Tickets de longo prazo, com SLA de resposta e resolução.
-            </p>
-          </div>
-        </div>
-        <Button onClick={() => setOpen(true)} variant="hero">
-          <Plus className="mr-1.5 h-4 w-4" />
-          Novo ticket
-        </Button>
-      </header>
+      <PageHeader
+        icon={Headphones}
+        title="Atendimento"
+        description="Tickets de longo prazo, com SLA de resposta e resolução."
+        actions={
+          <Button onClick={() => setOpen(true)} variant="hero">
+            <Plus className="mr-1.5 h-4 w-4" />
+            Novo ticket
+          </Button>
+        }
+      />
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
         <div className="relative flex-1">
@@ -120,30 +117,27 @@ export default function AtendimentoPage() {
         </TabsList>
       </Tabs>
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-16 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" aria-label="Carregando tickets" />
-        </div>
-      )}
+      {isLoading && <ListSkeleton rows={5} />}
 
       {error && (
-        <Card className="border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          Erro ao carregar tickets: {(error as Error).message}
-        </Card>
+        <ErrorState
+          title="Não foi possível carregar tickets"
+          description={(error as Error).message}
+          onRetry={() => refetch()}
+        />
       )}
 
       {!isLoading && !error && (data?.length ?? 0) === 0 && (
-        <Card className="flex flex-col items-center gap-2 border-dashed p-10 text-center">
-          <Headphones className="h-8 w-8 text-muted-foreground/60" />
-          <p className="text-sm font-medium">Nenhum ticket por aqui ainda</p>
-          <p className="text-xs text-muted-foreground">
-            Crie um ticket pra abrir um chamado com SLA dedicado.
-          </p>
-          <Button onClick={() => setOpen(true)} size="sm" variant="outline" className="mt-2">
-            <Plus className="mr-1.5 h-4 w-4" />
-            Novo ticket
-          </Button>
-        </Card>
+        <EmptyState
+          icon={Headphones}
+          title="Sem tickets ainda"
+          description="Crie um ticket pra abrir um chamado com SLA dedicado."
+          action={{
+            label: "Novo ticket",
+            onClick: () => setOpen(true),
+            icon: Plus,
+          }}
+        />
       )}
 
       {!isLoading && !error && (data?.length ?? 0) > 0 && (

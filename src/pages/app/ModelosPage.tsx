@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -100,22 +101,16 @@ export default function ModelosPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <FileStack className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Modelos</h1>
-            <p className="text-sm text-muted-foreground">
-              Catálogo unificado de checklists, mensagens, briefs, legendas e formulários reutilizáveis.
-            </p>
-          </div>
-        </div>
-        <Button onClick={openNew}>
-          <Plus className="mr-2 h-4 w-4" /> Novo modelo
-        </Button>
-      </header>
+      <PageHeader
+        icon={FileStack}
+        title="Modelos"
+        description="Catálogo unificado de checklists, mensagens, briefs, legendas e formulários reutilizáveis."
+        actions={
+          <Button onClick={openNew}>
+            <Plus className="mr-2 h-4 w-4" /> Novo modelo
+          </Button>
+        }
+      />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
         <TabsList className="flex flex-wrap">

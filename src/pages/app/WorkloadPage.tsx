@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   Dialog,
   DialogContent,
@@ -105,31 +106,29 @@ export default function WorkloadPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8">
-      <header className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-            <BarChart3 className="h-3.5 w-3.5" /> Insights
-          </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">Workload</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Carga semanal por pessoa. Realocate tarefas entre membros sem sair daqui.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setAnchor((d) => addWeeks(d, -1))}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setAnchor(new Date())}>
-            Esta semana
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => setAnchor((d) => addWeeks(d, 1))}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <span className="ml-2 hidden text-sm font-medium text-muted-foreground sm:inline">
-            {weekLabel}
-          </span>
-        </div>
-      </header>
+      <div className="mb-5">
+        <PageHeader
+          icon={BarChart3}
+          title="Workload"
+          description="Carga semanal por pessoa. Realocate tarefas entre membros sem sair daqui."
+          actions={
+            <>
+              <Button variant="outline" size="icon" onClick={() => setAnchor((d) => addWeeks(d, -1))}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setAnchor(new Date())}>
+                Esta semana
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => setAnchor((d) => addWeeks(d, 1))}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <span className="ml-2 hidden text-sm font-medium text-muted-foreground sm:inline">
+                {weekLabel}
+              </span>
+            </>
+          }
+        />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="inline-flex rounded-lg border bg-muted/40 p-1 text-xs">

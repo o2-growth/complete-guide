@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { CalendarRange } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   useCapacityData,
   useUpsertCapacity,
@@ -80,15 +80,11 @@ export default function CapacityPage() {
 
   return (
     <div className="container max-w-7xl py-8 space-y-6">
-      <header>
-        <Badge variant="outline" className="mb-3 border-primary/30 bg-primary/5 text-primary">
-          <CalendarRange className="mr-1.5 h-3 w-3" /> Capacity Planning · Fase 2 · Passo 18
-        </Badge>
-        <h1 className="text-3xl font-bold tracking-tight">Planejamento de Capacidade</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Defina horas semanais, dias de trabalho e ausências. A equipe vê quanto cada pessoa tem disponível nos próximos 30 dias.
-        </p>
-      </header>
+      <PageHeader
+        icon={CalendarRange}
+        title="Planejamento de Capacidade"
+        description="Defina horas semanais, dias de trabalho e ausências. A equipe vê quanto cada pessoa tem disponível nos próximos 30 dias."
+      />
 
       <Tabs defaultValue="team">
         <TabsList>

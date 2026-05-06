@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useAuth } from "@/hooks/useAuth";
 import { queryProfile } from "@/lib/query-config";
 import { toast } from "sonner";
 
@@ -17,6 +18,9 @@ export interface ProjectTreeNode {
 }
 
 const MAX_DEPTH = 3;
+// Inbox pessoal: trigger handle_new_user cria um projeto "Inbox de <nome>" por usuário.
+// Cada user só vê a própria inbox — evita poluição vinda de signups de teste/QA na sidebar.
+const INBOX_PREFIX = "Inbox de ";
 
 interface ProjectFlatRow {
   id: string;
@@ -26,6 +30,7 @@ interface ProjectFlatRow {
   parent_id: string | null;
   sort_order: number | null;
   archived: boolean;
+  created_by: string | null;
 }
 
 function buildTree(rows: ProjectFlatRow[]): ProjectTreeNode[] {
@@ -77,19 +82,25 @@ function subtreeDepth(node: ProjectTreeNode, current = 1): number {
 export function useProjectTree() {
   const qc = useQueryClient();
   const { tenantId } = useWorkspace();
+  const { user } = useAuth();
 
   const query = useQuery({
     ...queryProfile("structural"),
-    queryKey: ["project-tree", tenantId],
+    queryKey: ["project-tree", tenantId, user?.id],
     enabled: !!tenantId,
     queryFn: async (): Promise<ProjectFlatRow[]> => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, icon, color, archived, parent_id, sort_order")
+        .select("id, name, icon, color, archived, parent_id, sort_order, created_by")
         .eq("tenant_id", tenantId!)
         .eq("archived", false);
       if (error) throw error;
-      return (data ?? []) as ProjectFlatRow[];
+      const rows = (data ?? []) as ProjectFlatRow[];
+      // Esconde inboxes de outros usuários (mantém a do usuário atual).
+      return rows.filter((r) => {
+        if (!r.name.startsWith(INBOX_PREFIX)) return true;
+        return r.created_by ? r.created_by === user?.id : false;
+      });
     },
   });
 

@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { TimerIndicator } from "@/components/timer/TimerIndicator";
 import { useUnreadCount } from "@/hooks/useNotifications";
@@ -30,6 +31,7 @@ export function Topbar({ onOpenCommand }: TopbarProps) {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [displayName, setDisplayName] = useState<string>("");
   const unread = useUnreadCount();
 
@@ -58,24 +60,37 @@ export function Topbar({ onOpenCommand }: TopbarProps) {
   };
 
   return (
-    <header data-tour="topbar" className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header data-tour="topbar" className="sticky top-0 z-30 flex h-14 min-w-0 flex-nowrap items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <WorkspaceSwitcher />
       <Separator orientation="vertical" className="h-6 hidden md:block" />
 
-      <button
-        onClick={onOpenCommand}
-        className="group flex h-9 flex-1 max-w-md items-center gap-2 rounded-md border bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:bg-muted"
-      >
-        <Search className="h-4 w-4" />
-        <span className="flex-1 text-left">Buscar tarefas, projetos, atalhos…</span>
-        <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium opacity-100 sm:inline-flex">
-          <CommandIcon className="h-3 w-3" />K
-        </kbd>
-      </button>
+      {isMobile ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onOpenCommand}
+          aria-label="Buscar"
+          className="shrink-0"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+      ) : (
+        <button
+          onClick={onOpenCommand}
+          aria-label="Buscar tarefas, projetos, atalhos"
+          className="group flex h-9 min-w-0 flex-1 max-w-md items-center gap-2 rounded-md border bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:bg-muted"
+        >
+          <Search className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1 truncate text-left">Buscar tarefas, projetos, atalhos…</span>
+          <kbd className="pointer-events-none hidden h-5 shrink-0 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium opacity-100 sm:inline-flex">
+            <CommandIcon className="h-3 w-3" />K
+          </kbd>
+        </button>
+      )}
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex shrink-0 items-center gap-1">
         <OnlineIndicator />
         <TimerIndicator />
         <Button

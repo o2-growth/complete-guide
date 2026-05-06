@@ -10,9 +10,12 @@ import { TaskRow } from "@/components/tasks/TaskRow";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
 import { TaskChartView } from "@/components/tasks/views/TaskChartView";
+import { BulkActionsToolbar } from "@/components/tasks/BulkActionsToolbar";
 import { EmptyState } from "@/components/EmptyState";
 import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { SmartList, useTasks, useTasksInfinite, type TaskRow as TTask } from "@/hooks/useTasks";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
 
 type ViewMode = "list" | "gallery" | "chart";
 
@@ -74,6 +77,34 @@ function InfiniteListBody({
     [data],
   );
 
+  const bulk = useBulkSelection();
+
+  useEffect(() => {
+    bulk.setVisible(tasks.map((t) => t.id));
+  }, [tasks, bulk]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInput =
+        !!target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+      if (isInput) return;
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a") {
+        if (!tasks.length) return;
+        e.preventDefault();
+        bulk.selectAll(tasks.map((t) => t.id));
+      } else if (e.key === "Escape" && bulk.bulkMode) {
+        bulk.clear();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [tasks, bulk]);
+
   if (isLoading) return <ListSkeleton rows={6} />;
 
   if (error) {
@@ -90,9 +121,15 @@ function InfiniteListBody({
 
   return (
     <>
-      <div className="space-y-2">
+      <div className="space-y-2 pb-20">
         {tasks.map((task, i) => (
-          <TaskRow key={task.id} task={task} onOpen={setOpenId} index={i} />
+          <TaskRow
+            key={task.id}
+            task={task}
+            onOpen={setOpenId}
+            index={i}
+            bulkMode={bulk.bulkMode}
+          />
         ))}
       </div>
       {hasNextPage && (
@@ -112,6 +149,7 @@ function InfiniteListBody({
         </div>
       )}
       <TaskDetailSheet taskId={openId} onOpenChange={(o) => !o && setOpenId(null)} />
+      <BulkActionsToolbar />
     </>
   );
 }
@@ -205,13 +243,16 @@ export default function SmartListPage({
   return (
     <div className="container py-8">
       <div className={`mx-auto ${containerWidth} space-y-6`}>
-        <div>
-          <Badge variant="outline" className="mb-3 border-primary/30 bg-primary/5 text-primary">
-            <Icon className="mr-1.5 h-3 w-3" /> Smart list
-          </Badge>
-          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        </div>
+        <PageHeader
+          icon={Icon}
+          title={title}
+          description={description}
+          badge={
+            <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
+              Smart list
+            </Badge>
+          }
+        />
 
         {showQuickAdd && <QuickAdd />}
 

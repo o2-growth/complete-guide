@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { FolderKanban, Plus, Archive, ArchiveRestore, Search, Loader2 } from "lucide-react";
+import { FolderKanban, Plus, Archive, ArchiveRestore, Search, Loader2, Star } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardGridSkeleton } from "@/components/skeletons/ListSkeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import { useProjects, useCreateProject, useArchiveProject, ProjectWithStats } from "@/hooks/useProjects";
 import { useSquads } from "@/hooks/useSquads";
 import { cn } from "@/lib/utils";
@@ -86,17 +90,61 @@ function CreateProjectDialog() {
   );
 }
 
+const PROJECT_FAV_KEY = "oxy.project-favorites";
+
+function readProjectFavorites(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(PROJECT_FAV_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw) as unknown;
+    if (Array.isArray(arr)) return new Set(arr.filter((x): x is string => typeof x === "string"));
+  } catch {
+    // ignore
+  }
+  return new Set();
+}
+
+function writeProjectFavorites(ids: Set<string>) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PROJECT_FAV_KEY, JSON.stringify([...ids]));
+  window.dispatchEvent(new CustomEvent("oxy:project-favs"));
+}
+
+function useProjectFavorites() {
+  const [ids, setIds] = useState<Set<string>>(() => readProjectFavorites());
+  useEffect(() => {
+    const h = () => setIds(readProjectFavorites());
+    window.addEventListener("oxy:project-favs", h);
+    window.addEventListener("storage", h);
+    return () => {
+      window.removeEventListener("oxy:project-favs", h);
+      window.removeEventListener("storage", h);
+    };
+  }, []);
+  const toggle = useCallback((id: string) => {
+    const next = readProjectFavorites();
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    writeProjectFavorites(next);
+    setIds(next);
+  }, []);
+  return { ids, toggle };
+}
+
 function ProjectCard({ project, index }: { project: ProjectWithStats; index?: number }) {
   const archive = useArchiveProject();
+  const favs = useProjectFavorites();
+  const isFav = favs.ids.has(project.id);
   const staggerDelay =
     typeof index === "number" && index < 5 ? `${index * 40}ms` : undefined;
   return (
     <Card
-      className="group relative overflow-hidden transition hover:shadow-md animate-fade-in"
+      className="group relative overflow-hidden transition hover:shadow-md animate-fade-in [--card-pad-tweak:var(--density-card-pad)]"
       style={staggerDelay ? { animationDelay: staggerDelay } : undefined}
     >
       <div className="absolute left-0 top-0 h-full w-1" style={{ backgroundColor: project.color || project.squadColor || "hsl(var(--primary))" }} />
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3" style={{ padding: "var(--density-card-pad)", paddingBottom: "calc(var(--density-card-pad) * 0.6)" }}>
         <div className="flex items-start justify-between gap-3">
           <Link to={`/app/projetos/${project.id}`} className="min-w-0 flex-1">
             <CardTitle className="truncate text-base hover:text-primary">{project.name}</CardTitle>
@@ -105,17 +153,42 @@ function ProjectCard({ project, index }: { project: ProjectWithStats; index?: nu
               {project.squadName && <span>· {project.squadName}</span>}
             </div>
           </Link>
-          <Button
-            size="icon" variant="ghost"
-            aria-label={project.archived ? "Restaurar" : "Arquivar"}
-            onClick={() => archive.mutate({ id: project.id, archived: !project.archived })}
-          >
-            {project.archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
-          </Button>
+          <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className={cn(isFav && "text-amber-500")}
+                  aria-label={isFav ? "Remover dos favoritos" : "Favoritar"}
+                  aria-pressed={isFav}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    favs.toggle(project.id);
+                  }}
+                >
+                  <Star className={cn("h-4 w-4", isFav && "fill-current")} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{isFav ? "Remover dos favoritos" : "Favoritar"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon" variant="ghost"
+                  aria-label={project.archived ? "Restaurar" : "Arquivar"}
+                  onClick={() => archive.mutate({ id: project.id, archived: !project.archived })}
+                >
+                  {project.archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{project.archived ? "Restaurar" : "Arquivar"}</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
         {project.description && <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{project.description}</p>}
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3" style={{ padding: "var(--density-card-pad)", paddingTop: 0 }}>
         <div>
           <div className="mb-1 flex items-center justify-between text-[11px]">
             <span className="text-muted-foreground">Progresso</span>
@@ -143,7 +216,7 @@ function ProjectCard({ project, index }: { project: ProjectWithStats; index?: nu
 }
 
 export default function ProjectsPage() {
-  const { data, isLoading } = useProjects();
+  const { data, isLoading, error, refetch } = useProjects();
   const [search, setSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
 
@@ -177,16 +250,12 @@ export default function ProjectsPage() {
 
   return (
     <div className="container max-w-7xl py-8 space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <Badge variant="outline" className="mb-3 border-primary/30 bg-primary/5 text-primary">
-            <FolderKanban className="mr-1.5 h-3 w-3" /> Projetos · Fase 2 · Passo 20
-          </Badge>
-          <h1 className="text-3xl font-bold tracking-tight">Projetos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Hierarquia Squad → Projeto → Tarefas com múltiplas visões.</p>
-        </div>
-        <CreateProjectDialog />
-      </header>
+      <PageHeader
+        icon={FolderKanban}
+        title="Projetos"
+        description="Hierarquia Squad → Projeto → Tarefas com múltiplas visões."
+        actions={<CreateProjectDialog />}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
@@ -198,10 +267,18 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      {grouped.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-sm text-muted-foreground">
-          Nenhum projeto. Crie o primeiro para começar.
-        </CardContent></Card>
+      {error ? (
+        <ErrorState
+          title="Não foi possível carregar projetos"
+          description={(error as Error).message}
+          onRetry={() => refetch()}
+        />
+      ) : grouped.length === 0 ? (
+        <EmptyState
+          icon={FolderKanban}
+          title="Sem projetos ainda"
+          description="Crie seu primeiro projeto pra organizar squads, tarefas e visões."
+        />
       ) : (
         <div className="space-y-6">
           {grouped.map((g) => (

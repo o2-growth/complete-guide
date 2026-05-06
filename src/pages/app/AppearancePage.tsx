@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Palette, Upload, RotateCcw, Eye, Type, Contrast, Image as ImageIcon, Check } from "lucide-react";
+import { Palette, Upload, RotateCcw, Eye, Type, Contrast, Image as ImageIcon, Check, LayoutGrid } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useBranding, BrandingSettings } from "@/hooks/useBranding";
 import { usePreferences } from "@/hooks/usePreferences";
+import { useDensity, type Density } from "@/hooks/useDensity";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -39,9 +40,16 @@ const FONT_SIZES: Array<{ value: BrandingSettings["fontSize"]; label: string; sa
   { value: "large", label: "Grande", sample: "18px" },
 ];
 
+const DENSITIES: Array<{ value: Density; label: string; description: string }> = [
+  { value: "compact", label: "Compacto", description: "Mais itens visíveis por tela." },
+  { value: "cozy", label: "Confortável", description: "Equilíbrio entre espaço e densidade (padrão)." },
+  { value: "comfortable", label: "Espaçoso", description: "Mais respiro entre elementos." },
+];
+
 export default function AppearancePage() {
   const branding = useBranding();
   const prefs = usePreferences();
+  const { density, setDensity } = useDensity();
   const { tenantId } = useWorkspace();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -313,6 +321,39 @@ export default function AppearancePage() {
                 }
                 aria-label="Mostrar prazos como contagem regressiva"
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Densidade da interface */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LayoutGrid className="h-4 w-4 text-primary" /> Densidade da interface
+            </CardTitle>
+            <CardDescription>
+              Ajusta espaçamento de listas, cards e sidebar. Mudança imediata.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-2">
+              {DENSITIES.map((d) => (
+                <button
+                  key={d.value}
+                  type="button"
+                  onClick={() => {
+                    void setDensity(d.value);
+                  }}
+                  aria-pressed={density === d.value}
+                  className={cn(
+                    "rounded-lg border-2 p-4 text-left transition-all hover:bg-muted/30",
+                    density === d.value ? "border-primary bg-primary/5" : "border-border",
+                  )}
+                >
+                  <p className="font-semibold">{d.label}</p>
+                  <p className="text-xs text-muted-foreground">{d.description}</p>
+                </button>
+              ))}
             </div>
           </CardContent>
         </Card>

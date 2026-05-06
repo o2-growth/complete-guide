@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Workflow, Trash2, Play, Zap, FlaskConical } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   useAutomationRules,
   useSaveRule,
@@ -128,29 +129,30 @@ export default function AutomationRulesPage() {
         description="Crie regras 'quando X, faça Y' arrastando blocos visuais."
       />
 
-      <header className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Workflow className="h-6 w-6 text-primary" /> Automações
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Builder visual estilo Zapier. Quando algo acontecer, dispare ações automaticamente.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => process.mutate()}
-            disabled={process.isPending}
-          >
-            <Play className="h-4 w-4 mr-1" /> Processar fila agora
-          </Button>
-          <Button size="sm" onClick={startNew}>
-            <Plus className="h-4 w-4 mr-1" /> Nova regra
-          </Button>
-        </div>
-      </header>
+      <PageHeader
+        icon={Workflow}
+        title="Automações"
+        description="Builder visual estilo Zapier. Quando algo acontecer, dispare ações automaticamente."
+        breadcrumbs={[
+          { label: "Automações", to: "/app/automacoes" },
+          { label: "Regras" },
+        ]}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => process.mutate()}
+              disabled={process.isPending}
+            >
+              <Play className="h-4 w-4 mr-1" /> Processar fila agora
+            </Button>
+            <Button size="sm" onClick={startNew}>
+              <Plus className="h-4 w-4 mr-1" /> Nova regra
+            </Button>
+          </>
+        }
+      />
 
       <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
         {/* PAINEL ESQUERDO — lista + templates */}

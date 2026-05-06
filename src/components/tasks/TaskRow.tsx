@@ -1,4 +1,4 @@
-import { Calendar, Clock, MoreHorizontal, Trash2, Flag, Palette } from "lucide-react";
+import { Calendar, Clock, MoreHorizontal, Trash2, Flag, Palette, Copy, Pencil } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TaskRow as TTask, useDeleteTask, useToggleTaskDone } from "@/hooks/useTasks";
+import {
+  TaskRow as TTask,
+  useDeleteTask,
+  useDuplicateTask,
+  useToggleTaskDone,
+} from "@/hooks/useTasks";
 import { cn } from "@/lib/utils";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { TaskHoursChip } from "@/components/timer/TaskHoursChip";
@@ -18,6 +23,7 @@ import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { DueDateLabel } from "@/components/tasks/DueDateLabel";
 import { ProgressBar } from "@/components/tasks/ProgressBar";
 import { useWhiteboardTaskIndex } from "@/hooks/useWhiteboards";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "text-[hsl(var(--prio-urgent))]",
@@ -35,20 +41,27 @@ const PRIO_LABEL: Record<string, string> = {
   none: "",
 };
 
-export function TaskRow({
-  task,
-  onOpen,
-  index,
-}: {
+interface TaskRowProps {
   task: TTask;
   onOpen?: (id: string) => void;
+  onEdit?: (id: string) => void;
   index?: number;
-}) {
+  /** Quando true, o checkbox de bulk fica sempre visível. */
+  bulkMode?: boolean;
+}
+
+export function TaskRow({ task, onOpen, onEdit, index, bulkMode = false }: TaskRowProps) {
   const toggle = useToggleTaskDone();
   const remove = useDeleteTask();
+  const duplicate = useDuplicateTask();
   const { data: wbIndex } = useWhiteboardTaskIndex();
   const hasWhiteboard = !!wbIndex?.[task.id];
   const done = !!task.done_at;
+
+  const bulk = useBulkSelection();
+  const checked = bulk.isSelected(task.id);
+  const showBulkCheckbox = bulkMode || bulk.bulkMode;
+
   const handleToggle = () => toggle.mutate(task);
   const swipeRef = useSwipeGesture<HTMLDivElement>({
     onSwipeRight: () => handleToggle(),
@@ -62,27 +75,74 @@ export function TaskRow({
   const staggerDelay =
     typeof index === "number" && index < 5 ? `${index * 40}ms` : undefined;
 
+  // Shift+click range. lastSelectedId é o anchor.
+  const handleBulkToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey && bulk.lastSelectedId && bulk.lastSelectedId !== task.id) {
+      bulk.setRange(bulk.lastSelectedId, task.id);
+      return;
+    }
+    bulk.toggle(task.id);
+  };
+
   return (
     <div
       ref={swipeRef}
       className={cn(
-        "group flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30 animate-fade-in",
+        "group relative flex items-start rounded-lg border bg-card row-density transition-colors hover:bg-muted/30 animate-fade-in",
         done && "opacity-60",
         onOpen && "cursor-pointer",
+        checked && "ring-2 ring-primary/40 bg-primary/5",
       )}
       style={staggerDelay ? { animationDelay: staggerDelay } : undefined}
       onClick={(e) => {
         if (!onOpen) return;
         const target = e.target as HTMLElement;
         if (target.closest("[data-no-open]")) return;
+        // Em modo bulk, click vira toggle de seleção (modelo Linear/Notion).
+        if (showBulkCheckbox) {
+          handleBulkToggle(e);
+          return;
+        }
         onOpen(task.id);
       }}
     >
+      {/* Bulk checkbox — circular, à esquerda */}
+      <div
+        data-no-open
+        className={cn(
+          "mr-2 flex shrink-0 items-center pt-0.5 transition-opacity",
+          showBulkCheckbox
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100 focus-within:opacity-100",
+        )}
+      >
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={checked}
+          aria-label={checked ? "Desmarcar tarefa" : "Marcar tarefa"}
+          onClick={handleBulkToggle}
+          className={cn(
+            "flex h-4 w-4 items-center justify-center rounded-full border transition-all",
+            checked
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-muted-foreground/40 hover:border-foreground",
+          )}
+        >
+          {checked && (
+            <svg viewBox="0 0 12 12" className="h-3 w-3 stroke-current" fill="none" strokeWidth={2.5} aria-hidden>
+              <polyline points="2,6 5,9 10,3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+      </div>
+
       <Checkbox
         checked={done}
         onCheckedChange={() => handleToggle()}
         disabled={toggle.isPending}
-        className="mt-0.5"
+        className="mt-0.5 mr-3"
         data-no-open
       />
 
@@ -164,29 +224,100 @@ export function TaskRow({
         )}
       </div>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-            data-no-open
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" data-no-open>
-          <DropdownMenuItem
-            onClick={() => remove.mutate(task.id)}
-            className="text-destructive focus:text-destructive"
-          >
-            <Trash2 className="mr-2 h-4 w-4" /> Arquivar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Hover toolbar — ações power-user (timer, editar, duplicar, arquivar). */}
+      <div
+        className="ml-2 flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+        data-no-open
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">
+              <TaskTimerButton taskId={task.id} size="icon" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>Iniciar timer</TooltipContent>
+        </Tooltip>
 
-      <div className="opacity-0 transition-opacity group-hover:opacity-100">
-        <TaskTimerButton taskId={task.id} size="icon" />
+        {onEdit && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                aria-label="Editar"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(task.id);
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Editar</TooltipContent>
+          </Tooltip>
+        )}
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              aria-label="Duplicar tarefa"
+              onClick={(e) => {
+                e.stopPropagation();
+                duplicate.mutate(task);
+              }}
+              disabled={duplicate.isPending}
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Duplicar</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+              aria-label="Arquivar tarefa"
+              onClick={(e) => {
+                e.stopPropagation();
+                remove.mutate(task.id);
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Arquivar</TooltipContent>
+        </Tooltip>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              aria-label="Mais ações"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => duplicate.mutate(task)}>
+              <Copy className="mr-2 h-4 w-4" /> Duplicar
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => remove.mutate(task.id)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Arquivar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

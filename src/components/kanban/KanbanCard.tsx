@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Calendar, Flag, GripVertical, Pencil } from "lucide-react";
+import { Calendar, Copy, Flag, GripVertical, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useUpdateTask } from "@/hooks/useTaskDetail";
 import type { TaskRow } from "@/hooks/useTasks";
+import { useDeleteTask, useDuplicateTask } from "@/hooks/useTasks";
 import type { KanbanStatus } from "./KanbanColumn";
 import { DueDateLabel } from "@/components/tasks/DueDateLabel";
 import { ProgressBar } from "@/components/tasks/ProgressBar";
@@ -36,6 +38,8 @@ export function KanbanCard({ task, allStatuses, onOpen, onMoveToStatus, isOverla
   });
 
   const update = useUpdateTask();
+  const duplicate = useDuplicateTask();
+  const remove = useDeleteTask();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(task.title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -108,7 +112,7 @@ export function KanbanCard({ task, allStatuses, onOpen, onMoveToStatus, isOverla
       aria-label={`Tarefa: ${task.title}`}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        "group rounded-lg border bg-card p-3 shadow-sm outline-none transition-all",
+        "group rounded-lg border bg-card card-density shadow-sm outline-none transition-all",
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background",
         isDragging && !isOverlay && "scale-105 opacity-60 ring-2 ring-primary",
         isOverlay && "shadow-lg ring-2 ring-primary cursor-grabbing scale-105",
@@ -225,6 +229,52 @@ export function KanbanCard({ task, allStatuses, onOpen, onMoveToStatus, isOverla
       {progress > 0 && (
         <div className="mt-2">
           <ProgressBar value={progress} thin hideLabel />
+        </div>
+      )}
+
+      {/* Hover toolbar — duplicar / arquivar. Editar inline já existe via lápis. */}
+      {!isOverlay && (
+        <div
+          className="absolute right-1 top-1 flex items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                aria-label="Duplicar"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  duplicate.mutate(task);
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Duplicar</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                aria-label="Arquivar"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remove.mutate(task.id);
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Arquivar</TooltipContent>
+          </Tooltip>
         </div>
       )}
     </div>
