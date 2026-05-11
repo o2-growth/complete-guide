@@ -107,9 +107,17 @@ export default function WhiteboardDetailPage() {
 
   const initialData = useMemo(() => {
     if (!board) return null;
+    // Excalidraw espera Map em campos como `collaborators`. Como serializamos via JSON,
+    // viram `{}` e quebram (`forEach is not a function`). Sanitiza removendo campos
+    // voláteis de colaboração — a engine reidrata com defaults corretos.
+    const {
+      collaborators: _c,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ...safeAppState
+    } = (board.snapshot.appState ?? {}) as Record<string, unknown>;
     return {
       elements: board.snapshot.elements as never,
-      appState: board.snapshot.appState as never,
+      appState: safeAppState as never,
       files: board.snapshot.files as never,
       scrollToContent: true,
     };
