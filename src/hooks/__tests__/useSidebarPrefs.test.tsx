@@ -61,7 +61,8 @@ describe("useSidebarPrefs", () => {
     expect(result.current.favorites).toEqual([]);
     expect(result.current.isGroupCollapsed("midias-sociais")).toBe(true);
     expect(result.current.isGroupCollapsed("sistema")).toBe(true);
-    expect(result.current.isGroupCollapsed("visoes")).toBe(false);
+    expect(result.current.isGroupCollapsed("operacao")).toBe(true);
+    expect(result.current.isGroupCollapsed("inicio")).toBe(false);
   });
 
   it("toggleFavorite adiciona e remove paths persistindo em localStorage", async () => {
@@ -89,10 +90,10 @@ describe("useSidebarPrefs", () => {
     const { result } = renderHook(() => useSidebarPrefs());
 
     await act(async () => {
-      result.current.toggleGroupCollapsed("trabalho");
+      result.current.toggleGroupCollapsed("inicio");
     });
     await waitFor(() => {
-      expect(result.current.isGroupCollapsed("trabalho")).toBe(true);
+      expect(result.current.isGroupCollapsed("inicio")).toBe(true);
     });
 
     await waitFor(() => {
@@ -101,7 +102,7 @@ describe("useSidebarPrefs", () => {
     const payload = lastUpdatePayload as {
       preferences?: { sidebar?: { collapsedGroups?: string[] } };
     };
-    expect(payload.preferences?.sidebar?.collapsedGroups).toContain("trabalho");
+    expect(payload.preferences?.sidebar?.collapsedGroups).toContain("inicio");
   });
 
   it("reorderItems salva customOrder por groupId", async () => {
@@ -109,10 +110,10 @@ describe("useSidebarPrefs", () => {
     const order = ["/app/projetos", "/app/squads", "/app/demandas"];
 
     await act(async () => {
-      result.current.reorderItems("trabalho", order);
+      result.current.reorderItems("operacao", order);
     });
     await waitFor(() => {
-      expect(result.current.customOrder.trabalho).toEqual(order);
+      expect(result.current.customOrder.operacao).toEqual(order);
     });
   });
 });

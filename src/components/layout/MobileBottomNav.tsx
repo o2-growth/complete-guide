@@ -16,7 +16,7 @@ type NavItem = {
 };
 
 const items: NavItem[] = [
-  { to: "/app", icon: Inbox, label: "Inbox", end: true },
+  { to: "/app", icon: Inbox, label: "Entrada", end: true },
   { to: "/app/hoje", icon: Sun, label: "Hoje" },
   { to: "/app/calendario", icon: CalendarDays, label: "Agenda" },
   { to: "/app/notificacoes", icon: Bell, label: "Alertas" },

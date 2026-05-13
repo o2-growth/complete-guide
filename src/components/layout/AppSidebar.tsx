@@ -60,6 +60,7 @@ import {
   Languages,
   Lock,
   ShieldAlert,
+  Briefcase,
   Store,
   Compass,
   HelpCircle,
@@ -131,14 +132,25 @@ interface NavGroup {
 
 const GROUPS: NavGroup[] = [
   {
-    id: "visoes",
-    label: "Visões",
+    id: "inicio",
+    label: "Início",
     items: [
-      { title: "Inbox", url: "/app", icon: Inbox, end: true },
+      { title: "Caixa de entrada", url: "/app", icon: Inbox, end: true },
       { title: "Hoje", url: "/app/hoje", icon: Sun },
       { title: "Próximos 7 dias", url: "/app/proximos", icon: CalendarClock },
       { title: "Atrasadas", url: "/app/atrasadas", icon: AlertTriangle },
       { title: "Atribuídas a mim", url: "/app/atribuidas", icon: UserCheck },
+    ],
+  },
+  {
+    id: "projetos",
+    label: "Projetos",
+    items: [{ title: "Ver todos os projetos", url: "/app/projetos", icon: FolderKanban }],
+  },
+  {
+    id: "visualizacoes",
+    label: "Visualizações",
+    items: [
       { title: "Calendário", url: "/app/calendario", icon: CalendarDays },
       { title: "Kanban", url: "/app/kanban", icon: KanbanSquare },
       { title: "Eisenhower", url: "/app/eisenhower", icon: Grid2X2 },
@@ -149,23 +161,22 @@ const GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: "trabalho",
-    label: "Trabalho",
+    id: "operacao",
+    label: "Operações",
     items: [
-      { title: "Projetos", url: "/app/projetos", icon: FolderKanban },
       { title: "Squads", url: "/app/squads", icon: Users },
       { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
-      { title: "Workload", url: "/app/workload", icon: BarChart3 },
-      { title: "Timesheet", url: "/app/timesheet", icon: Clock },
-      { title: "Skills", url: "/app/skills", icon: Award },
-      { title: "Capacity", url: "/app/capacity", icon: CalendarRange },
+      { title: "Carga de trabalho", url: "/app/workload", icon: BarChart3 },
+      { title: "Apontamento de horas", url: "/app/timesheet", icon: Clock },
+      { title: "Habilidades", url: "/app/skills", icon: Award },
+      { title: "Capacidade", url: "/app/capacity", icon: CalendarRange },
       { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
       { title: "SLAs", url: "/app/slas", icon: Shield },
       { title: "Modelos", url: "/app/modelos", icon: FileStack },
-      { title: "Templates", url: "/app/templates", icon: ListTodo },
+      { title: "Modelos prontos", url: "/app/templates", icon: ListTodo },
       { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
-      { title: "Whiteboards", url: "/app/whiteboards", icon: Palette },
-      { title: "Audit log", url: "/app/audit", icon: History },
+      { title: "Quadros brancos", url: "/app/whiteboards", icon: Palette },
+      { title: "Registro de auditoria", url: "/app/audit", icon: History },
     ],
   },
   {
@@ -175,39 +186,39 @@ const GROUPS: NavGroup[] = [
   },
   {
     id: "midias-sociais",
-    label: "Mídias sociais",
+    label: "Social e mídia",
     items: [
       { title: "Calendário editorial", url: "/app/social", icon: CalendarRange },
       { title: "Pipeline", url: "/app/social/pipeline", icon: Workflow },
       { title: "Studio", url: "/app/social/studio", icon: Wand2 },
       { title: "Inteligência IA", url: "/app/social/intel", icon: Brain },
-      { title: "Inbox social", url: "/app/social/inbox", icon: InboxIcon },
+      { title: "Caixa do social", url: "/app/social/inbox", icon: InboxIcon },
       { title: "Cadência", url: "/app/social/cadencia", icon: Clock },
       { title: "Campanhas", url: "/app/campanhas", icon: Megaphone },
-      { title: "Boosts/ROAS", url: "/app/social/boosts", icon: Rocket },
-      { title: "Creators", url: "/app/social/creators", icon: UserPlus },
-      { title: "Link in bio", url: "/app/social/bio", icon: Link2 },
+      { title: "Boosts e ROAS", url: "/app/social/boosts", icon: Rocket },
+      { title: "Criadores", url: "/app/social/creators", icon: UserPlus },
+      { title: "Link na bio", url: "/app/social/bio", icon: Link2 },
       { title: "Biblioteca", url: "/app/biblioteca", icon: Library },
-      { title: "Snippets", url: "/app/snippets", icon: FileText },
+      { title: "Trechos", url: "/app/snippets", icon: FileText },
       { title: "Personas", url: "/app/personas", icon: UserCircle },
       { title: "Mídias", url: "/app/midias", icon: ImageIcon },
-      { title: "Analytics social", url: "/app/social/analytics", icon: PieChart },
+      { title: "Métricas sociais", url: "/app/social/analytics", icon: PieChart },
     ],
   },
   {
     id: "insights",
-    label: "Insights",
+    label: "Inteligência",
     items: [
-      { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
-      { title: "Reports", url: "/app/reports", icon: FileBarChart },
+      { title: "Painel", url: "/app/dashboard", icon: LayoutDashboard },
+      { title: "Relatórios", url: "/app/reports", icon: FileBarChart },
       { title: "Anomalias", url: "/app/anomalias", icon: AlertOctagon },
-      { title: "Forecast", url: "/app/forecast", icon: TrendingUp },
+      { title: "Previsões", url: "/app/forecast", icon: TrendingUp },
       { title: "OKRs", url: "/app/okrs", icon: Target },
-      { title: "Executivo", url: "/app/exec", icon: Crown },
-      { title: "Copilot IA", url: "/app/copilot", icon: Bot },
-      { title: "Benchmarks", url: "/app/benchmarks", icon: Gauge },
+      { title: "Visão executiva", url: "/app/exec", icon: Crown },
+      { title: "Copiloto IA", url: "/app/copilot", icon: Bot },
+      { title: "Comparativos", url: "/app/benchmarks", icon: Gauge },
       { title: "Simulações", url: "/app/simulacoes", icon: FlaskConical },
-      { title: "IA Proativa", url: "/app/ia-proativa", icon: Sparkles },
+      { title: "IA proativa", url: "/app/ia-proativa", icon: Sparkles },
       { title: "Gênio", url: "/app/genio", icon: Sparkles },
     ],
   },
@@ -216,25 +227,25 @@ const GROUPS: NavGroup[] = [
     label: "Conhecimento",
     items: [
       { title: "Wiki interna", url: "/app/conhecimento", icon: BookOpen },
-      { title: "Central de Ajuda", url: "/app/ajuda", icon: HelpCircle },
+      { title: "Central de ajuda", url: "/app/ajuda", icon: HelpCircle },
     ],
   },
   {
     id: "sistema",
-    label: "Sistema",
+    label: "Conta e workspace",
     items: [
       { title: "Notificações", url: "/app/notificacoes", icon: Bell },
       { title: "Automações", url: "/app/automacoes", icon: Workflow },
       { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
       { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
-      { title: "Plano & billing", url: "/app/configuracoes/plano", icon: Crown },
+      { title: "Plano e faturamento", url: "/app/configuracoes/plano", icon: Crown },
       { title: "Marketplace", url: "/app/marketplace", icon: Store },
-      { title: "Developer Hub", url: "/app/developer", icon: Code2 },
-      { title: "Conquistas & XP", url: "/app/conquistas", icon: Trophy },
+      { title: "Hub do desenvolvedor", url: "/app/developer", icon: Code2 },
+      { title: "Conquistas e XP", url: "/app/conquistas", icon: Trophy },
       { title: "Comece aqui", url: "/app/comecar", icon: Compass },
       { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
       { title: "Busca global", url: "/app/buscar", icon: Search },
-      { title: "Enterprise", url: "/app/enterprise", icon: Building2 },
+      { title: "Enterprise", url: "/app/enterprise", icon: Briefcase },
       { title: "Segurança", url: "/app/seguranca", icon: Lock },
       { title: "Privacidade", url: "/app/configuracoes/privacidade", icon: ShieldAlert },
       { title: "Aparência", url: "/app/configuracoes/aparencia", icon: Palette },
@@ -641,7 +652,7 @@ export function AppSidebar() {
 
         {pinnedViews.length > 0 && (
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel>Saved Views</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel>Views salvas</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {pinnedViews.map((v) => {
@@ -665,7 +676,7 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {GROUPS.map((group, idx) => (
+        {GROUPS.map((group) => (
           <div key={group.id}>
             <CollapsibleGroup
               group={group}
@@ -679,7 +690,7 @@ export function AppSidebar() {
               pathname={pathname}
               enableDnd={enableDnd}
             />
-            {idx === 1 && (
+            {group.id === "projetos" && (
               <SidebarGroup>
                 <SidebarGroupContent>
                   <ProjectTreeSidebar collapsed={collapsed} />
@@ -693,7 +704,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
-            v1.0 · 40/43
+            v1.0 · 43/43
           </p>
         )}
       </SidebarFooter>
