@@ -140,11 +140,16 @@ export function useRevokeInvite() {
 }
 
 export function useAcceptInvitation() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (token: string) => {
       const { data, error } = await supabase.rpc("accept_invitation", { _token: token });
       if (error) throw error;
       return data as unknown as string;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my_workspaces"] });
+      qc.invalidateQueries({ queryKey: ["tenant_members"] });
     },
   });
 }
