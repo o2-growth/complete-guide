@@ -106,18 +106,22 @@ export function useSendInvite() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ tenantId, email, role }: { tenantId: string; email: string; role: string }) => {
+      const normalizedEmail = email.trim().toLowerCase();
       const { data, error } = await supabase
         .from("invitations")
-        .insert({ tenant_id: tenantId, email, role: role as never })
+        .insert({ tenant_id: tenantId, email: normalizedEmail, role: role as never })
         .select()
         .single();
       if (error) throw error;
       // dispara email (modo best-effort — sem RESEND_API_KEY apenas registra)
-      await supabase.functions.invoke("send-invite", { body: { invitation_id: data.id } })
+      const emailResult = await supabase.functions.invoke("send-invite", { body: { invitation_id: data.id } })
         .catch((err) => {
           toast.warning(`Convite criado, mas e-mail pode não ter sido enviado: ${err?.message ?? "erro desconhecido"}`);
           return null;
         });
+      if (emailResult?.data?.status === "dry_run") {
+        toast.warning("Convite criado. O envio por e-mail ainda não está configurado; use Copiar link por enquanto.");
+      }
       return data;
     },
     onSuccess: () => {
@@ -140,11 +144,16 @@ export function useRevokeInvite() {
 }
 
 export function useAcceptInvitation() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (token: string) => {
       const { data, error } = await supabase.rpc("accept_invitation", { _token: token });
       if (error) throw error;
       return data as unknown as string;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my_workspaces"] });
+      qc.invalidateQueries({ queryKey: ["tenant_members"] });
     },
   });
 }

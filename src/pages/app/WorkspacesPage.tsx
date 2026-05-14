@@ -75,10 +75,15 @@ export default function WorkspacesPage() {
               </SelectContent>
             </Select>
             <Button size="sm" onClick={async () => {
-              if (!inviteEmail || !tenantId) return;
-              await sendInvite.mutateAsync({ tenantId, email: inviteEmail, role: inviteRole });
+              const email = inviteEmail.trim().toLowerCase();
+              if (!tenantId) return;
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                toast.error("Informe um e-mail válido");
+                return;
+              }
+              await sendInvite.mutateAsync({ tenantId, email, role: inviteRole });
               setInviteEmail("");
-            }}>Convidar</Button>
+            }} disabled={sendInvite.isPending}>{sendInvite.isPending ? "Enviando…" : "Convidar"}</Button>
           </div>
           <div className="space-y-1.5">
             {invites.map((i) => (

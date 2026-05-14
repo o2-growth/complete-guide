@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,12 +30,15 @@ type SignupValues = z.infer<typeof signupSchema>;
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const nextParam = searchParams.get("next");
+  const nextPath = nextParam?.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/app";
 
   useEffect(() => {
-    if (!loading && user) navigate("/app", { replace: true });
-  }, [user, loading, navigate]);
+    if (!loading && user) navigate(nextPath, { replace: true });
+  }, [user, loading, navigate, nextPath]);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -62,7 +65,7 @@ const Auth = () => {
       return;
     }
     toast.success("Bem-vindo de volta!");
-    navigate("/app", { replace: true });
+    navigate(nextPath, { replace: true });
   };
 
   const onSignup = async (values: SignupValues) => {
@@ -71,7 +74,7 @@ const Auth = () => {
       email: values.email,
       password: values.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/app`,
+        emailRedirectTo: `${window.location.origin}${nextPath}`,
         data: { full_name: values.fullName },
       },
     });
@@ -84,7 +87,7 @@ const Auth = () => {
       return;
     }
     toast.success("Conta criada! Vamos configurar seu perfil.");
-    navigate("/onboarding", { replace: true });
+    navigate(nextPath === "/app" ? "/onboarding" : nextPath, { replace: true });
   };
 
   return (
