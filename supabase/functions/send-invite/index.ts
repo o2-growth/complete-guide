@@ -14,14 +14,24 @@ Deno.serve(async (req) => {
 
     const { data: inv, error } = await sb
       .from("invitations")
-      .select("*, tenants(name, primary_color)")
+      .select("*")
       .eq("id", invitation_id)
       .maybeSingle();
-    if (error || !inv) throw new Error("invitation not found");
+    if (error) {
+      console.error("[send-invite] query error:", error);
+      throw new Error(`invitation lookup failed: ${error.message}`);
+    }
+    if (!inv) throw new Error(`invitation not found: ${invitation_id}`);
+
+    const { data: tenant } = await sb
+      .from("tenants")
+      .select("name, primary_color")
+      .eq("id", inv.tenant_id)
+      .maybeSingle();
 
     const baseUrl = req.headers.get("origin") || "https://app.example.com";
     const acceptUrl = `${baseUrl}/aceitar-convite/${inv.token}`;
-    const tenantName = (inv as { tenants: { name: string } }).tenants?.name ?? "workspace";
+    const tenantName = tenant?.name ?? "workspace";
 
     const resendKey = Deno.env.get("RESEND_API_KEY");
     if (!resendKey) {
