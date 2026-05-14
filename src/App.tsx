@@ -78,6 +78,7 @@ const AutomationRulesPage = lazy(() => import("./pages/app/AutomationRulesPage.t
 const WorkspacesPage = lazy(() => import("./pages/app/WorkspacesPage.tsx"));
 const PlanPage = lazy(() => import("./pages/app/PlanPage.tsx"));
 const AcceptInvitePage = lazy(() => import("./pages/public/AcceptInvitePage.tsx"));
+const UnsubscribePage = lazy(() => import("./pages/public/UnsubscribePage.tsx"));
 const AdminErrorsPage = lazy(() => import("./pages/app/AdminErrorsPage.tsx"));
 const AdminHealthPage = lazy(() => import("./pages/app/AdminHealthPage.tsx"));
 const LanguagePage = lazy(() => import("./pages/app/LanguagePage.tsx"));
@@ -132,6 +133,7 @@ const App = () => (
               <Route path="/aprovar-midia/:token" element={<SocialApprovePage />} />
               <Route path="/bio/:slug" element={<PublicBioPage />} />
               <Route path="/aceitar-convite/:token" element={<AcceptInvitePage />} />
+              <Route path="/unsubscribe" element={<UnsubscribePage />} />
               <Route path="/precos" element={<PricingPage />} />
               <Route path="/checkout/:plan" element={<CheckoutPage />} />
               <Route
