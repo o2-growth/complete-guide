@@ -113,14 +113,27 @@ export function useSendInvite() {
         .select()
         .single();
       if (error) throw error;
-      // dispara email (modo best-effort — sem RESEND_API_KEY apenas registra)
-      const emailResult = await supabase.functions.invoke("send-invite", { body: { invitation_id: data.id } })
-        .catch((err) => {
-          toast.warning(`Convite criado, mas e-mail pode não ter sido enviado: ${err?.message ?? "erro desconhecido"}`);
-          return null;
-        });
-      if (emailResult?.data?.status === "dry_run") {
-        toast.warning("Convite criado. O envio por e-mail ainda não está configurado; use Copiar link por enquanto.");
+      const acceptUrl = `${window.location.origin}/aceitar-convite/${data.token}`;
+      const { data: tenant } = await supabase
+        .from("tenants")
+        .select("name")
+        .eq("id", tenantId)
+        .maybeSingle();
+
+      const { error: emailError } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "workspace-invite",
+          recipientEmail: normalizedEmail,
+          idempotencyKey: `workspace-invite-${data.id}`,
+          templateData: {
+            tenantName: tenant?.name ?? "workspace",
+            role,
+            acceptUrl,
+          },
+        },
+      });
+      if (emailError) {
+        toast.warning(`Convite criado, mas e-mail pode não ter sido enviado: ${emailError.message}`);
       }
       return data;
     },

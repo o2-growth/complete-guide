@@ -159,13 +159,29 @@ const Onboarding = () => {
       const { data: created, error } = await supabase
         .from("invitations")
         .insert(rows)
-        .select("id");
+        .select("id, email, token, role");
       if (error) throw error;
 
-      // Best-effort: dispara e-mails (silencioso se falhar)
+      const { data: tenant } = await supabase
+        .from("tenants")
+        .select("name")
+        .eq("id", tenantId)
+        .maybeSingle();
+
       await Promise.all(
         (created ?? []).map((inv) =>
-          supabase.functions.invoke("send-invite", { body: { invitation_id: inv.id } }).catch(() => null),
+          supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "workspace-invite",
+              recipientEmail: inv.email,
+              idempotencyKey: `workspace-invite-${inv.id}`,
+              templateData: {
+                tenantName: tenant?.name ?? "workspace",
+                role: inv.role,
+                acceptUrl: `${window.location.origin}/aceitar-convite/${inv.token}`,
+              },
+            },
+          }).catch(() => null),
         ),
       );
 
