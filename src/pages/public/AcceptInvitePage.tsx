@@ -28,13 +28,13 @@ export default function AcceptInvitePage() {
   const onAccept = async () => {
     if (!token) return;
     if (!user) {
-      navigate(`/auth?next=/aceitar-convite/${token}`);
+      navigate(`/auth?next=${encodeURIComponent(`/aceitar-convite/${token}`)}`);
       return;
     }
     try {
       await accept.mutateAsync(token);
       toast.success("Convite aceito! Redirecionando…");
-      setTimeout(() => navigate("/app"), 800);
+      setTimeout(() => navigate("/app", { replace: true }), 800);
     } catch (e) {
       toast.error((e as Error).message);
     }
