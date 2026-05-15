@@ -34,6 +34,7 @@ export function useExecBriefing() {
   const { tenantId } = useWorkspace();
   return useMutation({
     mutationFn: async () => {
+      if (!tenantId) throw new Error("Workspace ainda carregando, tente novamente em instantes");
       const { data, error } = await supabase.functions.invoke("exec-briefing", {
         body: { tenant_id: tenantId },
       });
