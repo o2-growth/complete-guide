@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tree, type NodeApi, type NodeRendererProps, type MoveHandler } from "react-arborist";
+import { Tree, type NodeRendererProps, type MoveHandler } from "react-arborist";
 import {
   ChevronRight,
   ChevronDown,
@@ -8,6 +8,10 @@ import {
   Plus,
   Pencil,
   FolderPlus,
+  Inbox,
+  Folder,
+  List as ListIcon,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +30,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useProjectTree, type ProjectTreeNode } from "@/hooks/useProjectTree";
+import { useSquads } from "@/hooks/useSquads";
 
 interface NewProjectDialogState {
   open: boolean;
@@ -35,12 +40,27 @@ interface NewProjectDialogState {
 export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   const navigate = useNavigate();
   const { tree, isLoading, mutateMove, mutateRename, mutateCreate, maxDepth } = useProjectTree();
+  const { data: squads = [] } = useSquads();
   const [newProject, setNewProject] = useState<NewProjectDialogState>({ open: false, parentId: null });
   const [newName, setNewName] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // react-arborist espera array com children opcional; nossa forma já bate.
-  const data = useMemo(() => tree, [tree]);
+  const grouped = useMemo(() => {
+    const inbox = tree.filter((n) => n.kind === "inbox");
+    const bySquad = new Map<string, ProjectTreeNode[]>();
+    const orphan: ProjectTreeNode[] = [];
+    for (const n of tree) {
+      if (n.kind === "inbox") continue;
+      if (n.squad_id) {
+        const arr = bySquad.get(n.squad_id) ?? [];
+        arr.push(n);
+        bySquad.set(n.squad_id, arr);
+      } else {
+        orphan.push(n);
+      }
+    }
+    return { inbox, bySquad, orphan };
+  }, [tree]);
 
   const handleMove: MoveHandler<ProjectTreeNode> = ({ dragIds, parentId, index }) => {
     const id = dragIds[0];
@@ -67,12 +87,7 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
       <div className="flex flex-col items-center gap-1 py-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          aria-label="Novo projeto"
-          onClick={() => openNewProject(null)}
-        >
+        <Button size="icon" variant="ghost" aria-label="Novo projeto" onClick={() => openNewProject(null)}>
           <Plus className="h-4 w-4" />
         </Button>
       </div>
@@ -82,7 +97,7 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="px-1">
       <div className="flex items-center justify-between px-2 pb-1">
-        <span className="text-xs font-medium text-sidebar-foreground/70">Projetos</span>
+        <span className="text-xs font-medium text-sidebar-foreground/70">Espaços</span>
         <Button
           size="icon"
           variant="ghost"
@@ -94,44 +109,64 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
         </Button>
       </div>
 
-      <div ref={containerRef} className="min-h-[120px]">
+      <div ref={containerRef} className="min-h-[120px] space-y-2">
         {isLoading ? (
           <div className="px-2 py-1 text-xs text-muted-foreground">Carregando…</div>
-        ) : data.length === 0 ? (
+        ) : tree.length === 0 ? (
           <div className="px-2 py-2 text-xs text-muted-foreground">
             Nenhum projeto ainda. Crie o primeiro acima.
           </div>
         ) : (
-          <Tree<ProjectTreeNode>
-            data={data}
-            openByDefault={false}
-            width={232}
-            height={Math.min(360, Math.max(160, data.length * 28))}
-            indent={16}
-            rowHeight={28}
-            onMove={handleMove}
-            onRename={handleRename}
-            disableDrop={({ parentNode, dragNodes }) => {
-              if (!parentNode) return false;
-              const draggingDepth = dragNodes[0]?.level ?? 0;
-              return parentNode.level + 1 + draggingDepth > maxDepth;
-            }}
-          >
-            {(props) => (
-              <ProjectNode
-                {...props}
-                onAddChild={(id) => openNewProject(id)}
+          <>
+            {grouped.inbox.length > 0 && (
+              <SquadGroup
+                label="Caixa de entrada pessoal"
+                color={null}
+                icon={<Inbox className="h-3.5 w-3.5" />}
+                roots={grouped.inbox}
+                onMove={handleMove}
+                onRename={handleRename}
+                onAddChild={openNewProject}
                 onNavigate={(id) => navigate(`/app/projetos/${id}`)}
+                maxDepth={maxDepth}
               />
             )}
-          </Tree>
+            {squads.map((s) => {
+              const roots = grouped.bySquad.get(s.id) ?? [];
+              if (roots.length === 0) return null;
+              return (
+                <SquadGroup
+                  key={s.id}
+                  label={s.name}
+                  color={s.color}
+                  icon={<Users className="h-3.5 w-3.5" />}
+                  roots={roots}
+                  onMove={handleMove}
+                  onRename={handleRename}
+                  onAddChild={openNewProject}
+                  onNavigate={(id) => navigate(`/app/projetos/${id}`)}
+                  maxDepth={maxDepth}
+                />
+              );
+            })}
+            {grouped.orphan.length > 0 && (
+              <SquadGroup
+                label="Sem espaço"
+                color={null}
+                icon={<FolderKanban className="h-3.5 w-3.5" />}
+                roots={grouped.orphan}
+                onMove={handleMove}
+                onRename={handleRename}
+                onAddChild={openNewProject}
+                onNavigate={(id) => navigate(`/app/projetos/${id}`)}
+                maxDepth={maxDepth}
+              />
+            )}
+          </>
         )}
       </div>
 
-      <Dialog
-        open={newProject.open}
-        onOpenChange={(o) => setNewProject((s) => ({ ...s, open: o }))}
-      >
+      <Dialog open={newProject.open} onOpenChange={(o) => setNewProject((s) => ({ ...s, open: o }))}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -165,6 +200,65 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   );
 }
 
+interface SquadGroupProps {
+  label: string;
+  color: string | null;
+  icon: React.ReactNode;
+  roots: ProjectTreeNode[];
+  onMove: MoveHandler<ProjectTreeNode>;
+  onRename: (args: { id: string; name: string }) => void;
+  onAddChild: (parentId: string | null) => void;
+  onNavigate: (id: string) => void;
+  maxDepth: number;
+}
+
+function SquadGroup({ label, color, icon, roots, onMove, onRename, onAddChild, onNavigate, maxDepth }: SquadGroupProps) {
+  const [open, setOpen] = useState(true);
+  const count = useMemo(() => {
+    let n = 0;
+    const walk = (arr: ProjectTreeNode[]) => {
+      n += arr.length;
+      arr.forEach((c) => walk(c.children));
+    };
+    walk(roots);
+    return n;
+  }, [roots]);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-1 px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-sidebar-foreground/60 hover:text-sidebar-foreground/90"
+      >
+        {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+        <span style={color ? { color } : undefined} className="flex items-center gap-1">
+          {icon}
+          <span className="truncate">{label}</span>
+        </span>
+      </button>
+      {open && (
+        <Tree<ProjectTreeNode>
+          data={roots}
+          openByDefault={false}
+          width={232}
+          height={Math.min(280, Math.max(60, count * 28))}
+          indent={14}
+          rowHeight={28}
+          onMove={onMove}
+          onRename={onRename}
+          disableDrop={({ parentNode, dragNodes }) => {
+            if (!parentNode) return false;
+            const draggingDepth = dragNodes[0]?.level ?? 0;
+            return parentNode.level + 1 + draggingDepth > maxDepth;
+          }}
+        >
+          {(props) => <ProjectNode {...props} onAddChild={onAddChild} onNavigate={onNavigate} />}
+        </Tree>
+      )}
+    </div>
+  );
+}
+
 interface ProjectNodeProps extends NodeRendererProps<ProjectTreeNode> {
   onAddChild: (parentId: string) => void;
   onNavigate: (id: string) => void;
@@ -172,11 +266,12 @@ interface ProjectNodeProps extends NodeRendererProps<ProjectTreeNode> {
 
 function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate }: ProjectNodeProps) {
   const hasChildren = node.children && node.children.length > 0;
+  const KindIcon =
+    node.data.kind === "inbox" ? Inbox : node.data.kind === "folder" || hasChildren ? Folder : ListIcon;
 
   const handleClick = (e: React.MouseEvent) => {
     if (node.isEditing) return;
     if (hasChildren) {
-      // Click no chevron toggles; click no rótulo navega.
       if ((e.target as HTMLElement).dataset.role === "chevron") {
         node.toggle();
         return;
@@ -216,7 +311,7 @@ function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate }: Projec
               )
             ) : null}
           </button>
-          <FolderKanban
+          <KindIcon
             className="h-3.5 w-3.5 shrink-0"
             style={node.data.color ? { color: node.data.color } : undefined}
           />
