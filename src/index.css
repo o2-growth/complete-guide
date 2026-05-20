@@ -10,34 +10,31 @@
 @layer base {
   :root {
     /* Surfaces */
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 60 14% 98%;            /* #FBFBFA off-white */
+    --foreground: 0 0% 7%;               /* #111 */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 7%;
 
-    /* Brand — azul Oxy #0EA5E9. L:48%→38% para que `text-primary` em
-       fundos transparentes (bg-primary/5, bg-primary/10) e em white passe
-       AA WCAG. O CTA principal continua usando bg-primary com texto branco,
-       que não depende deste delta. */
-    --primary: 199 89% 38%;
-    --primary-foreground: 210 40% 98%;
-    --primary-glow: 199 95% 65%;
+    /* Brand O2 — Lima 500 #00D842 (verde para fundos claros).
+       L mantido em 35% para garantir AA WCAG quando usado como texto. */
+    --primary: 137 100% 32%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 137 100% 42%;
 
-    /* Brand — dourado #FCD34D */
-    --accent: 45 96% 64%;
-    --accent-foreground: 222 47% 11%;
-    --accent-glow: 45 100% 78%;
+    /* Accent neutro — superfícies de hover suaves (ink-150). */
+    --accent: 0 0% 92%;
+    --accent-foreground: 0 0% 13%;
+    --accent-glow: 119 84% 80%;
 
-    --secondary: 210 40% 94%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 13%;
 
-    --muted: 210 30% 94%;
-    /* L: 47%→38% para passar contraste WCAG AA contra --background. */
-    --muted-foreground: 215 16% 38%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 33%;        /* ink-500 escurecido p/ AA */
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -49,16 +46,16 @@
     --warning: 38 92% 50%;
     --warning-foreground: 222 47% 11%;
 
-    --border: 214 32% 88%;
-    --input: 214 32% 91%;
-    --ring: 199 89% 48%;
+    --border: 0 0% 88%;
+    --input: 0 0% 91%;
+    --ring: 137 100% 42%;
 
     --radius: 0.625rem;
 
     /* Squads (PRD §13) */
     --squad-ia: 262 83% 58%;          /* #7c3aed */
     --squad-marketing: 0 84% 60%;     /* #ef4444 */
-    --squad-expansao: 160 84% 39%;    /* #10b981 */
+    --squad-expansao: 137 100% 42%;   /* alinhado com Lima O2 */
 
     /* Workload heatmap */
     --workload-low: 142 71% 45%;      /* verde <70% */
@@ -69,33 +66,33 @@
     --prio-urgent: 0 84% 60%;
     --prio-high: 24 95% 53%;
     --prio-medium: 45 96% 64%;
-    --prio-low: 199 89% 48%;
+    --prio-low: 137 100% 42%;
     --prio-none: 215 16% 65%;
 
-    /* Gradientes da marca */
-    --gradient-brand: linear-gradient(135deg, hsl(199 89% 48%), hsl(199 95% 65%));
-    --gradient-gold: linear-gradient(135deg, hsl(45 96% 64%), hsl(45 100% 78%));
-    --gradient-hero: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(217 91% 60%) 50%, hsl(262 83% 58%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(210 40% 98%), hsl(210 30% 94%));
+    /* Gradientes da marca O2 — verde Lima */
+    --gradient-brand: linear-gradient(135deg, hsl(137 100% 42%), hsl(119 84% 66%));
+    --gradient-gold: linear-gradient(135deg, hsl(119 84% 66%), hsl(137 100% 42%));
+    --gradient-hero: linear-gradient(135deg, hsl(137 100% 35%) 0%, hsl(137 100% 42%) 50%, hsl(119 84% 66%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(60 14% 98%), hsl(0 0% 94%));
 
     /* Shadows com tom da marca */
-    --shadow-brand: 0 10px 30px -10px hsl(199 89% 48% / 0.35);
-    --shadow-soft: 0 4px 12px -2px hsl(222 47% 11% / 0.08);
-    --shadow-elevated: 0 20px 40px -12px hsl(222 47% 11% / 0.18);
+    --shadow-brand: 0 10px 30px -10px hsl(137 100% 42% / 0.35);
+    --shadow-soft: 0 4px 12px -2px hsl(0 0% 7% / 0.08);
+    --shadow-elevated: 0 20px 40px -12px hsl(0 0% 7% / 0.18);
 
-    /* Transições */
-    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* Transições — easing único da plataforma O2. */
+    --transition-base: 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition-spring: 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
-    /* Sidebar */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 199 89% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 40% 18%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 222 40% 18%;
-    --sidebar-ring: 199 89% 48%;
+    /* Sidebar — sempre dark (identidade O2 dark-first). */
+    --sidebar-background: 0 0% 13%;       /* #212121 ink-900 */
+    --sidebar-foreground: 0 0% 98%;       /* #FAFAFA */
+    --sidebar-primary: 119 84% 66%;       /* Lima 400 em fundo escuro */
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 18%;           /* #2E2E2E */
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 23%;           /* #3A3A3A */
+    --sidebar-ring: 119 84% 66%;
 
     /* Density tokens — controlam padding/gap/font-size de listas e cards.
        Default = "cozy" (compatível com layout atual). Trocar via
@@ -124,28 +121,29 @@
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 96%;
+    --background: 0 0% 23%;              /* #3A3A3A */
+    --foreground: 0 0% 98%;              /* #FAFAFA */
 
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 96%;
+    --card: 0 0% 18%;                    /* #2E2E2E */
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 0 0% 18%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 199 89% 55%;
-    --primary-foreground: 222 47% 6%;
-    --primary-glow: 199 95% 70%;
+    /* Lima 400 — verde em fundos escuros (#63F161). */
+    --primary: 119 84% 66%;
+    --primary-foreground: 0 0% 4%;
+    --primary-glow: 119 84% 78%;
 
-    --accent: 45 96% 64%;
-    --accent-foreground: 222 47% 6%;
-    --accent-glow: 45 100% 78%;
+    --accent: 0 0% 29%;                  /* #494949 ink-700 */
+    --accent-foreground: 0 0% 98%;
+    --accent-glow: 119 84% 78%;
 
-    --secondary: 222 40% 14%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary: 0 0% 29%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 222 40% 14%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 77%;        /* #C4C4C4 */
 
     --destructive: 0 73% 55%;
     --destructive-foreground: 210 40% 96%;
@@ -156,23 +154,23 @@
     --warning: 38 92% 55%;
     --warning-foreground: 222 47% 6%;
 
-    --border: 222 40% 18%;
-    --input: 222 40% 18%;
-    --ring: 199 89% 55%;
+    --border: 0 0% 23%;
+    --input: 0 0% 29%;
+    --ring: 119 84% 66%;
 
-    --gradient-subtle: linear-gradient(180deg, hsl(222 47% 6%), hsl(222 47% 9%));
-    --shadow-brand: 0 10px 30px -10px hsl(199 89% 55% / 0.5);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 23%), hsl(0 0% 18%));
+    --shadow-brand: 0 10px 30px -10px hsl(119 84% 66% / 0.5);
     --shadow-soft: 0 4px 12px -2px hsl(0 0% 0% / 0.3);
     --shadow-elevated: 0 20px 40px -12px hsl(0 0% 0% / 0.5);
 
-    --sidebar-background: 222 47% 4%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 199 89% 55%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 222 40% 12%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 222 40% 12%;
-    --sidebar-ring: 199 89% 55%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 119 84% 66%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 119 84% 66%;
   }
 }
 
@@ -191,13 +189,13 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: 'Montserrat', ui-sans-serif, system-ui, -apple-system, sans-serif;
     transition: background-color 250ms ease, color 250ms ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    @apply tracking-tight;
+    font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+    @apply tracking-tight font-semibold;
   }
 }
 
