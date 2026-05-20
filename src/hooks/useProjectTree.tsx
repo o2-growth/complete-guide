@@ -85,6 +85,24 @@ function subtreeDepth(node: ProjectTreeNode, current = 1): number {
   return Math.max(...node.children.map((c) => subtreeDepth(c, current + 1)));
 }
 
+/**
+ * Coleta recursivamente todos os ids descendentes (incluindo o próprio nó).
+ */
+export function collectDescendantIds(node: ProjectTreeNode): string[] {
+  const ids: string[] = [node.id];
+  node.children.forEach((c) => ids.push(...collectDescendantIds(c)));
+  return ids;
+}
+
+export function findNode(nodes: ProjectTreeNode[], id: string): ProjectTreeNode | null {
+  for (const n of nodes) {
+    if (n.id === id) return n;
+    const r = findNode(n.children, id);
+    if (r) return r;
+  }
+  return null;
+}
+
 export function useProjectTree() {
   const qc = useQueryClient();
   const { tenantId } = useWorkspace();

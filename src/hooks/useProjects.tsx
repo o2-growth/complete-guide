@@ -18,6 +18,9 @@ export interface Project {
   task_seq: number;
   created_at: string;
   created_by?: string | null;
+  kind?: "space_root" | "folder" | "list" | "inbox" | null;
+  parent_id?: string | null;
+  is_private?: boolean | null;
 }
 
 // Inboxes pessoais são auto-criadas com prefixo "Inbox de " pelo trigger handle_new_user.
@@ -113,6 +116,31 @@ export function useProjectTasks(projectId: string | undefined) {
         .eq("project_id", projectId!)
         .eq("archived", false)
         .order("position", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+/**
+ * Tasks de um conjunto de projetos (usado por pastas/espaços que agregam
+ * tarefas de todos os descendentes na árvore).
+ */
+export function useTasksForProjects(projectIds: string[] | undefined) {
+  const ids = (projectIds ?? []).slice().sort();
+  return useQuery({
+    ...queryProfile("structural"),
+    queryKey: ["tasks-for-projects", ids.join(",")],
+    enabled: ids.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .in("project_id", ids)
+        .eq("archived", false)
+        .order("due_at", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return data ?? [];
     },

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BarChart3, FileStack, KanbanSquare, LayoutGrid, ListTodo, Loader2 } from "lucide-react";
+import { ArrowLeft, BarChart3, FileStack, Folder, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,7 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useProject, useProjectTasks } from "@/hooks/useProjects";
+import { useProject, useProjectTasks, useTasksForProjects } from "@/hooks/useProjects";
+import { useProjectTree, collectDescendantIds, findNode } from "@/hooks/useProjectTree";
 import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskRow as TaskRowItem } from "@/components/tasks/TaskRow";
@@ -44,7 +45,21 @@ function setStoredProjectView(projectId: string | undefined, value: string) {
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: project, isLoading } = useProject(id);
-  const { data: tasks, isLoading: lt } = useProjectTasks(id);
+  const { tree } = useProjectTree();
+  const node = useMemo(() => (id ? findNode(tree, id) : null), [tree, id]);
+  const kind = (project?.kind ?? node?.kind ?? "list") as "space_root" | "folder" | "list" | "inbox";
+  const isAggregator = kind === "space_root" || kind === "folder";
+  const descendantIds = useMemo(
+    () => (isAggregator && node ? collectDescendantIds(node) : []),
+    [isAggregator, node],
+  );
+  const childrenNodes = node?.children ?? [];
+
+  const ownTasks = useProjectTasks(isAggregator ? undefined : id);
+  const aggTasks = useTasksForProjects(isAggregator ? descendantIds : undefined);
+  const tasks = isAggregator ? aggTasks.data : ownTasks.data;
+  const lt = isAggregator ? aggTasks.isLoading : ownTasks.isLoading;
+
   const [openId, setOpenId] = useState<string | null>(null);
   const [tplOpen, setTplOpen] = useState(false);
   const [tplName, setTplName] = useState("");
@@ -77,6 +92,14 @@ export default function ProjectDetailPage() {
   const total = allTasks.length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
 
+  const kindMeta: Record<typeof kind, { label: string; Icon: typeof Folder }> = {
+    space_root: { label: "Espaço", Icon: Hash },
+    folder: { label: "Pasta", Icon: Folder },
+    list: { label: "Lista", Icon: ListTodo },
+    inbox: { label: "Inbox", Icon: Inbox },
+  };
+  const KindIcon = kindMeta[kind].Icon;
+
   return (
     <div className="container max-w-7xl py-6 space-y-5">
       <div>
@@ -85,10 +108,19 @@ export default function ProjectDetailPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="font-mono text-[10px]">{project.key}</Badge>
+              <Badge variant="secondary" className="gap-1 text-[10px]"><KindIcon className="h-3 w-3" /> {kindMeta[kind].label}</Badge>
+              {project.is_private && (
+                <Badge variant="outline" className="gap-1 text-[10px]"><Lock className="h-3 w-3" /> Privado</Badge>
+              )}
               {project.archived && <Badge variant="secondary" className="text-[10px]">Arquivado</Badge>}
             </div>
             <h1 className="mt-1 text-3xl font-bold tracking-tight">{project.name}</h1>
             {project.description && <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{project.description}</p>}
+            {isAggregator && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Mostrando tarefas agregadas de {descendantIds.length} {descendantIds.length === 1 ? "item" : "itens"} desta {kindMeta[kind].label.toLowerCase()}.
+              </p>
+            )}
           </div>
           <div className="flex min-w-[220px] flex-col items-end gap-1">
             <Dialog open={tplOpen} onOpenChange={setTplOpen}>
@@ -121,6 +153,27 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </div>
+
+      {isAggregator && childrenNodes.length > 0 && (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-muted-foreground">Conteúdo</h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            {childrenNodes.map((c) => {
+              const Meta = kindMeta[c.kind].Icon;
+              return (
+                <Link
+                  key={c.id}
+                  to={`/app/projetos/${c.id}`}
+                  className="group flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm transition-colors hover:bg-accent"
+                >
+                  <Meta className="h-4 w-4 text-muted-foreground group-hover:text-foreground" style={c.color ? { color: c.color } : undefined} />
+                  <span className="truncate">{c.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <Tabs value={view} onValueChange={handleViewChange}>
         <TabsList>
