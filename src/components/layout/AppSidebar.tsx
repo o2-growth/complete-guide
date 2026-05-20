@@ -38,6 +38,7 @@ import {
   Link2,
   Rocket,
   UserPlus,
+  Share2,
   FileBarChart,
   AlertOctagon,
   TrendingUp,
