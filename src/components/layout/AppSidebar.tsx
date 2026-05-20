@@ -140,6 +140,8 @@ const GROUPS: NavGroup[] = [
       { title: "Próximos 7 dias", url: "/app/proximos", icon: CalendarClock },
       { title: "Atrasadas", url: "/app/atrasadas", icon: AlertTriangle },
       { title: "Atribuídas a mim", url: "/app/atribuidas", icon: UserCheck },
+      { title: "Atribuídas por mim", url: "/app/deleguei", icon: UserPlus },
+      { title: "Compartilhadas comigo", url: "/app/compartilhadas", icon: Share2 },
     ],
   },
   {
