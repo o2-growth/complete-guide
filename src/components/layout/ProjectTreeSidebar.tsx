@@ -351,9 +351,7 @@ interface ProjectNodeProps extends NodeRendererProps<ProjectTreeNode> {
 
 function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate, openCount, onArchive, onSetColor, onTogglePrivacy }: ProjectNodeProps) {
   const hasChildren = node.children && node.children.length > 0;
-  const isPrivate = Boolean(
-    (node.data as ProjectTreeNode & { is_private?: boolean }).is_private,
-  );
+  const isPrivate = node.data.is_private;
   const KindIcon =
     node.data.kind === "inbox" ? Inbox : node.data.kind === "folder" || hasChildren ? Folder : ListIcon;
 
