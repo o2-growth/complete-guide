@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useProject, useProjectTasks, useTasksForProjects } from "@/hooks/useProjects";
 import { useRescheduleTask } from "@/hooks/useTasks";
-import { useProjectTree, collectDescendantIds, findNode } from "@/hooks/useProjectTree";
+import { useProjectTree, collectDescendantIds, findNode, findPath } from "@/hooks/useProjectTree";
 import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskRow as TaskRowItem } from "@/components/tasks/TaskRow";
@@ -54,6 +54,7 @@ export default function ProjectDetailPage() {
   const { data: project, isLoading } = useProject(id);
   const { tree } = useProjectTree();
   const node = useMemo(() => (id ? findNode(tree, id) : null), [tree, id]);
+  const path = useMemo(() => (id ? findPath(tree, id) : []), [tree, id]);
   const kind = (project?.kind ?? node?.kind ?? "list") as "space_root" | "folder" | "list" | "inbox";
   const isAggregator = kind === "space_root" || kind === "folder";
   const descendantIds = useMemo(
@@ -115,6 +116,23 @@ export default function ProjectDetailPage() {
     <div className="container max-w-7xl py-6 space-y-5">
       <div>
         <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2"><Link to="/app/projetos"><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Projetos</Link></Button>
+        {path.length > 1 && (
+          <nav aria-label="Caminho" className="mb-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+            {path.slice(0, -1).map((p, idx) => (
+              <span key={p.id} className="flex items-center gap-1">
+                <Link
+                  to={`/app/projetos/${p.id}`}
+                  className="rounded px-1 py-0.5 hover:bg-accent hover:text-foreground"
+                >
+                  {p.name}
+                </Link>
+                <ChevronRight className="h-3 w-3 opacity-60" />
+                {idx === path.length - 2 ? null : null}
+              </span>
+            ))}
+            <span className="font-medium text-foreground">{path[path.length - 1].name}</span>
+          </nav>
+        )}
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
