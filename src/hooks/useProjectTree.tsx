@@ -16,6 +16,7 @@ export interface ProjectTreeNode {
   archived: boolean;
   kind: "space_root" | "folder" | "list" | "inbox";
   squad_id: string | null;
+  is_private: boolean;
   children: ProjectTreeNode[];
 }
 
@@ -35,6 +36,7 @@ interface ProjectFlatRow {
   created_by: string | null;
   kind: string | null;
   squad_id: string | null;
+  is_private: boolean | null;
 }
 
 function buildTree(rows: ProjectFlatRow[]): ProjectTreeNode[] {
@@ -50,6 +52,7 @@ function buildTree(rows: ProjectFlatRow[]): ProjectTreeNode[] {
       archived: r.archived,
       kind: (r.kind as ProjectTreeNode["kind"]) ?? "list",
       squad_id: r.squad_id,
+      is_private: !!r.is_private,
       children: [],
     });
   });
@@ -115,7 +118,7 @@ export function useProjectTree() {
     queryFn: async (): Promise<ProjectFlatRow[]> => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, icon, color, archived, parent_id, sort_order, created_by, kind, squad_id")
+        .select("id, name, icon, color, archived, parent_id, sort_order, created_by, kind, squad_id, is_private")
         .eq("tenant_id", tenantId!)
         .eq("archived", false);
       if (error) throw error;
