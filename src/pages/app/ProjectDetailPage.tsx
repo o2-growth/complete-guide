@@ -15,7 +15,7 @@ import { useRescheduleTask } from "@/hooks/useTasks";
 import { useProjectTree, collectDescendantIds, findNode, findPath } from "@/hooks/useProjectTree";
 import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
-import { TaskRow as TaskRowItem } from "@/components/tasks/TaskRow";
+import { TaskListGrouped } from "@/components/tasks/TaskListGrouped";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
 import { TaskChartView } from "@/components/tasks/views/TaskChartView";
@@ -224,7 +224,7 @@ export default function ProjectDetailPage() {
           ) : allTasks.length === 0 ? (
             <Card className="py-12 text-center text-sm text-muted-foreground">Nenhuma tarefa neste projeto ainda.</Card>
           ) : (
-            <ListWithBulk tasks={allTasks} onOpen={setOpenId} setVisible={setVisible} clear={clear} />
+            <ListWithBulk tasks={allTasks} onOpen={setOpenId} setVisible={setVisible} clear={clear} scope={id ?? "project"} />
           )}
         </TabsContent>
 
@@ -290,22 +290,18 @@ function ListWithBulk({
   onOpen,
   setVisible,
   clear,
+  scope,
 }: {
   tasks: TaskRow[];
   onOpen: (id: string) => void;
   setVisible: (ids: string[]) => void;
   clear: () => void;
+  scope: string;
 }) {
   useEffect(() => {
     setVisible(tasks.map((t) => t.id));
     return () => clear();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks]);
-  return (
-    <Card className="divide-y">
-      {tasks.map((t) => (
-        <TaskRowItem key={t.id} task={t} onOpen={onOpen} bulkMode />
-      ))}
-    </Card>
-  );
+  return <TaskListGrouped tasks={tasks} onOpen={onOpen} scope={scope} />;
 }
