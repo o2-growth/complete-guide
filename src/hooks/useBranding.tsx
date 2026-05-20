@@ -12,12 +12,12 @@ export interface BrandingSettings {
 }
 
 const DEFAULT: BrandingSettings = {
-  primaryColor: "#0EA5E9",
-  accentColor: "#FCD34D",
+  primaryColor: "#00D842",
+  accentColor: "#63F161",
   logoUrl: null,
   highContrast: false,
   fontSize: "normal",
-  workspaceName: "Oxy Growth OS",
+  workspaceName: "O2 Growth OS",
 };
 
 interface BrandingContextValue extends BrandingSettings {
