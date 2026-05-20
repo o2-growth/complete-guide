@@ -47,7 +47,14 @@ export interface TaskRow {
   scheduled_at?: string | null;
 }
 
-export type SmartList = "inbox" | "today" | "next7" | "overdue" | "assigned";
+export type SmartList =
+  | "inbox"
+  | "today"
+  | "next7"
+  | "overdue"
+  | "assigned"
+  | "assigned_by_me"
+  | "shared_with_me";
 
 function startOfToday() {
   const d = new Date();
@@ -94,6 +101,19 @@ export function useTasks(list: SmartList) {
         q = q.lt("due_at", startOfToday().toISOString()).is("done_at", null);
       } else if (list === "assigned" && user) {
         q = q.eq("assignee_id", user.id).is("done_at", null);
+      } else if (list === "assigned_by_me" && user) {
+        // Tarefas que eu deleguei: sou reporter/criador, mas não sou o executor.
+        q = q
+          .or(`reporter_id.eq.${user.id},created_by.eq.${user.id}`)
+          .not("assignee_id", "is", null)
+          .not("assignee_id", "eq", user.id)
+          .is("done_at", null);
+      } else if (list === "shared_with_me" && user) {
+        // Tarefas que pingaram em mim por outra pessoa (assignee = eu, criada por outro).
+        q = q
+          .eq("assignee_id", user.id)
+          .not("created_by", "eq", user.id)
+          .is("done_at", null);
       }
 
       const { data, error } = await q;
@@ -162,6 +182,17 @@ export function useTasksInfinite(list: SmartList, filters: TasksInfiniteFilters 
         q = q.lt("due_at", startOfToday().toISOString()).is("done_at", null);
       } else if (list === "assigned" && user) {
         q = q.eq("assignee_id", user.id).is("done_at", null);
+      } else if (list === "assigned_by_me" && user) {
+        q = q
+          .or(`reporter_id.eq.${user.id},created_by.eq.${user.id}`)
+          .not("assignee_id", "is", null)
+          .not("assignee_id", "eq", user.id)
+          .is("done_at", null);
+      } else if (list === "shared_with_me" && user) {
+        q = q
+          .eq("assignee_id", user.id)
+          .not("created_by", "eq", user.id)
+          .is("done_at", null);
       }
 
       if (filters.projectId) q = q.eq("project_id", filters.projectId);
