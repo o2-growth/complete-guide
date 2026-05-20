@@ -14,6 +14,8 @@ export interface ProjectTreeNode {
   parent_id: string | null;
   sort_order: number;
   archived: boolean;
+  kind: "space_root" | "folder" | "list" | "inbox";
+  squad_id: string | null;
   children: ProjectTreeNode[];
 }
 
@@ -31,6 +33,8 @@ interface ProjectFlatRow {
   sort_order: number | null;
   archived: boolean;
   created_by: string | null;
+  kind: string | null;
+  squad_id: string | null;
 }
 
 function buildTree(rows: ProjectFlatRow[]): ProjectTreeNode[] {
@@ -44,6 +48,8 @@ function buildTree(rows: ProjectFlatRow[]): ProjectTreeNode[] {
       parent_id: r.parent_id,
       sort_order: r.sort_order ?? 0,
       archived: r.archived,
+      kind: (r.kind as ProjectTreeNode["kind"]) ?? "list",
+      squad_id: r.squad_id,
       children: [],
     });
   });
@@ -91,14 +97,15 @@ export function useProjectTree() {
     queryFn: async (): Promise<ProjectFlatRow[]> => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, icon, color, archived, parent_id, sort_order, created_by")
+        .select("id, name, icon, color, archived, parent_id, sort_order, created_by, kind, squad_id")
         .eq("tenant_id", tenantId!)
         .eq("archived", false);
       if (error) throw error;
       const rows = (data ?? []) as ProjectFlatRow[];
       // Esconde inboxes de outros usuários (mantém a do usuário atual).
       return rows.filter((r) => {
-        if (!r.name.startsWith(INBOX_PREFIX)) return true;
+        const isInbox = r.kind === "inbox" || r.name.startsWith(INBOX_PREFIX);
+        if (!isInbox) return true;
         return r.created_by ? r.created_by === user?.id : false;
       });
     },
