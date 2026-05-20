@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BarChart3, FileStack, Folder, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, BarChart3, CalendarDays, ChevronLeft, ChevronRight, FileStack, Folder, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock, Users2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useProject, useProjectTasks, useTasksForProjects } from "@/hooks/useProjects";
+import { useRescheduleTask } from "@/hooks/useTasks";
 import { useProjectTree, collectDescendantIds, findNode } from "@/hooks/useProjectTree";
 import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
@@ -18,6 +19,12 @@ import { TaskRow as TaskRowItem } from "@/components/tasks/TaskRow";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
 import { TaskChartView } from "@/components/tasks/views/TaskChartView";
+import { MonthView } from "@/components/calendar/MonthView";
+import { fmt } from "@/components/calendar/calendar-utils";
+import { BulkActionsBar } from "@/components/tasks/BulkActionsBar";
+import { ProjectMembersDialog } from "@/components/projects/ProjectMembersDialog";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
+import { useEffect } from "react";
 import type { TaskRow } from "@/hooks/useTasks";
 
 const PROJECT_VIEW_KEY = "oxy:project-view";
@@ -69,6 +76,10 @@ export default function ProjectDetailPage() {
     setView(v);
     setStoredProjectView(id, v);
   };
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [calAnchor, setCalAnchor] = useState<Date>(new Date());
+  const reschedule = useRescheduleTask();
+  const { setVisible, clear } = useBulkSelection();
 
   if (isLoading) {
     return (
@@ -123,9 +134,13 @@ export default function ProjectDetailPage() {
             )}
           </div>
           <div className="flex min-w-[220px] flex-col items-end gap-1">
+            <div className="mb-1 flex items-center gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => setMembersOpen(true)}>
+                <Users2 className="mr-1.5 h-3.5 w-3.5" /> Membros
+              </Button>
             <Dialog open={tplOpen} onOpenChange={setTplOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="mb-1">
+                <Button size="sm" variant="outline">
                   <FileStack className="mr-1.5 h-3.5 w-3.5" /> Salvar como template
                 </Button>
               </DialogTrigger>
@@ -147,6 +162,7 @@ export default function ProjectDetailPage() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            </div>
             <span className="text-xs text-muted-foreground">{done} de {total} concluídas</span>
             <Progress value={progress} className="h-1.5 w-full" />
             <span className="text-[11px] font-medium">{progress}%</span>
@@ -179,6 +195,7 @@ export default function ProjectDetailPage() {
         <TabsList>
           <TabsTrigger value="list"><ListTodo className="mr-1.5 h-3.5 w-3.5" /> Lista</TabsTrigger>
           <TabsTrigger value="kanban"><KanbanSquare className="mr-1.5 h-3.5 w-3.5" /> Kanban</TabsTrigger>
+          <TabsTrigger value="calendar"><CalendarDays className="mr-1.5 h-3.5 w-3.5" /> Calendário</TabsTrigger>
           <TabsTrigger value="gallery"><LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria</TabsTrigger>
           <TabsTrigger value="chart"><BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico</TabsTrigger>
         </TabsList>
@@ -189,15 +206,38 @@ export default function ProjectDetailPage() {
           ) : allTasks.length === 0 ? (
             <Card className="py-12 text-center text-sm text-muted-foreground">Nenhuma tarefa neste projeto ainda.</Card>
           ) : (
-            <Card className="divide-y">
-              {allTasks.map((t) => <TaskRowItem key={t.id} task={t} onOpen={setOpenId} />)}
-            </Card>
+            <ListWithBulk tasks={allTasks} onOpen={setOpenId} setVisible={setVisible} clear={clear} />
           )}
         </TabsContent>
 
         <TabsContent value="kanban" className="mt-4">
           <div className="min-h-[60vh]">
             <KanbanBoard projectId={id} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="calendar" className="mt-4">
+          <div className="mb-2 flex items-center justify-between">
+            <div className="text-sm font-medium">{fmt(calAnchor, "MMMM 'de' yyyy")}</div>
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setCalAnchor(new Date(calAnchor.getFullYear(), calAnchor.getMonth() - 1, 1))}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost" className="h-7" onClick={() => setCalAnchor(new Date())}>Hoje</Button>
+              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setCalAnchor(new Date(calAnchor.getFullYear(), calAnchor.getMonth() + 1, 1))}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="h-[640px]">
+            <MonthView
+              anchor={calAnchor}
+              tasks={allTasks}
+              onOpenTask={setOpenId}
+              onDropTask={(taskId, day, currentDueAt) =>
+                reschedule.mutate({ taskId, newDate: day, keepTime: true, currentDueAt })
+              }
+            />
           </div>
         </TabsContent>
 
@@ -216,6 +256,38 @@ export default function ProjectDetailPage() {
       </Tabs>
 
       <TaskDetailSheet taskId={openId} onOpenChange={(o) => !o && setOpenId(null)} />
+      <ProjectMembersDialog
+        projectId={project.id}
+        projectName={project.name}
+        open={membersOpen}
+        onOpenChange={setMembersOpen}
+      />
+      <BulkActionsBar />
     </div>
+  );
+}
+
+function ListWithBulk({
+  tasks,
+  onOpen,
+  setVisible,
+  clear,
+}: {
+  tasks: TaskRow[];
+  onOpen: (id: string) => void;
+  setVisible: (ids: string[]) => void;
+  clear: () => void;
+}) {
+  useEffect(() => {
+    setVisible(tasks.map((t) => t.id));
+    return () => clear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks]);
+  return (
+    <Card className="divide-y">
+      {tasks.map((t) => (
+        <TaskRowItem key={t.id} task={t} onOpen={onOpen} bulkMode />
+      ))}
+    </Card>
   );
 }
