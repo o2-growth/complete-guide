@@ -104,7 +104,7 @@ const AtendimentoTicketPage = lazy(() => import("./pages/app/AtendimentoTicketPa
 const TimesheetPage = lazy(() => import("./pages/app/TimesheetPage.tsx"));
 const WhiteboardsPage = lazy(() => import("./pages/app/WhiteboardsPage.tsx"));
 const WhiteboardDetailPage = lazy(() => import("./pages/app/WhiteboardDetailPage.tsx"));
-import { CalendarClock, AlertTriangle, UserCheck, Sun } from "lucide-react";
+import { CalendarClock, AlertTriangle, UserCheck, Sun, UserPlus, Share2 } from "lucide-react";
 
 const queryClient = new QueryClient(DEFAULT_QUERY_CLIENT_CONFIG);
 
@@ -199,6 +199,32 @@ const App = () => (
                       title="Atribuídas a mim"
                       description="Todas as tarefas que estão com você no momento."
                       icon={UserCheck}
+                    />
+                  }
+                />
+                <Route
+                  path="deleguei"
+                  element={
+                    <SmartListPage
+                      list="assigned_by_me"
+                      title="Atribuídas por mim"
+                      description="Tarefas que você delegou e estão com outras pessoas."
+                      icon={UserPlus}
+                      emptyTitle="Você não delegou nada"
+                      emptyDescription="Quando atribuir uma tarefa a alguém, ela aparece aqui."
+                    />
+                  }
+                />
+                <Route
+                  path="compartilhadas"
+                  element={
+                    <SmartListPage
+                      list="shared_with_me"
+                      title="Compartilhadas comigo"
+                      description="Tarefas que outras pessoas atribuíram a você."
+                      icon={Share2}
+                      emptyTitle="Nada compartilhado"
+                      emptyDescription="Tarefas atribuídas a você por colegas aparecem aqui."
                     />
                   }
                 />

@@ -106,6 +106,19 @@ export function findNode(nodes: ProjectTreeNode[], id: string): ProjectTreeNode 
   return null;
 }
 
+/**
+ * Retorna a cadeia de nós da raiz até o nó alvo (inclusivo).
+ * Útil pra montar breadcrumbs Espaço → Pasta → Lista.
+ */
+export function findPath(nodes: ProjectTreeNode[], id: string): ProjectTreeNode[] {
+  for (const n of nodes) {
+    if (n.id === id) return [n];
+    const sub = findPath(n.children, id);
+    if (sub.length) return [n, ...sub];
+  }
+  return [];
+}
+
 export function useProjectTree() {
   const qc = useQueryClient();
   const { tenantId } = useWorkspace();
