@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Inbox,
+  Home,
   CalendarDays,
   KanbanSquare,
   ListTodo,
@@ -136,7 +137,7 @@ const GROUPS: NavGroup[] = [
     id: "inicio",
     label: "Início",
     items: [
-      { title: "Caixa de entrada", url: "/app", icon: Inbox, end: true },
+      { title: "Resumo", url: "/app", icon: Home, end: true },
       { title: "Hoje", url: "/app/hoje", icon: Sun },
       { title: "Próximos 7 dias", url: "/app/proximos", icon: CalendarClock },
       { title: "Atrasadas", url: "/app/atrasadas", icon: AlertTriangle },
@@ -144,11 +145,6 @@ const GROUPS: NavGroup[] = [
       { title: "Atribuídas por mim", url: "/app/deleguei", icon: UserPlus },
       { title: "Compartilhadas comigo", url: "/app/compartilhadas", icon: Share2 },
     ],
-  },
-  {
-    id: "projetos",
-    label: "Projetos",
-    items: [{ title: "Ver todos os projetos", url: "/app/projetos", icon: FolderKanban }],
   },
   {
     id: "visualizacoes",
