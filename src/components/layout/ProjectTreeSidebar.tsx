@@ -129,8 +129,6 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   };
 
   const nodeActions = {
-    togglePrivacy: (n: ProjectTreeNode) =>
-      updateMeta.mutate({ id: n.id, patch: { is_private: !n.children?.length && n.kind === "list" ? true : !((n as ProjectTreeNode & { is_private?: boolean }).is_private) } }),
     setColor: (id: string, color: string) => updateMeta.mutate({ id, patch: { color } }),
     archive: (id: string) => archive.mutate({ id, archived: true }),
   };
