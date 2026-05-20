@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Tree, type NodeRendererProps, type MoveHandler } from "react-arborist";
 import {
   ChevronRight,
@@ -70,6 +70,18 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   const [newProject, setNewProject] = useState<NewProjectDialogState>({ open: false, parentId: null });
   const [newName, setNewName] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [treeWidth, setTreeWidth] = useState(220);
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+    const ro = new ResizeObserver(() => {
+      setTreeWidth(Math.max(160, el.clientWidth));
+    });
+    ro.observe(el);
+    setTreeWidth(Math.max(160, el.clientWidth));
+    return () => ro.disconnect();
+  }, []);
 
   // Realtime: atualiza árvore e contadores quando algo muda no tenant.
   useEffect(() => {
@@ -145,8 +157,8 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
 
   return (
     <div className="px-1">
-      <div className="flex items-center justify-between px-2 pb-1">
-        <span className="text-xs font-medium text-sidebar-foreground/70">Espaços</span>
+      <div className="flex items-center justify-between px-2 pb-1 pt-2">
+        <span className="text-xs font-medium text-sidebar-foreground/60">Projetos</span>
         <Button
           size="icon"
           variant="ghost"
@@ -157,6 +169,18 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
           <Plus className="h-3.5 w-3.5" />
         </Button>
       </div>
+      <NavLink
+        to="/app/projetos"
+        end
+        className={({ isActive }) =>
+          `mx-1 mb-1 flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-sidebar-accent ${
+            isActive ? "bg-sidebar-accent text-sidebar-foreground" : "text-sidebar-foreground/80"
+          }`
+        }
+      >
+        <FolderKanban className="h-4 w-4" />
+        <span className="truncate">Ver todos</span>
+      </NavLink>
 
       <div ref={containerRef} className="min-h-[120px] space-y-2">
         {isLoading ? (
@@ -173,6 +197,7 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
                 color={null}
                 icon={<Inbox className="h-3.5 w-3.5" />}
                 roots={grouped.inbox}
+                width={treeWidth}
                 onMove={handleMove}
                 onRename={handleRename}
                 onAddChild={openNewProject}
@@ -196,6 +221,7 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
                   color={s.color}
                   icon={<Users className="h-3.5 w-3.5" />}
                   roots={roots}
+                  width={treeWidth}
                   onMove={handleMove}
                   onRename={handleRename}
                   onAddChild={openNewProject}
@@ -216,6 +242,7 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
                 color={null}
                 icon={<FolderKanban className="h-3.5 w-3.5" />}
                 roots={grouped.orphan}
+                width={treeWidth}
                 onMove={handleMove}
                 onRename={handleRename}
                 onAddChild={openNewProject}
@@ -272,6 +299,7 @@ interface SquadGroupProps {
   color: string | null;
   icon: React.ReactNode;
   roots: ProjectTreeNode[];
+  width: number;
   onMove: MoveHandler<ProjectTreeNode>;
   onRename: (args: { id: string; name: string }) => void;
   onAddChild: (parentId: string | null) => void;
@@ -283,7 +311,7 @@ interface SquadGroupProps {
   onTogglePrivacy: (id: string, current: boolean) => void;
 }
 
-function SquadGroup({ label, color, icon, roots, onMove, onRename, onAddChild, onNavigate, maxDepth, openCounts, onArchive, onSetColor, onTogglePrivacy }: SquadGroupProps) {
+function SquadGroup({ label, color, icon, roots, width, onMove, onRename, onAddChild, onNavigate, maxDepth, openCounts, onArchive, onSetColor, onTogglePrivacy }: SquadGroupProps) {
   const [open, setOpen] = useState(true);
   const count = useMemo(() => {
     let n = 0;
@@ -311,7 +339,7 @@ function SquadGroup({ label, color, icon, roots, onMove, onRename, onAddChild, o
         <Tree<ProjectTreeNode>
           data={roots}
           openByDefault={false}
-          width={232}
+          width={width}
           height={Math.min(280, Math.max(60, count * 28))}
           indent={14}
           rowHeight={28}
