@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tree, type NodeRendererProps, type MoveHandler } from "react-arborist";
 import {
@@ -12,6 +12,10 @@ import {
   Folder,
   List as ListIcon,
   Users,
+  Lock,
+  Unlock,
+  Archive,
+  Palette,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +31,27 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useProjectTree, type ProjectTreeNode } from "@/hooks/useProjectTree";
 import { useSquads } from "@/hooks/useSquads";
+import {
+  useArchiveProject,
+  useProjectOpenCounts,
+  useUpdateProjectMeta,
+} from "@/hooks/useProjects";
+import { useQueryClient } from "@tanstack/react-query";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { supabase } from "@/integrations/supabase/client";
+
+const COLOR_SWATCHES = [
+  "#64748b", "#0ea5e9", "#10b981", "#f59e0b",
+  "#ef4444", "#a855f7", "#ec4899", "#14b8a6",
+];
 
 interface NewProjectDialogState {
   open: boolean;
@@ -41,9 +62,32 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   const navigate = useNavigate();
   const { tree, isLoading, mutateMove, mutateRename, mutateCreate, maxDepth } = useProjectTree();
   const { data: squads = [] } = useSquads();
+  const { data: openCounts = {} } = useProjectOpenCounts();
+  const archive = useArchiveProject();
+  const updateMeta = useUpdateProjectMeta();
+  const qc = useQueryClient();
+  const { tenantId } = useWorkspace();
   const [newProject, setNewProject] = useState<NewProjectDialogState>({ open: false, parentId: null });
   const [newName, setNewName] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Realtime: atualiza árvore e contadores quando algo muda no tenant.
+  useEffect(() => {
+    if (!tenantId) return;
+    const channel = supabase
+      .channel(`tenant:${tenantId}:projects-tree`)
+      .on("broadcast", { event: "project_change" }, () => {
+        qc.invalidateQueries({ queryKey: ["project-tree", tenantId] });
+        qc.invalidateQueries({ queryKey: ["projects-list", tenantId] });
+      })
+      .on("broadcast", { event: "task_tree_change" }, () => {
+        qc.invalidateQueries({ queryKey: ["project-open-counts", tenantId] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tenantId, qc]);
 
   const grouped = useMemo(() => {
     const inbox = tree.filter((n) => n.kind === "inbox");
@@ -82,6 +126,13 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
     await mutateCreate.mutateAsync({ name: newName.trim(), parentId: newProject.parentId });
     setNewProject({ open: false, parentId: null });
     setNewName("");
+  };
+
+  const nodeActions = {
+    togglePrivacy: (n: ProjectTreeNode) =>
+      updateMeta.mutate({ id: n.id, patch: { is_private: !n.children?.length && n.kind === "list" ? true : !((n as ProjectTreeNode & { is_private?: boolean }).is_private) } }),
+    setColor: (id: string, color: string) => updateMeta.mutate({ id, patch: { color } }),
+    archive: (id: string) => archive.mutate({ id, archived: true }),
   };
 
   if (collapsed) {
@@ -129,6 +180,12 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
                 onAddChild={openNewProject}
                 onNavigate={(id) => navigate(`/app/projetos/${id}`)}
                 maxDepth={maxDepth}
+                openCounts={openCounts}
+                onArchive={nodeActions.archive}
+                onSetColor={nodeActions.setColor}
+                onTogglePrivacy={(id, current) =>
+                  updateMeta.mutate({ id, patch: { is_private: !current } })
+                }
               />
             )}
             {squads.map((s) => {
@@ -146,6 +203,12 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
                   onAddChild={openNewProject}
                   onNavigate={(id) => navigate(`/app/projetos/${id}`)}
                   maxDepth={maxDepth}
+                  openCounts={openCounts}
+                  onArchive={nodeActions.archive}
+                  onSetColor={nodeActions.setColor}
+                  onTogglePrivacy={(id, current) =>
+                    updateMeta.mutate({ id, patch: { is_private: !current } })
+                  }
                 />
               );
             })}
@@ -160,6 +223,12 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
                 onAddChild={openNewProject}
                 onNavigate={(id) => navigate(`/app/projetos/${id}`)}
                 maxDepth={maxDepth}
+                openCounts={openCounts}
+                onArchive={nodeActions.archive}
+                onSetColor={nodeActions.setColor}
+                onTogglePrivacy={(id, current) =>
+                  updateMeta.mutate({ id, patch: { is_private: !current } })
+                }
               />
             )}
           </>
@@ -210,9 +279,13 @@ interface SquadGroupProps {
   onAddChild: (parentId: string | null) => void;
   onNavigate: (id: string) => void;
   maxDepth: number;
+  openCounts: Record<string, number>;
+  onArchive: (id: string) => void;
+  onSetColor: (id: string, color: string) => void;
+  onTogglePrivacy: (id: string, current: boolean) => void;
 }
 
-function SquadGroup({ label, color, icon, roots, onMove, onRename, onAddChild, onNavigate, maxDepth }: SquadGroupProps) {
+function SquadGroup({ label, color, icon, roots, onMove, onRename, onAddChild, onNavigate, maxDepth, openCounts, onArchive, onSetColor, onTogglePrivacy }: SquadGroupProps) {
   const [open, setOpen] = useState(true);
   const count = useMemo(() => {
     let n = 0;
@@ -252,7 +325,17 @@ function SquadGroup({ label, color, icon, roots, onMove, onRename, onAddChild, o
             return parentNode.level + 1 + draggingDepth > maxDepth;
           }}
         >
-          {(props) => <ProjectNode {...props} onAddChild={onAddChild} onNavigate={onNavigate} />}
+          {(props) => (
+            <ProjectNode
+              {...props}
+              onAddChild={onAddChild}
+              onNavigate={onNavigate}
+              openCount={openCounts[props.node.id] ?? 0}
+              onArchive={onArchive}
+              onSetColor={onSetColor}
+              onTogglePrivacy={onTogglePrivacy}
+            />
+          )}
         </Tree>
       )}
     </div>
@@ -262,10 +345,17 @@ function SquadGroup({ label, color, icon, roots, onMove, onRename, onAddChild, o
 interface ProjectNodeProps extends NodeRendererProps<ProjectTreeNode> {
   onAddChild: (parentId: string) => void;
   onNavigate: (id: string) => void;
+  openCount: number;
+  onArchive: (id: string) => void;
+  onSetColor: (id: string, color: string) => void;
+  onTogglePrivacy: (id: string, current: boolean) => void;
 }
 
-function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate }: ProjectNodeProps) {
+function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate, openCount, onArchive, onSetColor, onTogglePrivacy }: ProjectNodeProps) {
   const hasChildren = node.children && node.children.length > 0;
+  const isPrivate = Boolean(
+    (node.data as ProjectTreeNode & { is_private?: boolean }).is_private,
+  );
   const KindIcon =
     node.data.kind === "inbox" ? Inbox : node.data.kind === "folder" || hasChildren ? Folder : ListIcon;
 
@@ -327,7 +417,17 @@ function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate }: Projec
               className="flex-1 rounded bg-background px-1 text-sm"
             />
           ) : (
-            <span className="flex-1 truncate">{node.data.name}</span>
+            <>
+              <span className="flex-1 truncate">{node.data.name}</span>
+              {isPrivate && (
+                <Lock className="h-3 w-3 shrink-0 text-muted-foreground" aria-label="Privado" />
+              )}
+              {openCount > 0 && (
+                <span className="ml-auto rounded bg-sidebar-accent px-1.5 text-[10px] font-medium tabular-nums text-sidebar-foreground/70">
+                  {openCount}
+                </span>
+              )}
+            </>
           )}
         </div>
       </ContextMenuTrigger>
@@ -340,6 +440,46 @@ function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate }: Projec
         </ContextMenuItem>
         <ContextMenuItem onClick={() => onNavigate(node.id)}>
           <FolderKanban className="mr-2 h-3.5 w-3.5" /> Abrir
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>
+            <Palette className="mr-2 h-3.5 w-3.5" /> Cor
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent>
+            <div className="grid grid-cols-4 gap-1 p-1">
+              {COLOR_SWATCHES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => onSetColor(node.id, c)}
+                  className="h-6 w-6 rounded ring-1 ring-border hover:scale-110 transition-transform"
+                  style={{ backgroundColor: c }}
+                  aria-label={`Definir cor ${c}`}
+                />
+              ))}
+            </div>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+        {node.data.kind !== "inbox" && (
+          <ContextMenuItem onClick={() => onTogglePrivacy(node.id, isPrivate)}>
+            {isPrivate ? (
+              <>
+                <Unlock className="mr-2 h-3.5 w-3.5" /> Tornar público
+              </>
+            ) : (
+              <>
+                <Lock className="mr-2 h-3.5 w-3.5" /> Tornar privado
+              </>
+            )}
+          </ContextMenuItem>
+        )}
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          onClick={() => onArchive(node.id)}
+          className="text-destructive focus:text-destructive"
+        >
+          <Archive className="mr-2 h-3.5 w-3.5" /> Arquivar
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
