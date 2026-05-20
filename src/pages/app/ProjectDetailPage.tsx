@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, FileStack, Folder, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,6 @@ import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
 import { TaskChartView } from "@/components/tasks/views/TaskChartView";
 import type { TaskRow } from "@/hooks/useTasks";
-import { useMemo } from "react";
 
 const PROJECT_VIEW_KEY = "oxy:project-view";
 
