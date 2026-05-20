@@ -689,7 +689,7 @@ export function AppSidebar() {
               pathname={pathname}
               enableDnd={enableDnd}
             />
-            {group.id === "projetos" && (
+            {group.id === "inicio" && (
               <SidebarGroup>
                 <SidebarGroupContent>
                   <ProjectTreeSidebar collapsed={collapsed} />
