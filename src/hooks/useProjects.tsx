@@ -183,7 +183,60 @@ export function useArchiveProject() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["projects-list", tenantId] });
+      qc.invalidateQueries({ queryKey: ["project-tree", tenantId] });
       toast.success("Projeto atualizado");
+    },
+  });
+}
+
+export function useUpdateProjectMeta() {
+  const qc = useQueryClient();
+  const { tenantId } = useWorkspace();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: Partial<Pick<Project, "is_private" | "color" | "icon" | "name">>;
+    }) => {
+      const { error } = await supabase.from("projects").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["projects-list", tenantId] });
+      qc.invalidateQueries({ queryKey: ["project-tree", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+/**
+ * Contagem de tarefas abertas (sem done_at e não arquivadas) por projeto, no tenant atual.
+ * Usada pelos badges na sidebar hierárquica.
+ */
+export function useProjectOpenCounts() {
+  const { tenantId } = useWorkspace();
+  return useQuery({
+    queryKey: ["project-open-counts", tenantId],
+    enabled: !!tenantId,
+    staleTime: 30_000,
+    queryFn: async (): Promise<Record<string, number>> => {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("project_id")
+        .eq("tenant_id", tenantId!)
+        .eq("archived", false)
+        .is("done_at", null)
+        .limit(10_000);
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      (data ?? []).forEach((t) => {
+        const pid = (t as { project_id: string | null }).project_id;
+        if (!pid) return;
+        counts[pid] = (counts[pid] ?? 0) + 1;
+      });
+      return counts;
     },
   });
 }
