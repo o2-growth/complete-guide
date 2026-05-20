@@ -4211,7 +4211,9 @@ export type Database = {
           description: string | null
           icon: string | null
           id: string
+          is_private: boolean
           key: string
+          kind: string
           name: string
           parent_id: string | null
           sort_order: number
@@ -4228,7 +4230,9 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          is_private?: boolean
           key: string
+          kind?: string
           name: string
           parent_id?: string | null
           sort_order?: number
@@ -4245,7 +4249,9 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          is_private?: boolean
           key?: string
+          kind?: string
           name?: string
           parent_id?: string | null
           sort_order?: number
@@ -5205,9 +5211,12 @@ export type Database = {
           color: string | null
           created_at: string
           description: string | null
+          icon: string | null
           id: string
+          is_private: boolean
           kind: Database["public"]["Enums"]["squad_kind"]
           name: string
+          sort_order: number
           tenant_id: string
           updated_at: string
         }
@@ -5215,9 +5224,12 @@ export type Database = {
           color?: string | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          is_private?: boolean
           kind?: Database["public"]["Enums"]["squad_kind"]
           name: string
+          sort_order?: number
           tenant_id: string
           updated_at?: string
         }
@@ -5225,9 +5237,12 @@ export type Database = {
           color?: string | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          is_private?: boolean
           kind?: Database["public"]["Enums"]["squad_kind"]
           name?: string
+          sort_order?: number
           tenant_id?: string
           updated_at?: string
         }
@@ -7073,6 +7088,8 @@ export type Database = {
       }
       campaign_report: { Args: { _campaign_id: string }; Returns: Json }
       campaign_roas: { Args: { _campaign_id: string }; Returns: Json }
+      can_see_project: { Args: { _project_id: string }; Returns: boolean }
+      can_see_task: { Args: { _task_id: string }; Returns: boolean }
       capacity_for_user: {
         Args: {
           _from: string
@@ -7285,6 +7302,7 @@ export type Database = {
         Returns: string
       }
       is_project_member: { Args: { _project_id: string }; Returns: boolean }
+      is_squad_member: { Args: { _squad_id: string }; Returns: boolean }
       kr_progress: { Args: { _tenant: string }; Returns: number }
       mark_notifications_read: { Args: { _ids?: string[] }; Returns: number }
       move_to_dlq: {
