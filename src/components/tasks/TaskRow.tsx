@@ -50,6 +50,20 @@ interface TaskRowProps {
   bulkMode?: boolean;
 }
 
+function ICEBadge({ score }: { score: number }) {
+  const cls =
+    score >= 667
+      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+      : score >= 334
+      ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+      : "text-muted-foreground";
+  return (
+    <Badge variant="outline" className={cn("text-[10px]", cls)}>
+      ICE {score}
+    </Badge>
+  );
+}
+
 export function TaskRow({ task, onOpen, onEdit, index, bulkMode = false }: TaskRowProps) {
   const toggle = useToggleTaskDone();
   const remove = useDeleteTask();
@@ -216,6 +230,9 @@ export function TaskRow({ task, onOpen, onEdit, index, bulkMode = false }: TaskR
             </span>
           )}
           <TaskHoursChip taskId={task.id} />
+          {task.ice_score != null && (
+            <ICEBadge score={task.ice_score} />
+          )}
         </div>
         {progress > 0 && (
           <div className="mt-2">

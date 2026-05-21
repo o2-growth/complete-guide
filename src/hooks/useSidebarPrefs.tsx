@@ -11,7 +11,16 @@ export interface SidebarPrefs {
 
 const DEFAULT_PREFS: SidebarPrefs = {
   favorites: [],
-  collapsedGroups: ["midias-sociais", "sistema", "operacao"],
+  collapsedGroups: [
+    "midias-sociais",
+    "insights-avancados",
+    "atendimento",
+    "conhecimento",
+    "enterprise",
+    "developer",
+    "gamificacao",
+    "marketplace",
+  ],
   customOrder: {},
 };
 

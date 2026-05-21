@@ -311,6 +311,10 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
         </FieldLabel>
       </div>
 
+      <div className="border-b bg-background px-6 py-4">
+        <ICEScorePanel task={task} onUpdate={(patch) => update.mutate({ id: task.id, patch })} />
+      </div>
+
       <div className="grid gap-4 border-b bg-background px-6 py-4 sm:grid-cols-2">
         <div>
           <RecurrenceBuilder
@@ -520,6 +524,104 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             <TaskWhiteboardsPanel taskId={task.id} projectId={task.project_id ?? null} />
           </TabsContent>
         </Tabs>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- ICE Score ---------------- */
+function ICEScorePanel({
+  task,
+  onUpdate,
+}: {
+  task: NonNullable<ReturnType<typeof useTask>["data"]>;
+  onUpdate: (patch: Partial<TaskRow>) => void;
+}) {
+  const [impact, setImpact] = useState<number | null>(task.ice_impact ?? null);
+  const [confidence, setConfidence] = useState<number | null>(task.ice_confidence ?? null);
+  const [ease, setEase] = useState<number | null>(task.ice_ease ?? null);
+
+  useEffect(() => {
+    setImpact(task.ice_impact ?? null);
+    setConfidence(task.ice_confidence ?? null);
+    setEase(task.ice_ease ?? null);
+  }, [task.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const localScore =
+    impact != null && confidence != null && ease != null
+      ? impact * confidence * ease
+      : null;
+
+  const clamp = (v: number) => Math.min(10, Math.max(1, Math.round(v)));
+
+  const handleBlur = (
+    field: "ice_impact" | "ice_confidence" | "ice_ease",
+    raw: string,
+    setter: (v: number | null) => void,
+  ) => {
+    if (raw.trim() === "") {
+      setter(null);
+      onUpdate({ [field]: null });
+      return;
+    }
+    const v = clamp(Number(raw));
+    setter(v);
+    onUpdate({ [field]: v });
+  };
+
+  const scoreTierClass =
+    localScore === null
+      ? ""
+      : localScore >= 667
+      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+      : localScore >= 334
+      ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+      : "bg-muted text-muted-foreground";
+
+  const scoreTierLabel =
+    localScore === null
+      ? null
+      : localScore >= 667
+      ? "Alto"
+      : localScore >= 334
+      ? "Médio"
+      : "Baixo";
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        ICE Score
+      </p>
+      <div className="flex flex-wrap items-center gap-4">
+        {(
+          [
+            { label: "Impacto", field: "ice_impact", value: impact, setter: setImpact },
+            { label: "Confiança", field: "ice_confidence", value: confidence, setter: setConfidence },
+            { label: "Facilidade", field: "ice_ease", value: ease, setter: setEase },
+          ] as const
+        ).map(({ label, field, value, setter }) => (
+          <div key={field} className="flex items-center gap-2">
+            <span className="w-16 text-xs text-muted-foreground">{label}</span>
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={value ?? ""}
+              placeholder="—"
+              className="h-8 w-16 text-center"
+              onChange={(e) => setter(e.target.value === "" ? null : Number(e.target.value))}
+              onBlur={(e) => handleBlur(field, e.target.value, setter)}
+            />
+          </div>
+        ))}
+        {localScore !== null && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold tabular-nums">{localScore}</span>
+            <Badge variant="outline" className={scoreTierClass}>
+              {scoreTierLabel}
+            </Badge>
+          </div>
+        )}
       </div>
     </div>
   );

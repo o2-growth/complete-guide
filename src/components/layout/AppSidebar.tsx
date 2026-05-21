@@ -133,9 +133,10 @@ interface NavGroup {
 }
 
 const GROUPS: NavGroup[] = [
+  // ── Core: visível por padrão ────────────────────────────────────────────────
   {
-    id: "inicio",
-    label: "Início",
+    id: "visoes",
+    label: "Visões",
     items: [
       { title: "Resumo", url: "/app", icon: Home, end: true },
       { title: "Hoje", url: "/app/hoje", icon: Sun },
@@ -144,48 +145,48 @@ const GROUPS: NavGroup[] = [
       { title: "Atribuídas a mim", url: "/app/atribuidas", icon: UserCheck },
       { title: "Atribuídas por mim", url: "/app/deleguei", icon: UserPlus },
       { title: "Compartilhadas comigo", url: "/app/compartilhadas", icon: Share2 },
-    ],
-  },
-  {
-    id: "visualizacoes",
-    label: "Visualizações",
-    items: [
       { title: "Calendário", url: "/app/calendario", icon: CalendarDays },
       { title: "Kanban", url: "/app/kanban", icon: KanbanSquare },
+      { title: "Foco", url: "/app/foco", icon: Timer },
+      { title: "Timeline", url: "/app/timeline", icon: GanttChartSquare },
       { title: "Eisenhower", url: "/app/eisenhower", icon: Grid2X2 },
       { title: "Plano do dia", url: "/app/plano-do-dia", icon: Sunrise },
-      { title: "Timeline", url: "/app/timeline", icon: GanttChartSquare },
-      { title: "Foco", url: "/app/foco", icon: Timer },
       { title: "Hábitos", url: "/app/habitos", icon: Repeat },
     ],
   },
   {
-    id: "operacao",
-    label: "Operações",
+    id: "trabalho",
+    label: "Trabalho",
     items: [
+      { title: "Projetos", url: "/app/projetos", icon: FolderKanban },
       { title: "Squads", url: "/app/squads", icon: Users },
-      { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
       { title: "Carga de trabalho", url: "/app/workload", icon: BarChart3 },
       { title: "Apontamento de horas", url: "/app/timesheet", icon: Clock },
       { title: "Habilidades", url: "/app/skills", icon: Award },
       { title: "Capacidade", url: "/app/capacity", icon: CalendarRange },
-      { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
-      { title: "SLAs", url: "/app/slas", icon: Shield },
-      { title: "Modelos", url: "/app/modelos", icon: FileStack },
-      { title: "Modelos prontos", url: "/app/templates", icon: ListTodo },
-      { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
       { title: "Quadros brancos", url: "/app/whiteboards", icon: Palette },
-      { title: "Registro de auditoria", url: "/app/audit", icon: History },
     ],
   },
   {
-    id: "atendimento",
-    label: "Atendimento",
-    items: [{ title: "Tickets", url: "/app/atendimento", icon: LifeBuoy }],
+    id: "insights-basicos",
+    label: "Insights",
+    items: [
+      { title: "Painel", url: "/app/dashboard", icon: LayoutDashboard },
+      { title: "Relatórios", url: "/app/reports", icon: FileBarChart },
+    ],
   },
   {
+    id: "sistema-core",
+    label: "Sistema",
+    items: [
+      { title: "Notificações", url: "/app/notificacoes", icon: Bell },
+      { title: "Configurações", url: "/app/configuracoes", icon: Settings, end: true },
+    ],
+  },
+  // ── Não-core: recolhido por padrão ─────────────────────────────────────────
+  {
     id: "midias-sociais",
-    label: "Social e mídia",
+    label: "Mídias Sociais",
     items: [
       { title: "Calendário editorial", url: "/app/social", icon: CalendarRange },
       { title: "Pipeline", url: "/app/social/pipeline", icon: Workflow },
@@ -205,11 +206,9 @@ const GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: "insights",
-    label: "Inteligência",
+    id: "insights-avancados",
+    label: "Insights Avançados",
     items: [
-      { title: "Painel", url: "/app/dashboard", icon: LayoutDashboard },
-      { title: "Relatórios", url: "/app/reports", icon: FileBarChart },
       { title: "Anomalias", url: "/app/anomalias", icon: AlertOctagon },
       { title: "Previsões", url: "/app/forecast", icon: TrendingUp },
       { title: "OKRs", url: "/app/okrs", icon: Target },
@@ -222,39 +221,69 @@ const GROUPS: NavGroup[] = [
     ],
   },
   {
+    id: "atendimento",
+    label: "Atendimento",
+    items: [
+      { title: "Demandas", url: "/app/demandas", icon: ClipboardList },
+      { title: "Aprovações", url: "/app/aprovacoes", icon: GitBranch },
+      { title: "SLAs", url: "/app/slas", icon: Shield },
+      { title: "Tickets", url: "/app/atendimento", icon: LifeBuoy },
+    ],
+  },
+  {
     id: "conhecimento",
     label: "Conhecimento",
     items: [
+      { title: "Modelos", url: "/app/modelos", icon: FileStack },
+      { title: "Modelos prontos", url: "/app/templates", icon: ListTodo },
+      { title: "Tipos de tarefa", url: "/app/configuracoes/tipos", icon: Tag },
+      { title: "Registro de auditoria", url: "/app/audit", icon: History },
       { title: "Wiki interna", url: "/app/conhecimento", icon: BookOpen },
       { title: "Central de ajuda", url: "/app/ajuda", icon: HelpCircle },
     ],
   },
   {
-    id: "sistema",
-    label: "Conta e workspace",
+    id: "enterprise",
+    label: "Enterprise",
     items: [
-      { title: "Notificações", url: "/app/notificacoes", icon: Bell },
+      { title: "Enterprise", url: "/app/enterprise", icon: Briefcase },
+      { title: "Segurança", url: "/app/seguranca", icon: Lock },
+      { title: "Privacidade", url: "/app/configuracoes/privacidade", icon: ShieldAlert },
+      { title: "Saúde do sistema", url: "/app/admin/saude", icon: Activity },
+      { title: "Erros (admin)", url: "/app/admin/erros", icon: Bug },
+    ],
+  },
+  {
+    id: "developer",
+    label: "Developer Hub",
+    items: [
+      { title: "Hub do desenvolvedor", url: "/app/developer", icon: Code2 },
       { title: "Automações", url: "/app/automacoes", icon: Workflow },
       { title: "Regras (no-code)", url: "/app/automacoes/regras", icon: Zap },
-      { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
-      { title: "Plano e faturamento", url: "/app/configuracoes/plano", icon: Crown },
-      { title: "Marketplace", url: "/app/marketplace", icon: Store },
-      { title: "Hub do desenvolvedor", url: "/app/developer", icon: Code2 },
+      { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
+      { title: "Integrações externas", url: "/app/configuracoes/integracoes-externas", icon: Plug },
+      { title: "Dados", url: "/app/configuracoes/dados", icon: Database },
+    ],
+  },
+  {
+    id: "gamificacao",
+    label: "Gamificação",
+    items: [
       { title: "Conquistas e XP", url: "/app/conquistas", icon: Trophy },
       { title: "Comece aqui", url: "/app/comecar", icon: Compass },
       { title: "Atalhos", url: "/app/atalhos", icon: Keyboard },
       { title: "Busca global", url: "/app/buscar", icon: Search },
-      { title: "Enterprise", url: "/app/enterprise", icon: Briefcase },
-      { title: "Segurança", url: "/app/seguranca", icon: Lock },
-      { title: "Privacidade", url: "/app/configuracoes/privacidade", icon: ShieldAlert },
+    ],
+  },
+  {
+    id: "marketplace",
+    label: "Marketplace",
+    items: [
+      { title: "Marketplace", url: "/app/marketplace", icon: Store },
+      { title: "Plano e faturamento", url: "/app/configuracoes/plano", icon: Crown },
+      { title: "Workspaces", url: "/app/workspaces", icon: Building2 },
       { title: "Aparência", url: "/app/configuracoes/aparencia", icon: Palette },
       { title: "Idioma", url: "/app/configuracoes/idioma", icon: Languages },
-      { title: "Dados", url: "/app/configuracoes/dados", icon: Database },
-      { title: "Integrações", url: "/app/configuracoes/integracoes", icon: Plug },
-      { title: "Integrações externas", url: "/app/configuracoes/integracoes-externas", icon: Plug },
-      { title: "Saúde do sistema", url: "/app/admin/saude", icon: Activity },
-      { title: "Erros (admin)", url: "/app/admin/erros", icon: Bug },
-      { title: "Configurações", url: "/app/configuracoes", icon: Settings, end: true },
     ],
   },
 ];
@@ -413,6 +442,8 @@ function CollapsibleGroup({
         <button
           type="button"
           onClick={onToggleCollapsed}
+          aria-expanded={!collapsedGroup}
+          aria-controls={`group-${group.id}`}
           className="flex w-full items-center justify-between px-2 py-1 text-xs font-medium text-sidebar-foreground/60 hover:text-sidebar-foreground/90 transition-colors"
         >
           <span className="flex items-center gap-1">
@@ -430,7 +461,7 @@ function CollapsibleGroup({
         </button>
       )}
       {(!collapsedGroup || collapsed) && (
-        <SidebarGroupContent>
+        <SidebarGroupContent id={`group-${group.id}`} role="group" aria-label={group.label}>
           {enableDnd && !collapsed ? (
             <DndContext
               sensors={sensors}
@@ -689,7 +720,7 @@ export function AppSidebar() {
               pathname={pathname}
               enableDnd={enableDnd}
             />
-            {group.id === "inicio" && (
+            {group.id === "trabalho" && (
               <SidebarGroup>
                 <SidebarGroupContent>
                   <ProjectTreeSidebar collapsed={collapsed} />

@@ -5701,6 +5701,10 @@ export type Database = {
           gcal_etag: string | null
           gcal_event_id: string | null
           gcal_last_synced_at: string | null
+          ice_confidence: number | null
+          ice_ease: number | null
+          ice_impact: number | null
+          ice_score: number | null
           id: string
           number: number
           parent_task_id: string | null
@@ -5742,6 +5746,9 @@ export type Database = {
           gcal_etag?: string | null
           gcal_event_id?: string | null
           gcal_last_synced_at?: string | null
+          ice_confidence?: number | null
+          ice_ease?: number | null
+          ice_impact?: number | null
           id?: string
           number: number
           parent_task_id?: string | null
@@ -5783,6 +5790,9 @@ export type Database = {
           gcal_etag?: string | null
           gcal_event_id?: string | null
           gcal_last_synced_at?: string | null
+          ice_confidence?: number | null
+          ice_ease?: number | null
+          ice_impact?: number | null
           id?: string
           number?: number
           parent_task_id?: string | null

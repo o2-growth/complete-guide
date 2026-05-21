@@ -34,6 +34,10 @@ export interface TaskRow {
   custom_fields?: Record<string, unknown> | null;
   checklist?: unknown;
   progress_pct?: number | null;
+  ice_impact?: number | null;
+  ice_confidence?: number | null;
+  ice_ease?: number | null;
+  ice_score?: number | null;
   persona_id?: string | null;
   audience_id?: string | null;
   gcal_event_id?: string | null;
