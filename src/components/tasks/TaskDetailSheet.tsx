@@ -17,7 +17,7 @@ import {
   Clock,
   X,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PresenceAvatars } from "@/components/presence/PresenceAvatars";
 import { Button } from "@/components/ui/button";
@@ -179,7 +179,7 @@ export function TaskDetailContent({ taskId }: { taskId: string }) {
 
   return (
     <div className="flex h-full flex-col">
-      <SheetHeader className="border-b px-6 py-4">
+      <header className="border-b px-6 py-4">
         <div className="flex items-center gap-2">
           {task.code && (
             <Badge variant="outline" className="font-mono text-[10px]">
@@ -207,7 +207,7 @@ export function TaskDetailContent({ taskId }: { taskId: string }) {
             <PresenceAvatars room={`task:${task.id}`} />
           </div>
         </div>
-        <SheetTitle className="sr-only">{task.title}</SheetTitle>
+        <h1 className="sr-only">{task.title}</h1>
         <div className="mt-2 flex items-start gap-3">
           <Checkbox
             checked={done}
@@ -231,7 +231,7 @@ export function TaskDetailContent({ taskId }: { taskId: string }) {
           />
           <TaskTimerButton taskId={task.id} />
         </div>
-      </SheetHeader>
+      </header>
 
       <div className="grid gap-3 border-b bg-muted/20 px-6 py-4 text-sm sm:grid-cols-3">
         <FieldLabel label="Status">
