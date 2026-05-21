@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { FolderKanban, Plus, Archive, ArchiveRestore, Search, Loader2, Star, Plug, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -239,9 +239,14 @@ function ProjectCard({ project, index }: { project: ProjectWithStats; index?: nu
 
 export default function ProjectsPage() {
   const { data, isLoading, error, refetch } = useProjects();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
-  const [sourceFilter, setSourceFilter] = useState<ProjectSourceFilter>("all");
+  const initialSource = ((): ProjectSourceFilter => {
+    const s = searchParams.get("source");
+    return s === "pipefy" || s === "manual" ? s : "all";
+  })();
+  const [sourceFilter, setSourceFilter] = useState<ProjectSourceFilter>(initialSource);
 
   const pipefyCount = useMemo(
     () => (data ?? []).filter((p) => !!p.pipefy_card_id && !p.archived).length,
