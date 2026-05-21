@@ -82,6 +82,9 @@ export default function ProjectDetailPage() {
   const [calAnchor, setCalAnchor] = useState<Date>(new Date());
   const reschedule = useRescheduleTask();
   const { setVisible, clear } = useBulkSelection();
+  const filter = useTaskFilter(`project:${id ?? "none"}`);
+  const allTasks = (tasks ?? []) as TaskRow[];
+  const visibleTasks = useMemo(() => filter.apply(allTasks), [filter, allTasks]);
 
   if (isLoading) {
     return (
@@ -100,9 +103,6 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const allTasks = (tasks ?? []) as TaskRow[];
-  const filter = useTaskFilter(`project:${id ?? "none"}`);
-  const visibleTasks = useMemo(() => filter.apply(allTasks), [filter, allTasks]);
   const done = visibleTasks.filter((t) => !!t.done_at).length;
   const total = visibleTasks.length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
