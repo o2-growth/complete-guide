@@ -59,14 +59,18 @@ describe("useSidebarPrefs", () => {
   it("inicia com defaults (sem favoritos, grupos pesados colapsados)", async () => {
     const { result } = renderHook(() => useSidebarPrefs());
     expect(result.current.favorites).toEqual([]);
-    expect(result.current.isGroupCollapsed("operacao")).toBe(true);
-    expect(result.current.isGroupCollapsed("atendimento")).toBe(true);
     expect(result.current.isGroupCollapsed("midias-sociais")).toBe(true);
-    expect(result.current.isGroupCollapsed("insights")).toBe(true);
+    expect(result.current.isGroupCollapsed("insights-avancados")).toBe(true);
+    expect(result.current.isGroupCollapsed("atendimento")).toBe(true);
     expect(result.current.isGroupCollapsed("conhecimento")).toBe(true);
-    expect(result.current.isGroupCollapsed("sistema")).toBe(true);
-    expect(result.current.isGroupCollapsed("inicio")).toBe(false);
-    expect(result.current.isGroupCollapsed("visualizacoes")).toBe(false);
+    expect(result.current.isGroupCollapsed("enterprise")).toBe(true);
+    expect(result.current.isGroupCollapsed("developer")).toBe(true);
+    expect(result.current.isGroupCollapsed("gamificacao")).toBe(true);
+    expect(result.current.isGroupCollapsed("marketplace")).toBe(true);
+    expect(result.current.isGroupCollapsed("visoes")).toBe(false);
+    expect(result.current.isGroupCollapsed("trabalho")).toBe(false);
+    expect(result.current.isGroupCollapsed("insights-basicos")).toBe(false);
+    expect(result.current.isGroupCollapsed("sistema-core")).toBe(false);
   });
 
   it("toggleFavorite adiciona e remove paths persistindo em localStorage", async () => {
@@ -94,10 +98,10 @@ describe("useSidebarPrefs", () => {
     const { result } = renderHook(() => useSidebarPrefs());
 
     await act(async () => {
-      result.current.toggleGroupCollapsed("inicio");
+      result.current.toggleGroupCollapsed("visoes");
     });
     await waitFor(() => {
-      expect(result.current.isGroupCollapsed("inicio")).toBe(true);
+      expect(result.current.isGroupCollapsed("visoes")).toBe(true);
     });
 
     await waitFor(() => {
@@ -106,18 +110,18 @@ describe("useSidebarPrefs", () => {
     const payload = lastUpdatePayload as {
       preferences?: { sidebar?: { collapsedGroups?: string[] } };
     };
-    expect(payload.preferences?.sidebar?.collapsedGroups).toContain("inicio");
+    expect(payload.preferences?.sidebar?.collapsedGroups).toContain("visoes");
   });
 
   it("reorderItems salva customOrder por groupId", async () => {
     const { result } = renderHook(() => useSidebarPrefs());
-    const order = ["/app/projetos", "/app/squads", "/app/demandas"];
+    const order = ["/app/projetos", "/app/squads", "/app/workload"];
 
     await act(async () => {
-      result.current.reorderItems("operacao", order);
+      result.current.reorderItems("trabalho", order);
     });
     await waitFor(() => {
-      expect(result.current.customOrder.operacao).toEqual(order);
+      expect(result.current.customOrder.trabalho).toEqual(order);
     });
   });
 });

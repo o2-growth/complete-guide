@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -68,6 +68,10 @@ export function useSidebarPrefs() {
     ...DEFAULT_PREFS,
     ...readLocal(),
   }));
+  // Cache do objeto preferences completo do usuário. Evita o ciclo
+  // read-modify-write a cada toggle, que perdia atualizações concorrentes.
+  // Permanece null até o primeiro fetch completar.
+  const remotePrefsRef = useRef<Record<string, Json> | null>(null);
 
   useEffect(() => {
     const handler = () => setPrefs({ ...DEFAULT_PREFS, ...readLocal() });
@@ -89,7 +93,8 @@ export function useSidebarPrefs() {
         .eq("id", user.id)
         .maybeSingle();
       if (cancelled) return;
-      const remote = (data?.preferences as Record<string, unknown> | null) ?? {};
+      const remote = (data?.preferences as Record<string, Json> | null) ?? {};
+      remotePrefsRef.current = remote;
       const sidebar = remote.sidebar;
       if (sidebar) {
         const next = normalize(sidebar);
@@ -107,16 +112,23 @@ export function useSidebarPrefs() {
       writeLocal(next);
       setPrefs(next);
       if (!user) return;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("preferences")
-        .eq("id", user.id)
-        .maybeSingle();
-      const remote = (profile?.preferences as Record<string, Json> | null) ?? {};
-      const merged: Json = { ...remote, sidebar: next as unknown as Json };
+      // Se o fetch inicial ainda não populou o cache, busca uma única vez.
+      if (remotePrefsRef.current === null) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("preferences")
+          .eq("id", user.id)
+          .maybeSingle();
+        remotePrefsRef.current = (data?.preferences as Record<string, Json> | null) ?? {};
+      }
+      const merged: Record<string, Json> = {
+        ...remotePrefsRef.current,
+        sidebar: next as unknown as Json,
+      };
+      remotePrefsRef.current = merged;
       await supabase
         .from("profiles")
-        .update({ preferences: merged })
+        .update({ preferences: merged as Json })
         .eq("id", user.id);
     },
     [user],
