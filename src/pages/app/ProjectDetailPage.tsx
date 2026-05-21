@@ -23,6 +23,7 @@ import { MonthView } from "@/components/calendar/MonthView";
 import { fmt } from "@/components/calendar/calendar-utils";
 import { BulkActionsBar } from "@/components/tasks/BulkActionsBar";
 import { ProjectMembersDialog } from "@/components/projects/ProjectMembersDialog";
+import { TaskFilterBar, useTaskFilter } from "@/components/tasks/TaskFilterBar";
 import { useBulkSelection } from "@/hooks/useBulkSelection";
 import { useEffect } from "react";
 import type { TaskRow } from "@/hooks/useTasks";
