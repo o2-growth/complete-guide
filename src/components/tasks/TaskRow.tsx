@@ -15,6 +15,8 @@ import {
   useDuplicateTask,
   useToggleTaskDone,
 } from "@/hooks/useTasks";
+import { useUpdateTask } from "@/hooks/useTaskDetail";
+import { ProjectPicker } from "@/components/tasks/ProjectPicker";
 import { cn } from "@/lib/utils";
 import { TaskTimerButton } from "@/components/timer/TimerIndicator";
 import { TaskHoursChip } from "@/components/timer/TaskHoursChip";
@@ -68,6 +70,7 @@ export function TaskRow({ task, onOpen, onEdit, index, bulkMode = false }: TaskR
   const toggle = useToggleTaskDone();
   const remove = useDeleteTask();
   const duplicate = useDuplicateTask();
+  const update = useUpdateTask();
   const { data: wbIndex } = useWhiteboardTaskIndex();
   const hasWhiteboard = !!wbIndex?.[task.id];
   const done = !!task.done_at;
@@ -233,6 +236,23 @@ export function TaskRow({ task, onOpen, onEdit, index, bulkMode = false }: TaskR
           {task.ice_score != null && (
             <ICEBadge score={task.ice_score} />
           )}
+          <span
+            data-no-open
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-[180px]"
+          >
+            <ProjectPicker
+              value={task.project_id}
+              onChange={(id) => {
+                if (id && id !== task.project_id) {
+                  update.mutate({ id: task.id, patch: { project_id: id } });
+                }
+              }}
+              compact
+              placeholder="Vincular produto"
+              className="h-6 w-auto max-w-[180px] border-dashed text-xs"
+            />
+          </span>
         </div>
         {progress > 0 && (
           <div className="mt-2">
