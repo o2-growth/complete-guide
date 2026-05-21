@@ -49,10 +49,6 @@ export interface TaskRow {
   publish_state?: string | null;
   campaign_id?: string | null;
   scheduled_at?: string | null;
-  ice_impact?: number | null;
-  ice_confidence?: number | null;
-  ice_ease?: number | null;
-  ice_score?: number | null;
 }
 
 export type SmartList =
