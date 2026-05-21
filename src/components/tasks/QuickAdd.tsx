@@ -16,16 +16,17 @@ const PRIO_LABEL: Record<string, string> = {
   none: "",
 };
 
-export function QuickAdd() {
+export function QuickAdd({ projectId }: { projectId?: string }) {
   const [value, setValue] = useState("");
   const mutation = useQuickAdd();
   const preview = value.trim() ? parseQuickAdd(value) : null;
 
   const submit = () => {
     if (!value.trim()) return;
-    mutation.mutate(value, {
-      onSuccess: () => setValue(""),
-    });
+    mutation.mutate(
+      projectId ? { text: value, projectId } : value,
+      { onSuccess: () => setValue("") },
+    );
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {

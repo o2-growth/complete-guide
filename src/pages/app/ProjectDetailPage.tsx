@@ -16,6 +16,8 @@ import { useProjectTree, collectDescendantIds, findNode, findPath } from "@/hook
 import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskListGrouped } from "@/components/tasks/TaskListGrouped";
+import { TaskTableView } from "@/components/tasks/TaskTableView";
+import { QuickAdd } from "@/components/tasks/QuickAdd";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
 import { TaskChartView } from "@/components/tasks/views/TaskChartView";
@@ -29,6 +31,18 @@ import { useEffect } from "react";
 import type { TaskRow } from "@/hooks/useTasks";
 
 const PROJECT_VIEW_KEY = "oxy:project-view";
+const PROJECT_LIST_MODE_KEY = "oxy:project-list-mode";
+
+function getStoredListMode(projectId: string | undefined): "table" | "grouped" {
+  if (typeof window === "undefined" || !projectId) return "table";
+  try {
+    const raw = window.localStorage.getItem(`${PROJECT_LIST_MODE_KEY}:${projectId}`);
+    if (raw === "table" || raw === "grouped") return raw;
+  } catch {
+    // ignore
+  }
+  return "table";
+}
 
 function getStoredProjectView(projectId: string | undefined) {
   if (typeof window === "undefined" || !projectId) return "list";
@@ -74,9 +88,20 @@ export default function ProjectDetailPage() {
   const [tplName, setTplName] = useState("");
   const saveTpl = useSaveProjectAsTemplate();
   const [view, setView] = useState<string>(() => getStoredProjectView(id));
+  const [listMode, setListMode] = useState<"table" | "grouped">(() => getStoredListMode(id));
   const handleViewChange = (v: string) => {
     setView(v);
     setStoredProjectView(id, v);
+  };
+  const handleListModeChange = (m: "table" | "grouped") => {
+    setListMode(m);
+    if (id) {
+      try {
+        window.localStorage.setItem(`${PROJECT_LIST_MODE_KEY}:${id}`, m);
+      } catch {
+        // ignore
+      }
+    }
   };
   const [membersOpen, setMembersOpen] = useState(false);
   const [calAnchor, setCalAnchor] = useState<Date>(new Date());
@@ -232,11 +257,43 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
-        <TabsContent value="list" className="mt-4">
+        <TabsContent value="list" className="mt-4 space-y-3">
+          {!isAggregator && id && <QuickAdd projectId={id} />}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              Visualização estilo ClickUp — edite status, prioridade e produto na tabela.
+            </p>
+            <div className="flex rounded-md border p-0.5">
+              <Button
+                size="sm"
+                variant={listMode === "table" ? "secondary" : "ghost"}
+                className="h-7 text-xs"
+                onClick={() => handleListModeChange("table")}
+              >
+                Tabela
+              </Button>
+              <Button
+                size="sm"
+                variant={listMode === "grouped" ? "secondary" : "ghost"}
+                className="h-7 text-xs"
+                onClick={() => handleListModeChange("grouped")}
+              >
+                Agrupada
+              </Button>
+            </div>
+          </div>
           {lt ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
           ) : visibleTasks.length === 0 ? (
             <Card className="py-12 text-center text-sm text-muted-foreground">Nenhuma tarefa neste projeto ainda.</Card>
+          ) : listMode === "table" ? (
+            <TableWithBulk
+              tasks={visibleTasks}
+              onOpen={setOpenId}
+              setVisible={setVisible}
+              clear={clear}
+              showProjectColumn={isAggregator}
+            />
           ) : (
             <ListWithBulk tasks={visibleTasks} onOpen={setOpenId} setVisible={setVisible} clear={clear} scope={id ?? "project"} />
           )}
@@ -296,6 +353,33 @@ export default function ProjectDetailPage() {
       />
       <BulkActionsBar />
     </div>
+  );
+}
+
+function TableWithBulk({
+  tasks,
+  onOpen,
+  setVisible,
+  clear,
+  showProjectColumn,
+}: {
+  tasks: TaskRow[];
+  onOpen: (id: string) => void;
+  setVisible: (ids: string[]) => void;
+  clear: () => void;
+  showProjectColumn: boolean;
+}) {
+  useEffect(() => {
+    setVisible(tasks.map((t) => t.id));
+    return () => clear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks]);
+  return (
+    <TaskTableView
+      tasks={tasks}
+      onOpen={onOpen}
+      showProjectColumn={showProjectColumn}
+    />
   );
 }
 

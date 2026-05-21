@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { FolderKanban, Plus, Archive, ArchiveRestore, Search, Loader2, Star } from "lucide-react";
+import { FolderKanban, Plus, Archive, ArchiveRestore, Search, Loader2, Star, Plug, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,9 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { useProjects, useCreateProject, useArchiveProject, ProjectWithStats } from "@/hooks/useProjects";
 import { useSquads } from "@/hooks/useSquads";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type ProjectSourceFilter = "all" | "pipefy" | "manual";
 
 function CreateProjectDialog() {
   const create = useCreateProject();
@@ -148,8 +151,16 @@ function ProjectCard({ project, index }: { project: ProjectWithStats; index?: nu
         <div className="flex items-start justify-between gap-3">
           <Link to={`/app/projetos/${project.id}`} className="min-w-0 flex-1">
             <CardTitle className="truncate text-base hover:text-primary">{project.name}</CardTitle>
-            <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
               <Badge variant="outline" className="font-mono text-[10px]">{project.key}</Badge>
+              {project.pipefy_card_id && (
+                <Badge variant="secondary" className="gap-0.5 text-[9px] text-violet-600">
+                  <Plug className="h-2.5 w-2.5" /> Pipefy
+                </Badge>
+              )}
+              {project.pipefy_phase_name && (
+                <span className="text-[10px]">{project.pipefy_phase_name}</span>
+              )}
               {project.squadName && <span>· {project.squadName}</span>}
             </div>
           </Link>
@@ -210,6 +221,17 @@ function ProjectCard({ project, index }: { project: ProjectWithStats; index?: nu
             <p className="text-muted-foreground">Atrasadas</p>
           </div>
         </div>
+        {project.pipefy_url && (
+          <a
+            href={project.pipefy_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Abrir no Pipefy <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
       </CardContent>
     </Card>
   );
@@ -219,14 +241,22 @@ export default function ProjectsPage() {
   const { data, isLoading, error, refetch } = useProjects();
   const [search, setSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<ProjectSourceFilter>("all");
+
+  const pipefyCount = useMemo(
+    () => (data ?? []).filter((p) => !!p.pipefy_card_id && !p.archived).length,
+    [data],
+  );
 
   const filtered = useMemo(() => {
     return (data ?? []).filter((p) => {
       if (!showArchived && p.archived) return false;
+      if (sourceFilter === "pipefy" && !p.pipefy_card_id) return false;
+      if (sourceFilter === "manual" && p.pipefy_card_id) return false;
       if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !p.key.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [data, search, showArchived]);
+  }, [data, search, showArchived, sourceFilter]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, { name: string; color: string | null; items: ProjectWithStats[] }>();
@@ -252,10 +282,36 @@ export default function ProjectsPage() {
     <div className="container max-w-7xl py-8 space-y-6">
       <PageHeader
         icon={FolderKanban}
-        title="Projetos"
-        description="Hierarquia Squad → Projeto → Tarefas com múltiplas visões."
+        title="Projetos e produtos"
+        description="Cards do Pipefy aparecem aqui como projetos. Abra a lista e vincule produtos nas tarefas."
         actions={<CreateProjectDialog />}
       />
+
+      {pipefyCount === 0 && (
+        <Card className="border-dashed bg-muted/30">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Plug className="h-4 w-4 text-violet-500" />
+              <span>
+                Conecte seu pipe de gestão para importar produtos automaticamente a cada 15 min.
+              </span>
+            </div>
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/app/configuracoes/integracoes/pipefy">Configurar Pipefy</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs value={sourceFilter} onValueChange={(v) => setSourceFilter(v as ProjectSourceFilter)}>
+        <TabsList>
+          <TabsTrigger value="all">Todos</TabsTrigger>
+          <TabsTrigger value="pipefy" className="gap-1">
+            <Plug className="h-3 w-3" /> Pipefy ({pipefyCount})
+          </TabsTrigger>
+          <TabsTrigger value="manual">Manuais</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px] max-w-sm">

@@ -1,7 +1,8 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "oxy-growth-os",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Oxy Growth OS — plataforma de gestão de tarefas e operação Growth (O2 Inc.)",
   "type": "module",
   "scripts": {
     "dev": "vite",

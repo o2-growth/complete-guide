@@ -49,6 +49,10 @@ export interface TaskRow {
   publish_state?: string | null;
   campaign_id?: string | null;
   scheduled_at?: string | null;
+  ice_impact?: number | null;
+  ice_confidence?: number | null;
+  ice_ease?: number | null;
+  ice_score?: number | null;
 }
 
 export type SmartList =
@@ -237,11 +241,14 @@ export function useQuickAdd() {
   const { data: taskTypes } = useTaskTypes();
 
   return useMutation({
-    mutationFn: async (input: string) => {
+    mutationFn: async (input: string | { text: string; projectId?: string }) => {
       if (!user || !tenantId || !inboxProjectId) {
         throw new Error("Workspace ainda não está pronto");
       }
-      const parsed = parseQuickAdd(input);
+      const text = typeof input === "string" ? input : input.text;
+      const targetProjectId =
+        typeof input === "string" ? inboxProjectId : (input.projectId ?? inboxProjectId);
+      const parsed = parseQuickAdd(text);
       const todoStatus = statuses?.find((s) => s.slug === "todo");
 
       // Default estimate: se o parser não capturou ~Xm/h, herda do tipo default
@@ -259,7 +266,7 @@ export function useQuickAdd() {
 
       const payload = {
         tenant_id: tenantId,
-        project_id: inboxProjectId,
+        project_id: targetProjectId,
         title: parsed.title,
         priority: parsed.priority,
         status_id: todoStatus?.id ?? null,

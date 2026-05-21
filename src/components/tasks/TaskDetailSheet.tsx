@@ -35,6 +35,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { RichEditor } from "./RichEditor";
+import { ICEScoreEditor } from "./ICEScoreEditor";
 import { useAuth } from "@/hooks/useAuth";
 import { useTaskStatuses, useToggleTaskDone, type TaskRow } from "@/hooks/useTasks";
 import {
@@ -78,6 +79,7 @@ import { AssigneePicker } from "./AssigneePicker";
 import { warnIfOverload } from "./assignee-utils";
 import { useUserWorkload } from "@/hooks/useWorkload";
 import { CustomFieldsPanel } from "./CustomFieldsPanel";
+import { TaskProjectLinker } from "./TaskProjectLinker";
 
 const PRIORITIES = [
   { value: "none", label: "Nenhuma" },
@@ -415,6 +417,28 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
             }}
           />
         </FieldLabel>
+      </div>
+
+      <div className="border-b bg-background px-6 py-4">
+        <TaskProjectLinker
+          taskId={task.id}
+          primaryProjectId={task.project_id}
+          onPrimaryChange={(projectId) => {
+            if (!projectId) return;
+            update.mutate({ id: task.id, patch: { project_id: projectId } });
+          }}
+        />
+      </div>
+
+      <div className="border-b bg-background px-6 py-4">
+        <ICEScoreEditor
+          key={task.id}
+          impact={task.ice_impact ?? null}
+          confidence={task.ice_confidence ?? null}
+          ease={task.ice_ease ?? null}
+          score={task.ice_score ?? null}
+          onChange={(patch) => update.mutate({ id: task.id, patch })}
+        />
       </div>
 
       <div className="flex-1 px-6 py-4">

@@ -94,6 +94,8 @@ const HelpCenterPage = lazy(() => import("./pages/app/HelpCenterPage.tsx"));
 const AchievementsPage = lazy(() => import("./pages/app/AchievementsPage.tsx"));
 const EnterprisePage = lazy(() => import("./pages/app/EnterprisePage.tsx"));
 const EisenhowerPage = lazy(() => import("./pages/app/EisenhowerPage.tsx"));
+const PriorizacaoPage = lazy(() => import("./pages/app/PriorizacaoPage.tsx"));
+const PipefyIntegrationPage = lazy(() => import("./pages/app/PipefyIntegrationPage.tsx"));
 const HabitsPage = lazy(() => import("./pages/app/HabitsPage.tsx"));
 const PlanYourDayPage = lazy(() => import("./pages/app/PlanYourDayPage.tsx"));
 const TimelinePage = lazy(() => import("./pages/app/TimelinePage.tsx"));
@@ -238,6 +240,8 @@ const App = () => (
                 />
                 <Route path="foco" element={<FocusPage />} />
                 <Route path="eisenhower" element={<EisenhowerPage />} />
+                <Route path="priorizacao" element={<PriorizacaoPage />} />
+                <Route path="configuracoes/integracoes/pipefy" element={<PipefyIntegrationPage />} />
                 <Route path="habitos" element={<HabitsPage />} />
                 <Route path="plano-do-dia" element={<PlanYourDayPage />} />
                 <Route path="timeline" element={<TimelinePage />} />

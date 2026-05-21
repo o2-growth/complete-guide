@@ -59,10 +59,14 @@ describe("useSidebarPrefs", () => {
   it("inicia com defaults (sem favoritos, grupos pesados colapsados)", async () => {
     const { result } = renderHook(() => useSidebarPrefs());
     expect(result.current.favorites).toEqual([]);
-    expect(result.current.isGroupCollapsed("midias-sociais")).toBe(true);
-    expect(result.current.isGroupCollapsed("sistema")).toBe(true);
     expect(result.current.isGroupCollapsed("operacao")).toBe(true);
+    expect(result.current.isGroupCollapsed("atendimento")).toBe(true);
+    expect(result.current.isGroupCollapsed("midias-sociais")).toBe(true);
+    expect(result.current.isGroupCollapsed("insights")).toBe(true);
+    expect(result.current.isGroupCollapsed("conhecimento")).toBe(true);
+    expect(result.current.isGroupCollapsed("sistema")).toBe(true);
     expect(result.current.isGroupCollapsed("inicio")).toBe(false);
+    expect(result.current.isGroupCollapsed("visualizacoes")).toBe(false);
   });
 
   it("toggleFavorite adiciona e remove paths persistindo em localStorage", async () => {

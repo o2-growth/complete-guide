@@ -21,6 +21,11 @@ export interface Project {
   kind?: "space_root" | "folder" | "list" | "inbox" | null;
   parent_id?: string | null;
   is_private?: boolean | null;
+  pipefy_card_id?: string | null;
+  pipefy_pipe_id?: string | null;
+  pipefy_url?: string | null;
+  pipefy_phase_name?: string | null;
+  pipefy_last_synced_at?: string | null;
 }
 
 // Inboxes pessoais são auto-criadas com prefixo "Inbox de " pelo trigger handle_new_user.

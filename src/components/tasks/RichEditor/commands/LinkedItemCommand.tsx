@@ -3,7 +3,7 @@ import type { Editor, Range } from "@tiptap/core";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
-import { Loader2, FileText, ListTodo, ImageIcon } from "lucide-react";
+import { Loader2, FileText, ListTodo, ImageIcon, FolderKanban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -72,13 +72,13 @@ export function LinkedItemCommand({ editor, range, onDone }: Props) {
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Vincular tarefa ou nota</DialogTitle>
+          <DialogTitle>Vincular tarefa, produto ou nota</DialogTitle>
         </DialogHeader>
         <Input
           autoFocus
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar tarefa ou nota… (mín. 2 letras)"
+          placeholder="Buscar tarefa, produto (pipe) ou nota…"
         />
         <div className="max-h-72 overflow-auto">
           {loading ? (
@@ -96,6 +96,8 @@ export function LinkedItemCommand({ editor, range, onDone }: Props) {
                   >
                     {r.kind === "post" ? (
                       <ImageIcon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    ) : r.kind === "project" ? (
+                      <FolderKanban className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" />
                     ) : (
                       <ListTodo className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                     )}
