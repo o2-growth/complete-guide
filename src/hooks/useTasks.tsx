@@ -320,6 +320,48 @@ export function useQuickAdd() {
   });
 }
 
+export function useCreateTask() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const { tenantId } = useWorkspace();
+  const { data: statuses } = useTaskStatuses();
+
+  return useMutation({
+    mutationFn: async (input: {
+      projectId: string;
+      title: string;
+      statusId?: string | null;
+      assigneeId?: string | null;
+      priority?: TaskRow["priority"];
+    }) => {
+      if (!user || !tenantId) throw new Error("Workspace não pronto");
+      const todo = statuses?.find((s) => s.slug === "todo");
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert({
+          tenant_id: tenantId,
+          project_id: input.projectId,
+          title: input.title,
+          status_id: input.statusId ?? todo?.id ?? null,
+          assignee_id: input.assigneeId ?? user.id,
+          reporter_id: user.id,
+          created_by: user.id,
+          priority: input.priority ?? "none",
+          number: 0,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as TaskRow;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["project-tasks"] });
+      qc.invalidateQueries({ queryKey: ["my-work"] });
+    },
+  });
+}
+
 export function useToggleTaskDone() {
   const qc = useQueryClient();
   const { data: statuses } = useTaskStatuses();

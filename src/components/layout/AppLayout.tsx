@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "./AppSidebar";
+import { ClickUpSidebar } from "./ClickUpSidebar";
 import { Topbar } from "./Topbar";
 import { CommandPalette } from "./CommandPalette";
 import { useTimerSync } from "@/hooks/useTimer";
@@ -63,13 +63,13 @@ export default function AppLayout() {
         {t("common.skip_to_content")}
       </a>
       <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
+        <ClickUpSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar onOpenCommand={() => setPaletteOpen(true)} />
           <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
             <Outlet />
           </main>
-          <MobileBottomNav onQuickAdd={() => navigate("/app")} />
+          <MobileBottomNav onQuickAdd={() => navigate("/app/inicio")} />
         </div>
       </div>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />

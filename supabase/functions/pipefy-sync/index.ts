@@ -166,19 +166,46 @@ function pickIceImpact(card: PipefyCard): number | null {
   return Math.max(1, Math.min(10, n));
 }
 
+async function resolveBancoSquadId(supabase: AnyClient, tenantId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("squads")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .ilike("name", "Banco de Projetos%")
+    .maybeSingle();
+  return (data as { id: string } | null)?.id ?? null;
+}
+
+// Cada card do Pipefy entra como Lista (kind='list') dentro do Espaço "Team IA & Automação".
+// Se o Espaço não existir ainda (seed pendente), o sync segue como root (parent_id null).
+async function resolveSpaceIaId(supabase: AnyClient, tenantId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("kind", "space_root")
+    .eq("key", "IA")
+    .maybeSingle();
+  return (data as { id: string } | null)?.id ?? null;
+}
+
 function cardToProjectPayload(
   card: PipefyCard,
   integration: { tenant_id: string; pipe_id: string },
   pipeName: string,
   syncedAt: string,
+  squadId: string | null,
+  parentId: string | null,
 ) {
   return {
     tenant_id: integration.tenant_id,
+    squad_id: squadId,
+    parent_id: parentId,
     key: buildProjectKey(card),
     name: card.title || `Card ${card.id}`,
     description: (card.fields.find((f) => f.field.id === "escopo_do_projeto")?.value as string | null) ?? null,
     color: pickColor(card),
-    kind: "pipefy",
+    kind: "list",
     pipefy_card_id: card.id,
     pipefy_pipe_id: integration.pipe_id,
     pipefy_url: card.url,
@@ -207,6 +234,8 @@ async function syncIntegration(supabase: AnyClient, token: string, integration: 
   try {
     const pipeData = await pipefyGraphQL<{ pipe: PipefyPipe }>(token, PIPE_QUERY, { id: integration.pipe_id });
     const pipeName = pipeData.pipe.name;
+    const squadId = await resolveBancoSquadId(supabase, integration.tenant_id);
+    const parentId = await resolveSpaceIaId(supabase, integration.tenant_id);
 
     let cursor: string | null = null;
     let hasNext = true;
@@ -226,7 +255,7 @@ async function syncIntegration(supabase: AnyClient, token: string, integration: 
           if (!integration.active_only) return true;
           return ACTIVE_PHASE_FILTER(card.current_phase?.name ?? "");
         })
-        .map((card) => cardToProjectPayload(card, integration, pipeName, syncedAt));
+        .map((card) => cardToProjectPayload(card, integration, pipeName, syncedAt, squadId, parentId));
 
       if (payloads.length > 0) {
         const { error: upErr } = await supabase

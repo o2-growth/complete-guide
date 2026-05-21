@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { taskDetailPath } from "@/lib/task-routes";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -119,18 +121,19 @@ interface TaskDetailSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
+/** Redireciona para página cheia — sem sheet lateral (estilo ClickUp). */
 export function TaskDetailSheet({ taskId, onOpenChange }: TaskDetailSheetProps) {
-  const open = !!taskId;
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-2xl">
-        {taskId && <TaskDetailContent taskId={taskId} />}
-      </SheetContent>
-    </Sheet>
-  );
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (taskId) {
+      navigate(taskDetailPath(taskId));
+      onOpenChange(false);
+    }
+  }, [taskId, navigate, onOpenChange]);
+  return null;
 }
 
-function TaskDetailContent({ taskId }: { taskId: string }) {
+export function TaskDetailContent({ taskId }: { taskId: string }) {
   const { data: task, isLoading } = useTask(taskId);
   const { data: statuses } = useTaskStatuses();
   const { data: taskTypes } = useTaskTypes();

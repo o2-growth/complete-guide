@@ -17,6 +17,9 @@ import Auth from "./pages/Auth.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import AppHome from "./pages/AppHome.tsx";
 import SmartListPage from "./pages/app/SmartListPage.tsx";
+const InicioPage = lazy(() => import("./pages/app/InicioPage.tsx"));
+const MyWorkPage = lazy(() => import("./pages/app/MyWorkPage.tsx"));
+const TaskDetailPage = lazy(() => import("./pages/app/TaskDetailPage.tsx"));
 
 // Code-splitting: tudo que não é entrypoint vai por lazy import.
 const KanbanPage = lazy(() => import("./pages/app/KanbanPage.tsx"));
@@ -106,7 +109,7 @@ const AtendimentoTicketPage = lazy(() => import("./pages/app/AtendimentoTicketPa
 const TimesheetPage = lazy(() => import("./pages/app/TimesheetPage.tsx"));
 const WhiteboardsPage = lazy(() => import("./pages/app/WhiteboardsPage.tsx"));
 const WhiteboardDetailPage = lazy(() => import("./pages/app/WhiteboardDetailPage.tsx"));
-import { CalendarClock, AlertTriangle, UserCheck, Sun, UserPlus, Share2 } from "lucide-react";
+import { CalendarClock, AlertTriangle, UserCheck, Sun, UserPlus, Share2, Inbox } from "lucide-react";
 
 const queryClient = new QueryClient(DEFAULT_QUERY_CLIENT_CONFIG);
 
@@ -128,7 +131,7 @@ const App = () => (
           <AuthProvider>
             <Suspense fallback={<PageFallback />}>
             <Routes>
-              <Route path="/" element={<Navigate to="/app" replace />} />
+              <Route path="/" element={<Navigate to="/app/inicio" replace />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/solicitar/:slug" element={<RequestPage />} />
               <Route path="/aprovar/:token" element={<ApprovePage />} />
@@ -154,7 +157,65 @@ const App = () => (
                   </ProtectedRoute>
                 }
               >
-                <Route index element={<AppHome />} />
+                <Route index element={<Navigate to="inicio" replace />} />
+                <Route path="inicio" element={<InicioPage />} />
+                <Route
+                  path="minhas-tarefas"
+                  element={
+                    <MyWorkPage
+                      title="Minhas tarefas"
+                      description="Tudo que está com você agora."
+                      defaultTab="pending"
+                    />
+                  }
+                />
+                <Route
+                  path="minhas-tarefas/hoje-atrasadas"
+                  element={
+                    <MyWorkPage
+                      title="Hoje e atrasadas"
+                      description="Foco no que vence hoje ou já passou do prazo."
+                      defaultTab="pending"
+                    />
+                  }
+                />
+                <Route
+                  path="lista-pessoal"
+                  element={
+                    <SmartListPage
+                      list="inbox"
+                      title="Lista pessoal"
+                      description="Deposite tarefas rápidas aqui — sua caixa pessoal."
+                      icon={Inbox}
+                      showQuickAdd
+                    />
+                  }
+                />
+                <Route
+                  path="caixa-de-entrada"
+                  element={
+                    <SmartListPage
+                      list="inbox"
+                      title="Caixa de entrada"
+                      description="Tarefas na sua lista pessoal."
+                      icon={Inbox}
+                      showQuickAdd
+                    />
+                  }
+                />
+                <Route
+                  path="comentarios-atribuidos"
+                  element={
+                    <SmartListPage
+                      list="shared_with_me"
+                      title="Comentários atribuídos"
+                      description="Demandas que outros compartilharam com você."
+                      icon={UserCheck}
+                    />
+                  }
+                />
+                <Route path="tarefas/:id" element={<TaskDetailPage />} />
+                <Route path="home-legado" element={<AppHome />} />
                 <Route
                   path="hoje"
                   element={

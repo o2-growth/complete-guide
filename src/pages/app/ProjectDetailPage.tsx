@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BarChart3, CalendarDays, ChevronLeft, ChevronRight, FileStack, Folder, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock, Users2 } from "lucide-react";
+import { ArrowLeft, BarChart3, CalendarDays, ChevronLeft, ChevronRight, FileStack, Folder, GanttChartSquare, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock, Plus, Table as TableIcon, Users2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,10 +14,13 @@ import { useProject, useProjectTasks, useTasksForProjects } from "@/hooks/usePro
 import { useRescheduleTask } from "@/hooks/useTasks";
 import { useProjectTree, collectDescendantIds, findNode, findPath } from "@/hooks/useProjectTree";
 import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
-import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskListGrouped } from "@/components/tasks/TaskListGrouped";
 import { TaskTableView } from "@/components/tasks/TaskTableView";
-import { QuickAdd } from "@/components/tasks/QuickAdd";
+import { ProjectGanttView } from "@/components/tasks/ProjectGanttView";
+import { ListByStatusView } from "@/components/tasks/ListByStatusView";
+import { CreateTaskModal } from "@/components/tasks/CreateTaskModal";
+import { useNavigate } from "react-router-dom";
+import { taskDetailPath } from "@/lib/task-routes";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
 import { TaskChartView } from "@/components/tasks/views/TaskChartView";
@@ -33,15 +36,15 @@ import type { TaskRow } from "@/hooks/useTasks";
 const PROJECT_VIEW_KEY = "oxy:project-view";
 const PROJECT_LIST_MODE_KEY = "oxy:project-list-mode";
 
-function getStoredListMode(projectId: string | undefined): "table" | "grouped" {
+function getStoredListMode(projectId: string | undefined): "clickup" | "table" | "grouped" {
   if (typeof window === "undefined" || !projectId) return "table";
   try {
     const raw = window.localStorage.getItem(`${PROJECT_LIST_MODE_KEY}:${projectId}`);
-    if (raw === "table" || raw === "grouped") return raw;
+    if (raw === "clickup" || raw === "table" || raw === "grouped") return raw;
   } catch {
     // ignore
   }
-  return "table";
+  return "clickup";
 }
 
 function getStoredProjectView(projectId: string | undefined) {
@@ -83,17 +86,17 @@ export default function ProjectDetailPage() {
   const tasks = isAggregator ? aggTasks.data : ownTasks.data;
   const lt = isAggregator ? aggTasks.isLoading : ownTasks.isLoading;
 
-  const [openId, setOpenId] = useState<string | null>(null);
   const [tplOpen, setTplOpen] = useState(false);
   const [tplName, setTplName] = useState("");
   const saveTpl = useSaveProjectAsTemplate();
   const [view, setView] = useState<string>(() => getStoredProjectView(id));
-  const [listMode, setListMode] = useState<"table" | "grouped">(() => getStoredListMode(id));
+  const [listMode, setListMode] = useState<"clickup" | "table" | "grouped">(() => getStoredListMode(id));
+  const navigate = useNavigate();
   const handleViewChange = (v: string) => {
     setView(v);
     setStoredProjectView(id, v);
   };
-  const handleListModeChange = (m: "table" | "grouped") => {
+  const handleListModeChange = (m: "clickup" | "table" | "grouped") => {
     setListMode(m);
     if (id) {
       try {
@@ -243,6 +246,8 @@ export default function ProjectDetailPage() {
           <TabsTrigger value="kanban"><KanbanSquare className="mr-1.5 h-3.5 w-3.5" /> Kanban</TabsTrigger>
           <TabsTrigger value="calendar"><CalendarDays className="mr-1.5 h-3.5 w-3.5" /> Calendário</TabsTrigger>
           <TabsTrigger value="gallery"><LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria</TabsTrigger>
+          <TabsTrigger value="table"><TableIcon className="mr-1.5 h-3.5 w-3.5" /> Tabela</TabsTrigger>
+          <TabsTrigger value="gantt"><GanttChartSquare className="mr-1.5 h-3.5 w-3.5" /> Gantt</TabsTrigger>
           <TabsTrigger value="chart"><BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico</TabsTrigger>
         </TabsList>
 
@@ -258,12 +263,22 @@ export default function ProjectDetailPage() {
         )}
 
         <TabsContent value="list" className="mt-4 space-y-3">
-          {!isAggregator && id && <QuickAdd projectId={id} />}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">
-              Visualização estilo ClickUp — edite status, prioridade e produto na tabela.
-            </p>
+            {!isAggregator && id && (
+              <CreateTaskModal
+                defaultProjectId={id}
+                trigger={<Button size="sm"><Plus className="mr-1 h-3.5 w-3.5" /> Tarefa</Button>}
+              />
+            )}
             <div className="flex rounded-md border p-0.5">
+              <Button
+                size="sm"
+                variant={listMode === "clickup" ? "secondary" : "ghost"}
+                className="h-7 text-xs"
+                onClick={() => handleListModeChange("clickup")}
+              >
+                Lista
+              </Button>
               <Button
                 size="sm"
                 variant={listMode === "table" ? "secondary" : "ghost"}
@@ -286,16 +301,18 @@ export default function ProjectDetailPage() {
             <div className="flex items-center justify-center py-12 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
           ) : visibleTasks.length === 0 ? (
             <Card className="py-12 text-center text-sm text-muted-foreground">Nenhuma tarefa neste projeto ainda.</Card>
+          ) : listMode === "clickup" && id && !isAggregator ? (
+            <ListByStatusView tasks={visibleTasks} projectId={id} isLoading={lt} />
           ) : listMode === "table" ? (
             <TableWithBulk
               tasks={visibleTasks}
-              onOpen={setOpenId}
+              onOpen={(tid) => navigate(taskDetailPath(tid))}
               setVisible={setVisible}
               clear={clear}
               showProjectColumn={isAggregator}
             />
           ) : (
-            <ListWithBulk tasks={visibleTasks} onOpen={setOpenId} setVisible={setVisible} clear={clear} scope={id ?? "project"} />
+            <ListWithBulk tasks={visibleTasks} onOpen={(tid) => navigate(taskDetailPath(tid))} setVisible={setVisible} clear={clear} scope={id ?? "project"} />
           )}
         </TabsContent>
 
@@ -322,7 +339,7 @@ export default function ProjectDetailPage() {
             <MonthView
               anchor={calAnchor}
               tasks={visibleTasks}
-              onOpenTask={setOpenId}
+              onOpenTask={(tid) => navigate(taskDetailPath(tid))}
               onDropTask={(taskId, day, currentDueAt) =>
                 reschedule.mutate({ taskId, newDate: day, keepTime: true, currentDueAt })
               }
@@ -339,12 +356,30 @@ export default function ProjectDetailPage() {
           />
         </TabsContent>
 
+        <TabsContent value="table" className="mt-4">
+          <TaskTableView
+            tasks={visibleTasks}
+            onOpen={(tid) => navigate(taskDetailPath(tid))}
+            showProjectColumn={isAggregator}
+            isLoading={lt}
+          />
+        </TabsContent>
+
+        <TabsContent value="gantt" className="mt-4">
+          {id && !isAggregator ? (
+            <ProjectGanttView projectId={id} projectColor={project.color} />
+          ) : (
+            <Card className="py-12 text-center text-sm text-muted-foreground">
+              Gantt disponível só dentro de uma Lista.
+            </Card>
+          )}
+        </TabsContent>
+
         <TabsContent value="chart" className="mt-4">
           <TaskChartView tasks={visibleTasks} isLoading={lt} />
         </TabsContent>
       </Tabs>
 
-      <TaskDetailSheet taskId={openId} onOpenChange={(o) => !o && setOpenId(null)} />
       <ProjectMembersDialog
         projectId={project.id}
         projectName={project.name}

@@ -158,7 +158,7 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="px-1">
       <div className="flex items-center justify-between px-2 pb-1 pt-2">
-        <span className="text-xs font-medium text-sidebar-foreground/60">Projetos</span>
+        <span className="text-xs font-medium text-sidebar-foreground/60">Espaços</span>
         <Button
           size="icon"
           variant="ghost"

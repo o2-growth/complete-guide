@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Inbox, LayoutGrid, ListTodo, LucideIcon } from "lucide-react";
+import { BarChart3, Calendar, Inbox, LayoutGrid, ListTodo, LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -238,7 +238,55 @@ export default function SmartListPage({
     setStoredView(list, next);
   };
 
-  const containerWidth = view === "list" ? "max-w-3xl" : "max-w-6xl";
+  // Listas de "agenda-friendly": mostram a coluna lateral com card de agenda (igual print 3).
+  const showAgenda = (list === "today" || list === "overdue") && view === "list";
+  const containerWidth = showAgenda ? "max-w-6xl" : view === "list" ? "max-w-3xl" : "max-w-6xl";
+
+  const mainContent = (
+    <Tabs value={view} onValueChange={handleViewChange} className="w-full">
+      <TabsList>
+        <TabsTrigger value="list">
+          <ListTodo className="mr-1.5 h-3.5 w-3.5" /> Lista
+        </TabsTrigger>
+        <TabsTrigger value="gallery">
+          <LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria
+        </TabsTrigger>
+        <TabsTrigger value="chart">
+          <BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="list" className="mt-4">
+        {useInfinite ? (
+          <InfiniteListBody
+            list={list}
+            emptyTitle={emptyTitle}
+            emptyDescription={emptyDescription}
+          />
+        ) : (
+          <TaskList list={list} emptyTitle={emptyTitle} emptyDescription={emptyDescription} />
+        )}
+      </TabsContent>
+
+      <TabsContent value="gallery" className="mt-4">
+        <NonListContent
+          list={list}
+          view="gallery"
+          emptyTitle={emptyTitle}
+          emptyDescription={emptyDescription}
+        />
+      </TabsContent>
+
+      <TabsContent value="chart" className="mt-4">
+        <NonListContent
+          list={list}
+          view="chart"
+          emptyTitle={emptyTitle}
+          emptyDescription={emptyDescription}
+        />
+      </TabsContent>
+    </Tabs>
+  );
 
   return (
     <div className="container py-8">
@@ -256,50 +304,37 @@ export default function SmartListPage({
 
         {showQuickAdd && <QuickAdd />}
 
-        <Tabs value={view} onValueChange={handleViewChange} className="w-full">
-          <TabsList>
-            <TabsTrigger value="list">
-              <ListTodo className="mr-1.5 h-3.5 w-3.5" /> Lista
-            </TabsTrigger>
-            <TabsTrigger value="gallery">
-              <LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria
-            </TabsTrigger>
-            <TabsTrigger value="chart">
-              <BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="list" className="mt-4">
-            {useInfinite ? (
-              <InfiniteListBody
-                list={list}
-                emptyTitle={emptyTitle}
-                emptyDescription={emptyDescription}
-              />
-            ) : (
-              <TaskList list={list} emptyTitle={emptyTitle} emptyDescription={emptyDescription} />
-            )}
-          </TabsContent>
-
-          <TabsContent value="gallery" className="mt-4">
-            <NonListContent
-              list={list}
-              view="gallery"
-              emptyTitle={emptyTitle}
-              emptyDescription={emptyDescription}
-            />
-          </TabsContent>
-
-          <TabsContent value="chart" className="mt-4">
-            <NonListContent
-              list={list}
-              view="chart"
-              emptyTitle={emptyTitle}
-              emptyDescription={emptyDescription}
-            />
-          </TabsContent>
-        </Tabs>
+        {showAgenda ? (
+          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+            <div className="min-w-0">{mainContent}</div>
+            <aside>
+              <AgendaSidebarCard />
+            </aside>
+          </div>
+        ) : (
+          mainContent
+        )}
       </div>
     </div>
+  );
+}
+
+function AgendaSidebarCard() {
+  return (
+    <Card className="p-4">
+      <h2 className="mb-3 text-sm font-semibold">Agenda</h2>
+      <div className="flex flex-col items-center gap-2 py-6 text-center">
+        <Calendar className="h-8 w-8 text-muted-foreground" />
+        <p className="text-xs text-muted-foreground">
+          Conecte seu calendário para ver os próximos eventos.
+        </p>
+        <a
+          href="/app/configuracoes/integracoes"
+          className="text-xs font-medium text-primary hover:underline"
+        >
+          Conectar Google Agenda →
+        </a>
+      </div>
+    </Card>
   );
 }
