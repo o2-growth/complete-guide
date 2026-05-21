@@ -221,13 +221,24 @@ export default function ProjectDetailPage() {
           <TabsTrigger value="chart"><BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico</TabsTrigger>
         </TabsList>
 
+        {view !== "kanban" && (
+          <div className="mt-3">
+            <TaskFilterBar
+              state={filter.state}
+              onChange={filter.setState}
+              total={allTasks.length}
+              filtered={visibleTasks.length}
+            />
+          </div>
+        )}
+
         <TabsContent value="list" className="mt-4">
           {lt ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
-          ) : allTasks.length === 0 ? (
+          ) : visibleTasks.length === 0 ? (
             <Card className="py-12 text-center text-sm text-muted-foreground">Nenhuma tarefa neste projeto ainda.</Card>
           ) : (
-            <ListWithBulk tasks={allTasks} onOpen={setOpenId} setVisible={setVisible} clear={clear} scope={id ?? "project"} />
+            <ListWithBulk tasks={visibleTasks} onOpen={setOpenId} setVisible={setVisible} clear={clear} scope={id ?? "project"} />
           )}
         </TabsContent>
 
@@ -253,7 +264,7 @@ export default function ProjectDetailPage() {
           <div className="h-[640px]">
             <MonthView
               anchor={calAnchor}
-              tasks={allTasks}
+              tasks={visibleTasks}
               onOpenTask={setOpenId}
               onDropTask={(taskId, day, currentDueAt) =>
                 reschedule.mutate({ taskId, newDate: day, keepTime: true, currentDueAt })
@@ -264,7 +275,7 @@ export default function ProjectDetailPage() {
 
         <TabsContent value="gallery" className="mt-4">
           <TaskGalleryView
-            tasks={allTasks}
+            tasks={visibleTasks}
             isLoading={lt}
             emptyTitle="Nenhuma tarefa neste projeto"
             emptyDescription="Crie a primeira pra ver os cards aqui."
@@ -272,7 +283,7 @@ export default function ProjectDetailPage() {
         </TabsContent>
 
         <TabsContent value="chart" className="mt-4">
-          <TaskChartView tasks={allTasks} isLoading={lt} />
+          <TaskChartView tasks={visibleTasks} isLoading={lt} />
         </TabsContent>
       </Tabs>
 
