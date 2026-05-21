@@ -26,6 +26,7 @@ export interface Project {
   pipefy_url?: string | null;
   pipefy_phase_name?: string | null;
   pipefy_last_synced_at?: string | null;
+  pipefy_metadata?: Record<string, unknown> | null;
 }
 
 // Inboxes pessoais são auto-criadas com prefixo "Inbox de " pelo trigger handle_new_user.

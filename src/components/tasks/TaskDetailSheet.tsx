@@ -75,6 +75,7 @@ import { usePersonas } from "@/hooks/usePersonas";
 import { useAudiences } from "@/hooks/useAudiences";
 import { TemplatePicker } from "@/components/modelos/TemplatePicker";
 import { useTaskTypes } from "@/hooks/useTaskTypes";
+import { useProjects } from "@/hooks/useProjects";
 import { AssigneePicker } from "./AssigneePicker";
 import { warnIfOverload } from "./assignee-utils";
 import { useUserWorkload } from "@/hooks/useWorkload";
@@ -133,6 +134,7 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
   const { data: task, isLoading } = useTask(taskId);
   const { data: statuses } = useTaskStatuses();
   const { data: taskTypes } = useTaskTypes();
+  const { data: projectsForTask } = useProjects();
   const update = useUpdateTask();
   const toggleDone = useToggleTaskDone();
   const recurrenceQuery = useRecurrence(taskId);
@@ -437,6 +439,11 @@ function TaskDetailContent({ taskId }: { taskId: string }) {
           confidence={task.ice_confidence ?? null}
           ease={task.ice_ease ?? null}
           score={task.ice_score ?? null}
+          pipefyImpactHint={(() => {
+            const project = (projectsForTask ?? []).find((p) => p.id === task.project_id);
+            const hint = project?.pipefy_metadata?.["ice_impact_hint"];
+            return typeof hint === "number" ? hint : null;
+          })()}
           onChange={(patch) => update.mutate({ id: task.id, patch })}
         />
       </div>

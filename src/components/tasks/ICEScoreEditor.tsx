@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Sparkles } from "lucide-react";
+import { Info, Plug, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ICEValue = number | null;
@@ -16,6 +16,8 @@ export interface ICEScoreEditorProps {
     ice_ease?: ICEValue;
   }) => void;
   compact?: boolean;
+  /** Urgência 0-10 do card no Pipefy. Se presente e diferente do impact atual, mostra "Aplicar". */
+  pipefyImpactHint?: number | null;
 }
 
 function parse(raw: string): ICEValue {
@@ -50,12 +52,18 @@ export function ICEScoreEditor({
   score,
   onChange,
   compact = false,
+  pipefyImpactHint,
 }: ICEScoreEditorProps) {
   const values: Record<string, ICEValue> = {
     ice_impact: impact,
     ice_confidence: confidence,
     ice_ease: ease,
   };
+  const showPipefyHint =
+    typeof pipefyImpactHint === "number" &&
+    pipefyImpactHint >= 1 &&
+    pipefyImpactHint <= 10 &&
+    pipefyImpactHint !== impact;
 
   return (
     <div className={cn("space-y-2", compact && "space-y-1")}>
@@ -79,6 +87,17 @@ export function ICEScoreEditor({
           {score ?? "—"}
         </span>
       </div>
+      {showPipefyHint && (
+        <button
+          type="button"
+          onClick={() => onChange({ ice_impact: pipefyImpactHint! })}
+          className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-primary/40 bg-primary/5 px-2 py-1 text-[11px] text-primary hover:bg-primary/10 transition-colors"
+        >
+          <Plug className="h-3 w-3" />
+          Pipefy sugere Impacto = {pipefyImpactHint}
+          <span className="text-muted-foreground">· clique pra aplicar</span>
+        </button>
+      )}
       <div className="grid grid-cols-3 gap-2">
         {FIELDS.map((f) => (
           <Tooltip key={f.key}>
