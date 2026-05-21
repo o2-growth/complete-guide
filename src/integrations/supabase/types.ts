@@ -4216,12 +4216,6 @@ export type Database = {
           kind: string
           name: string
           parent_id: string | null
-          pipefy_card_id: string | null
-          pipefy_last_synced_at: string | null
-          pipefy_metadata: Json | null
-          pipefy_phase_name: string | null
-          pipefy_pipe_id: string | null
-          pipefy_url: string | null
           sort_order: number
           squad_id: string | null
           task_seq: number
@@ -4241,12 +4235,6 @@ export type Database = {
           kind?: string
           name: string
           parent_id?: string | null
-          pipefy_card_id?: string | null
-          pipefy_last_synced_at?: string | null
-          pipefy_metadata?: Json | null
-          pipefy_phase_name?: string | null
-          pipefy_pipe_id?: string | null
-          pipefy_url?: string | null
           sort_order?: number
           squad_id?: string | null
           task_seq?: number
@@ -4266,12 +4254,6 @@ export type Database = {
           kind?: string
           name?: string
           parent_id?: string | null
-          pipefy_card_id?: string | null
-          pipefy_last_synced_at?: string | null
-          pipefy_metadata?: Json | null
-          pipefy_phase_name?: string | null
-          pipefy_pipe_id?: string | null
-          pipefy_url?: string | null
           sort_order?: number
           squad_id?: string | null
           task_seq?: number
@@ -4295,59 +4277,6 @@ export type Database = {
           },
           {
             foreignKeyName: "projects_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pipefy_integrations: {
-        Row: {
-          active_only: boolean
-          created_at: string
-          enabled: boolean
-          id: string
-          last_error: string | null
-          last_sync_at: string | null
-          last_sync_count: number | null
-          last_sync_status: string | null
-          pipe_id: string
-          pipe_name: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          active_only?: boolean
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          last_error?: string | null
-          last_sync_at?: string | null
-          last_sync_count?: number | null
-          last_sync_status?: string | null
-          pipe_id: string
-          pipe_name?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          active_only?: boolean
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          last_error?: string | null
-          last_sync_at?: string | null
-          last_sync_count?: number | null
-          last_sync_status?: string | null
-          pipe_id?: string
-          pipe_name?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pipefy_integrations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -5772,10 +5701,6 @@ export type Database = {
           gcal_etag: string | null
           gcal_event_id: string | null
           gcal_last_synced_at: string | null
-          ice_confidence: number | null
-          ice_ease: number | null
-          ice_impact: number | null
-          ice_score: number | null
           id: string
           number: number
           parent_task_id: string | null
@@ -5817,9 +5742,6 @@ export type Database = {
           gcal_etag?: string | null
           gcal_event_id?: string | null
           gcal_last_synced_at?: string | null
-          ice_confidence?: number | null
-          ice_ease?: number | null
-          ice_impact?: number | null
           id?: string
           number: number
           parent_task_id?: string | null
@@ -5861,9 +5783,6 @@ export type Database = {
           gcal_etag?: string | null
           gcal_event_id?: string | null
           gcal_last_synced_at?: string | null
-          ice_confidence?: number | null
-          ice_ease?: number | null
-          ice_impact?: number | null
           id?: string
           number?: number
           parent_task_id?: string | null
