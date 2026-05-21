@@ -3809,6 +3809,59 @@ export type Database = {
           },
         ]
       }
+      pipefy_integrations: {
+        Row: {
+          active_only: boolean
+          created_at: string
+          enabled: boolean
+          id: string
+          last_error: string | null
+          last_sync_at: string | null
+          last_sync_count: number | null
+          last_sync_status: string | null
+          pipe_id: string
+          pipe_name: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          active_only?: boolean
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          last_sync_count?: number | null
+          last_sync_status?: string | null
+          pipe_id: string
+          pipe_name?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          active_only?: boolean
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          last_sync_count?: number | null
+          last_sync_status?: string | null
+          pipe_id?: string
+          pipe_name?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipefy_integrations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pomodoros: {
         Row: {
           ambient: string | null
@@ -4295,59 +4348,6 @@ export type Database = {
           },
           {
             foreignKeyName: "projects_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pipefy_integrations: {
-        Row: {
-          active_only: boolean
-          created_at: string
-          enabled: boolean
-          id: string
-          last_error: string | null
-          last_sync_at: string | null
-          last_sync_count: number | null
-          last_sync_status: string | null
-          pipe_id: string
-          pipe_name: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          active_only?: boolean
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          last_error?: string | null
-          last_sync_at?: string | null
-          last_sync_count?: number | null
-          last_sync_status?: string | null
-          pipe_id: string
-          pipe_name?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          active_only?: boolean
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          last_error?: string | null
-          last_sync_at?: string | null
-          last_sync_count?: number | null
-          last_sync_status?: string | null
-          pipe_id?: string
-          pipe_name?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pipefy_integrations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -5606,6 +5606,58 @@ export type Database = {
           },
         ]
       }
+      task_project_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          link_kind: string
+          project_id: string
+          task_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_kind?: string
+          project_id: string
+          task_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_kind?: string
+          project_id?: string
+          task_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_project_links_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_project_links_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_project_links_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_statuses: {
         Row: {
           color: string | null
@@ -5772,10 +5824,6 @@ export type Database = {
           gcal_etag: string | null
           gcal_event_id: string | null
           gcal_last_synced_at: string | null
-          ice_confidence: number | null
-          ice_ease: number | null
-          ice_impact: number | null
-          ice_score: number | null
           id: string
           number: number
           parent_task_id: string | null
@@ -5817,9 +5865,6 @@ export type Database = {
           gcal_etag?: string | null
           gcal_event_id?: string | null
           gcal_last_synced_at?: string | null
-          ice_confidence?: number | null
-          ice_ease?: number | null
-          ice_impact?: number | null
           id?: string
           number: number
           parent_task_id?: string | null
@@ -5861,9 +5906,6 @@ export type Database = {
           gcal_etag?: string | null
           gcal_event_id?: string | null
           gcal_last_synced_at?: string | null
-          ice_confidence?: number | null
-          ice_ease?: number | null
-          ice_impact?: number | null
           id?: string
           number?: number
           parent_task_id?: string | null

@@ -49,10 +49,6 @@ export interface TaskRow {
   publish_state?: string | null;
   campaign_id?: string | null;
   scheduled_at?: string | null;
-  ice_impact?: number | null;
-  ice_confidence?: number | null;
-  ice_ease?: number | null;
-  ice_score?: number | null;
 }
 
 export type SmartList =
@@ -717,5 +713,24 @@ export function useRescheduleTask() {
       qc.invalidateQueries({ queryKey: ["task"] });
     },
     onError: (e: Error) => toast.error("Erro ao reagendar: " + e.message),
+  });
+}
+
+export function useUpdateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
+      const { error } = await supabase
+        .from("tasks")
+        .update(patch as never)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["task"] });
+      qc.invalidateQueries({ queryKey: ["kanban-tasks"] });
+    },
+    onError: (e: Error) => toast.error("Erro ao atualizar tarefa: " + e.message),
   });
 }
