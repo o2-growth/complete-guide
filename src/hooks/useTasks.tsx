@@ -715,3 +715,19 @@ export function useRescheduleTask() {
     onError: (e: Error) => toast.error("Erro ao reagendar: " + e.message),
   });
 }
+
+export function useUpdateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
+      const { error } = await supabase.from("tasks").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["task"] });
+      qc.invalidateQueries({ queryKey: ["kanban-tasks"] });
+    },
+    onError: (e: Error) => toast.error("Erro ao atualizar tarefa: " + e.message),
+  });
+}
