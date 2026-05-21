@@ -101,8 +101,10 @@ export default function ProjectDetailPage() {
   }
 
   const allTasks = (tasks ?? []) as TaskRow[];
-  const done = allTasks.filter((t) => !!t.done_at).length;
-  const total = allTasks.length;
+  const filter = useTaskFilter(`project:${id ?? "none"}`);
+  const visibleTasks = useMemo(() => filter.apply(allTasks), [filter, allTasks]);
+  const done = visibleTasks.filter((t) => !!t.done_at).length;
+  const total = visibleTasks.length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
 
   const kindMeta: Record<typeof kind, { label: string; Icon: typeof Folder }> = {
