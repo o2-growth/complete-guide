@@ -1,151 +1,89 @@
+# Plano: Refazer o app do zero — Oxy Tasks (ClickUp-style)
 
-# PRD/SPEC — Gestão hierárquica de tarefas e projetos (estilo ClickUp + identidade O2)
+Escopo confirmado: descartar as 43 fases anteriores, **DELETE** dos dados de projetos/tarefas, manter apenas identidade visual (logo, paleta lima, Montserrat/Anton, dark theme). O app vira **um gestor de tarefas focado**, sem mídias sociais, IA Gênio, OKRs, automações, marketplace, etc.
 
-## 1. Visão
-Reorganizar a plataforma em torno de uma **hierarquia navegável Espaço → Pasta → Lista → Tarefa**, com visibilidade estrita por squad/projeto e três modos pessoais de trabalho. Tudo acessível pela sidebar, com breadcrumb e múltiplas views por nó. Pré-requisito: pacote de identidade visual O2 já aplicado.
-
-## 2. Conceitos de domínio (mapping)
-
-| ClickUp        | Oxy/O2 (existente)                      | Mudança |
-|----------------|------------------------------------------|---------|
-| Workspace      | `tenants` (O2 Inc.)                      | — |
-| Space          | `squads` (IA / Marketing / Expansão)     | virar nó raiz da árvore; ganhar `icon`, `is_private` |
-| Folder         | `projects.parent_id != null`             | já existe (Fase 6B) — promover como "Pasta" no UI |
-| List           | `projects.parent_id` = folder (folha)    | mesma tabela; campo `is_list bool` (folha = lista) |
-| Task           | `tasks`                                  | — |
-| Personal Inbox | projetos `Inbox de {user}`               | manter; reforçar visibilidade só-do-dono |
-
-Decisões travadas:
-- **Tarefa pessoal = sem projeto vinculado** → mora na Inbox pessoal. Não criar coluna `is_private` em `tasks`.
-- **Visibilidade de projetos = membros do projeto OU do squad dono**. Admin/Manager do tenant veem tudo.
-- **Squads viram Spaces** com membros próprios; projetos herdam visibilidade do squad por padrão.
-
-## 3. Modelo de visibilidade (regra única)
-
-Um usuário **vê uma tarefa** quando:
-1. é admin/manager do tenant, OU
-2. é `assignee_id` / `reporter_id` / `created_by` da tarefa, OU
-3. é membro do `project_members` do projeto da tarefa, OU
-4. é membro do `squad_members` do squad dono do projeto E o squad/projeto não está marcado como `is_private`.
-
-A mesma regra vale para `projects` (sem o item 2). Inbox pessoal (`projects.kind='inbox'`) é visível só para o `created_by`.
-
-Implementação: nova SQL helper `can_see_project(_project uuid)` + `can_see_task(_task uuid)` (SECURITY DEFINER, `set search_path=public`). Policies de SELECT em `projects`, `tasks`, `comments`, `attachments`, `time_entries`, `task_assets`, `pomodoros` reescritas para usar esses helpers. INSERT/UPDATE continuam exigindo membership ativa.
-
-## 4. Vistas pessoais padrão (sidebar topo)
-
-| Item            | Filtro server-side |
-|-----------------|--------------------|
-| **Caixa de entrada** | tasks da Inbox pessoal do usuário |
-| **Minhas tarefas**   | `assignee_id = me` (todos os projetos visíveis) |
-| **Atribuídas por mim** | `reporter_id = me AND assignee_id <> me` |
-| **Compartilhadas comigo** | `assignee_id = me OR me ∈ project_members` agrupado por projeto |
-| **Hoje / Próximas / Atrasadas** | já existem — passam pelas novas RLS automaticamente |
-
-Cada uma usa o mesmo `useTasks({ filter })` parametrizado.
-
-## 5. Sidebar hierárquica (UI)
+## Modelo de dados (novo, minimalista)
 
 ```text
-┌─ Header: workspace switcher + busca ⌘K + avatar
-├─ Vistas pessoais (Caixa, Minhas, Atribuídas, Compartilhadas)
-├─ Planejado · Hoje · Próximas · Atrasadas · Calendário
-├─ ── Favoritos (drag-to-reorder, já existe)
-├─ ── Espaços (squads)
-│   └─ ▸ Espaço "Marketing"   [+ pasta/lista]
-│        └─ ▸ Pasta "Campanhas Q3"
-│             └─ ☰ Lista "Lançamento X" (badge contagem)
-│             └─ ☰ Lista "Conteúdo orgânico"
-│        └─ ☰ Lista "Backlog rápido"
-├─ + Novo Espaço
-└─ Footer: convidar · personalizar · ajuda
+tenants ── tenant_members (role: admin|member|guest)
+   │
+spaces (Espaço — ex: "Team IA & Automação")
+   └─ folders (Pasta — opcional, 1 nível)
+        └─ lists (Lista — onde tarefas vivem)
+             └─ tasks
+                  ├─ subtasks (self-FK, 3 níveis)
+                  ├─ task_assignees (N:N)
+                  ├─ task_tags
+                  ├─ task_checklists → checklist_items
+                  ├─ task_comments
+                  └─ task_activity (audit)
+
+statuses_per_list (cada Lista tem seus próprios status com cor)
 ```
 
-- Substitui o `ProjectTreeSidebar` por `WorkspaceTreeSidebar` com 3 níveis (Espaço/Pasta/Lista) usando o mesmo `react-arborist`.
-- DnD entre nós muda `parent_id` + `sort_order` (já suportado).
-- Context-menu por nó: Renomear, Duplicar, Cor/Ícone, Mover, Arquivar, Privacidade.
-- Collapsed mode: ícones do espaço + tooltip; clique abre popover com filhos.
+Migration destrutiva única: `DROP` em tudo de tasks/projects/social/ai/etc no schema `public`, recria as 10 tabelas acima com RLS por tenant_id.
 
-## 6. Vistas por nó (centro)
+## Estrutura de rotas (enxuta)
 
-Toda Lista, Pasta ou Espaço abre com tabs no topo (estado salvo por nó em `saved_views`):
+| Rota | O que é |
+|------|---------|
+| `/auth` | Login (mantém) |
+| `/app` | Home "Minhas tarefas" (Recentes + Meu trabalho + Agenda placeholder + Comentários) |
+| `/app/inbox` | Caixa de entrada |
+| `/app/atribuidas` | Atribuídas a mim |
+| `/app/hoje` | Hoje e atrasadas |
+| `/app/lista-pessoal` | Lista pessoal (privada) |
+| `/app/s/:spaceId` | Espaço (agregado) |
+| `/app/l/:listId` | Lista — com tabs Quadro/Lista/Calendar/Gantt/Table |
+| `/app/t/:taskId` | Painel detalhe (sheet sobre a lista atual) |
+| `/app/configuracoes` | Perfil, workspace, membros, aparência |
 
-- **Lista** (default) — grouping por status, com colunas customizáveis (já temos custom fields).
-- **Quadro** (Kanban) — reaproveita `KanbanBoard` passando `nodeId`.
-- **Calendário** — `due_at` no mês.
-- **Gantt** — fase futura; placeholder.
-- **+ Visualização** — cria saved view com filtros + grouping + colunas.
+Tudo o que não estiver acima vira 404. Páginas atuais (`social`, `genio`, `okrs`, `automacoes`, `marketplace`, etc.) deletadas.
 
-Breadcrumb no topo: `Espaço / Pasta / Lista` (cada parte é Link).
+## Componentes-chave (novos)
 
-## 7. Toolbar de tarefa (estilo print)
+1. **AppSidebar** — três blocos: Início (Inbox/Comentários/Minhas tarefas + filhos), Favoritos, Espaços (árvore Espaço→Pasta→Lista com contador, "+" inline, context-menu).
+2. **ListHeader** — breadcrumb Espaço/Pasta/Lista + tabs de view + ações (Agentes/Automatizar/Compartilhar — só visual nesta fase).
+3. **ListView** (default) — grupos colapsáveis por status com header colorido, colunas Nome/Responsável/Data/Prioridade/Status/Comentários, "+ Adicionar Tarefa" inline por grupo, "+ Novo status" no fim, BulkActionsBar inferior.
+4. **BoardView** (Quadro) — Kanban dnd-kit por status.
+5. **CalendarView** — mês com tarefas por dueAt.
+6. **TableView** — grid densa com inline edit.
+7. **GanttView** — placeholder simples (timeline horizontal por start/due).
+8. **TaskSheet** — painel direito: título, status pill, datas, responsáveis, prioridade, etiquetas, descrição, Subtarefas, Checklists, Anexos, Activity, comentários.
+9. **CreateTaskModal** — tabs Tarefa/Lembrete, picker de lista, chips OPEN/assignee/data/prioridade/etiqueta, botão Modelos (placeholder).
+10. **HomeDashboard** — grid 2x2: Recentes, Meu trabalho (tabs Pendente/Feito/Delegado), Agenda (placeholder conectar Google/Outlook), Comentários atribuídos.
 
-Acima da lista: `Status · Atribuído · Data · Prioridade · Filtros · Buscar · ⚙ · + Tarefa`. Quick Add inline ao final do grupo "+ Adicionar Tarefa".
+## Identidade visual preservada
 
-## 8. Permissões finas (papéis)
+- `src/index.css` (paleta lima/ink), `tailwind.config.ts`, Montserrat/Anton/JetBrains Mono, logo O2 — **intocados**.
+- Todos os tokens semânticos (`bg-primary`, `text-foreground`) reutilizados.
 
-| Ação                          | requester | specialist | manager | admin |
-|-------------------------------|-----------|------------|---------|-------|
-| Ver projetos do squad         | ❌        | ✅ (se membro) | ✅ | ✅ |
-| Criar Espaço/Pasta/Lista      | ❌        | ✅ (membro)| ✅      | ✅    |
-| Marcar Espaço privado         | ❌        | ❌         | ✅      | ✅    |
-| Arquivar Espaço               | ❌        | ❌         | ❌      | ✅    |
-| Convidar para Espaço          | ❌        | ❌         | ✅      | ✅    |
-| Ver tarefa atribuída a si     | ✅ (via /solicitar) | ✅ | ✅ | ✅ |
+## Limpeza de código
 
-## 9. Migrations necessárias
+Deletar:
+- `src/pages/app/*` (exceto novos)
+- `src/components/{social,ai,automations,wiki,personas,atendimento,dashboard,calendar antigo,kanban antigo,workload,skills,sla,approvals,timer,modelos,saved-views,presence}/`
+- `src/hooks/*` exceto `useAuth`, `useWorkspace`, `useTheme`, `useBranding`, `useIsMobile`, `use-toast`
+- `supabase/functions/*` exceto `send-invite`, `admin-create-user`, `send-transactional-email`, `process-email-queue`, `handle-email-unsubscribe`, `handle-email-suppression`
+- Rotas correspondentes em `App.tsx`
 
-1. `squads`: add `icon text`, `is_private bool default false`, `sort_order int default 0`.
-2. `projects`: add `kind text check in ('space_root','folder','list','inbox') default 'list'`, `is_private bool default false`. Backfill: inbox pessoal → `inbox`; projetos com `parent_id null` e `squad_id null` → `list`; com filhos → `folder`.
-3. Helpers: `can_see_project(uuid)`, `can_see_task(uuid)`, `is_squad_member(uuid)` (SECURITY DEFINER).
-4. RLS rewrite (SELECT) em: `projects`, `tasks`, `comments`, `attachments`, `time_entries`, `task_assets`, `pomodoros`, `task_custom_field_values`.
-5. Trigger `tg_project_inherit_squad`: ao criar projeto filho, herda `squad_id` do pai se vazio.
-6. Índices: `tasks(assignee_id, done_at)`, `tasks(reporter_id)`, `projects(squad_id, parent_id, sort_order)`.
+Manter:
+- Auth, convites, e-mail infra, branding, layout shell (Sidebar/Topbar reescritos).
 
-## 10. Frontend (entregáveis)
+## Faseamento (build mode)
 
-- `useWorkspaceTree()` — retorna árvore Espaços→Pastas→Listas com contagem de tarefas abertas (RPC `workspace_tree_counts`).
-- `WorkspaceTreeSidebar.tsx` — substitui `ProjectTreeSidebar`, suporta 3 níveis + DnD + context-menu.
-- `AppSidebar.tsx` — nova ordem de grupos (vistas pessoais → planejado → espaços → favoritos).
-- `NodeViewPage.tsx` (rota `/app/n/:id`) — recebe qualquer nó (espaço/pasta/lista) e renderiza tabs.
-- `PersonalViews/` — `InboxPage`, `MyTasksPage`, `AssignedByMePage`, `SharedWithMePage` reaproveitando `useTasks`.
-- `Breadcrumb.tsx` — header de node view.
-- `useTaskVisibility()` — apenas leitura; a regra é server-side.
+1. **F1 — Demolição + Schema**: migration destrutiva (drop + create 10 tabelas + RLS + triggers de updated_at/audit/auto-number). DELETE em dados antigos.
+2. **F2 — Limpeza**: apagar pastas/arquivos listados, reescrever `App.tsx` com rotas novas, manter Auth.
+3. **F3 — Sidebar + Espaços/Pastas/Listas**: hooks `useSpaces`, `useLists`, sidebar com árvore, CRUD via context-menu.
+4. **F4 — ListView (lista agrupada por status)** + CreateTaskModal + TaskSheet básico.
+5. **F5 — Outras views**: Quadro, Calendar, Table, Gantt (placeholder).
+6. **F6 — Home + visões pessoais** (Inbox, Atribuídas, Hoje, Lista pessoal).
+7. **F7 — Polimento**: realtime broadcast por tenant, atalhos, bulk actions, breadcrumbs.
 
-## 11. Quebras + migração de dados
+## Riscos / decisões pendentes
 
-- Rotas antigas `/app/projetos/:id` redirecionam para `/app/n/:id` (mantém compat).
-- Sidebar antiga em `pages/app/ProjetosPage` vira fallback para listar Espaços (admin).
-- Inboxes pessoais existentes recebem `kind='inbox'` no backfill — comportamento de filtro em `useProjects` (esconder outras inboxes) deixa de ser heurística por nome.
+- **Destrutivo de verdade**: vou rodar `DROP TABLE ... CASCADE` em ~80 tabelas. Sem rollback. Você confirma na migration quando ela aparecer pra aprovar.
+- **Members do tenant atual são preservados** (não mexo em `auth.users` nem `tenant_members`).
+- **Sem IA** nesta versão. Se quiser readicionar Gênio depois, vira módulo separado.
 
-## 12. Faseamento (entrega incremental, sem big-bang)
-
-**Fase A — Backend de visibilidade (1 migration)**
-- Migrations §9.1–§9.6. Reescreve RLS. Sem mudança visual.
-- Verificação: rodar smoke como specialist em squad X — não vê tarefas de squad Y.
-
-**Fase B — Sidebar hierárquica + vistas pessoais**
-- `WorkspaceTreeSidebar`, novas vistas pessoais, breadcrumb, rota `/app/n/:id`.
-
-**Fase C — Tabs por nó (Lista, Quadro, Calendário)**
-- Generalizar `KanbanBoard` e `TaskList` para aceitar nó. Saved views por nó.
-
-**Fase D — Polimentos**
-- Context-menu completo, privacidade de espaço, ícones por espaço, contadores realtime via broadcast já existente.
-
-## 13. Critérios de aceitação
-
-1. Specialist do squad Marketing **não vê** projetos do squad IA (a menos que adicionado).
-2. Tarefa criada na Inbox pessoal **não aparece** para nenhum outro usuário.
-3. Tarefa em projeto compartilhado aparece em "Minhas tarefas" do assignee E em "Compartilhadas comigo" dos membros.
-4. Arrastar uma Lista entre Pastas reflete em todos os clientes em <2s (broadcast).
-5. Admin sempre vê tudo.
-6. Nenhuma query do cliente quebra: rotas antigas redirecionam.
-7. Sidebar collapsada continua usável em mobile (Sheet).
-
-## 14. Fora de escopo (próxima onda)
-
-- Permissões granulares por tarefa (compartilhamento individual).
-- Gantt funcional.
-- Templates de Espaço.
-- Convites com escopo de Espaço (hoje só tenant).
+Quer que eu siga com essa estrutura ou prefere ajustar algo (ex: manter alguma área específica das 43 fases)?
