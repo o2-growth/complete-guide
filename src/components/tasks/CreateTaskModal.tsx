@@ -5,6 +5,7 @@ import { ptBR } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -131,6 +132,9 @@ export function CreateTaskModal({ trigger, defaultProjectId }: CreateTaskModalPr
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-w-xl p-0">
+        <DialogTitle className="sr-only">
+          {mode === "task" ? "Criar nova tarefa" : "Criar novo lembrete"}
+        </DialogTitle>
         {/* Tabs Tarefa / Lembrete */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)} className="w-full">
           <div className="border-b px-4 pt-2">

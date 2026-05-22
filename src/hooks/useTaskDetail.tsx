@@ -53,11 +53,48 @@ export function useUpdateTask() {
       const { error } = await supabase.from("tasks").update(update).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_d, vars) => {
+    // Optimistic update: aplica o patch no cache local IMEDIATAMENTE
+    // (sem esperar resposta do servidor). UI reflete a mudança em <1ms.
+    // Em caso de erro, restaura o estado anterior (rollback).
+    onMutate: async ({ id, patch }) => {
+      // Cancela queries em voo pra não sobrescrever nosso optimistic.
+      await qc.cancelQueries({ queryKey: ["task", id] });
+      const previous = qc.getQueryData<TaskRow>(["task", id]);
+      if (previous) {
+        qc.setQueryData<TaskRow>(["task", id], { ...previous, ...patch });
+      }
+      // Também aplica em qualquer lista de tasks que contenha esta task.
+      const listKeys = qc.getQueryCache().findAll({ queryKey: ["tasks"] });
+      const snapshots: Array<{ key: unknown[]; data: unknown }> = [];
+      for (const q of listKeys) {
+        const data = q.state.data;
+        if (Array.isArray(data)) {
+          snapshots.push({ key: q.queryKey as unknown[], data });
+          const next = data.map((t: TaskRow) =>
+            t && t.id === id ? { ...t, ...patch } : t,
+          );
+          qc.setQueryData(q.queryKey, next);
+        }
+      }
+      return { previous, snapshots };
+    },
+    onError: (e: Error, vars, context) => {
+      // Rollback do cache caso a mutation falhe.
+      if (context?.previous) {
+        qc.setQueryData(["task", vars.id], context.previous);
+      }
+      if (context?.snapshots) {
+        for (const s of context.snapshots) {
+          qc.setQueryData(s.key, s.data);
+        }
+      }
+      toast.error("Erro ao salvar: " + e.message);
+    },
+    onSettled: (_d, _e, vars) => {
+      // Re-sincroniza com servidor sem bloquear (background).
       qc.invalidateQueries({ queryKey: ["task", vars.id] });
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
-    onError: (e: Error) => toast.error("Erro ao salvar: " + e.message),
   });
 }
 
