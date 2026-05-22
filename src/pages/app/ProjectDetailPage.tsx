@@ -274,12 +274,12 @@ export default function ProjectDetailPage() {
       <Tabs value={view} onValueChange={handleViewChange}>
         <TabsList>
           <TabsTrigger value="list"><ListTodo className="mr-1.5 h-3.5 w-3.5" /> Lista</TabsTrigger>
-          <TabsTrigger value="kanban"><KanbanSquare className="mr-1.5 h-3.5 w-3.5" /> Kanban</TabsTrigger>
+          <TabsTrigger value="kanban"><KanbanSquare className="mr-1.5 h-3.5 w-3.5" /> Quadro</TabsTrigger>
           <TabsTrigger value="calendar"><CalendarDays className="mr-1.5 h-3.5 w-3.5" /> Calendário</TabsTrigger>
-          <TabsTrigger value="gallery"><LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria</TabsTrigger>
           <TabsTrigger value="table"><TableIcon className="mr-1.5 h-3.5 w-3.5" /> Tabela</TabsTrigger>
           <TabsTrigger value="gantt"><GanttChartSquare className="mr-1.5 h-3.5 w-3.5" /> Gantt</TabsTrigger>
-          <TabsTrigger value="chart"><BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico</TabsTrigger>
+          <TabsTrigger value="gallery" className="text-muted-foreground"><LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria</TabsTrigger>
+          <TabsTrigger value="chart" className="text-muted-foreground"><BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Gráfico</TabsTrigger>
         </TabsList>
 
         {view !== "kanban" && (

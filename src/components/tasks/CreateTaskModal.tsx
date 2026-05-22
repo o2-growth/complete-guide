@@ -151,9 +151,9 @@ export function CreateTaskModal({ trigger, defaultProjectId }: CreateTaskModalPr
           </div>
 
           <div className="space-y-3 px-4 py-4">
-            {/* Linha chips topo: dropdown lista */}
+            {/* Linha chips topo: dropdown lista + dropdown tipo */}
             <div className="flex flex-wrap items-center gap-2">
-              <div className="min-w-[200px]">
+              <div className="min-w-[200px] max-w-[260px] flex-1">
                 <ProjectPicker
                   value={projectId}
                   onChange={setProjectId}
@@ -161,6 +161,31 @@ export function CreateTaskModal({ trigger, defaultProjectId }: CreateTaskModalPr
                   compact
                 />
               </div>
+              <Select defaultValue="task">
+                <SelectTrigger className="h-8 w-auto gap-1.5 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="task" className="text-xs">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full border-2 border-muted-foreground/50" />
+                      Tarefa
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="subtask" className="text-xs">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full border border-muted-foreground/30" />
+                      Subtarefa
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="milestone" className="text-xs">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rotate-45 bg-amber-500" />
+                      Marco
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Título grande */}
@@ -183,10 +208,20 @@ export function CreateTaskModal({ trigger, defaultProjectId }: CreateTaskModalPr
 
             {/* Footer chips: status, assignee, data, prioridade, etiqueta */}
             <div className="flex flex-wrap items-center gap-1.5 border-t pt-3">
-              {/* Status */}
+              {/* Status — default "OPEN" */}
               <Select value={statusId} onValueChange={setStatusId}>
-                <SelectTrigger className="h-7 w-auto gap-1 border-dashed px-2 text-xs">
-                  <SelectValue placeholder="OPEN" />
+                <SelectTrigger className="h-7 w-auto gap-1 px-2 text-[10px] font-semibold uppercase tracking-wide">
+                  {currentStatus ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span
+                        className="inline-block h-2 w-2 rounded-full"
+                        style={{ background: currentStatus.color ?? "#94a3b8" }}
+                      />
+                      {currentStatus.name}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">OPEN</span>
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {statuses.map((s) => (

@@ -176,6 +176,8 @@ const App = () => (
                       title="Hoje e atrasadas"
                       description="Foco no que vence hoje ou já passou do prazo."
                       defaultTab="pending"
+                      withAgenda
+                      breadcrumb={[{ label: "Minhas tarefas", to: "/app/minhas-tarefas" }]}
                     />
                   }
                 />
