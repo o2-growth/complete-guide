@@ -51,23 +51,15 @@ export function MyWorkPanel({ defaultTab = "pending", compact = false }: MyWorkP
             <ListSkeleton rows={4} />
           ) : (
             <div className="space-y-3">
+              {groups.filter((g) => g.count > 0).length === 0 && (
+                <div className="py-8 text-center text-sm text-muted-foreground">
+                  Nenhuma tarefa nesta aba.
+                </div>
+              )}
               {groups.map((g) => {
+                // Esconde grupos vazios — evita "campo infinito de A FAZER" sem nada.
+                if (g.count === 0) return null;
                 const isColl = collapsed[g.key];
-                if (g.count === 0 && tab === "pending" && g.key !== "today") {
-                  return (
-                    <div key={g.key} className="flex items-center justify-between text-sm text-muted-foreground">
-                      <button
-                        type="button"
-                        className="flex items-center gap-1 hover:text-foreground"
-                        onClick={() => toggle(g.key)}
-                      >
-                        {isColl ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        {g.label}
-                      </button>
-                      <span className="text-xs">{g.count}</span>
-                    </div>
-                  );
-                }
                 return (
                   <div key={g.key}>
                     <button

@@ -1,23 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Calendar, Inbox, LayoutGrid, ListTodo, LucideIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  BarChart3,
+  Calendar,
+  CalendarDays,
+  GanttChartSquare,
+  Inbox,
+  LayoutGrid,
+  ListTodo,
+  LucideIcon,
+  Table as TableIcon,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TaskList } from "@/components/tasks/TaskList";
+import { TaskTableView } from "@/components/tasks/TaskTableView";
 import { QuickAdd } from "@/components/tasks/QuickAdd";
-import { TaskRow } from "@/components/tasks/TaskRow";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 import { TaskGalleryView } from "@/components/tasks/views/TaskGalleryView";
 import { TaskChartView } from "@/components/tasks/views/TaskChartView";
 import { BulkActionsToolbar } from "@/components/tasks/BulkActionsToolbar";
-import { EmptyState } from "@/components/EmptyState";
 import { ListSkeleton } from "@/components/skeletons/ListSkeleton";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SmartList, useTasks, useTasksInfinite, type TaskRow as TTask } from "@/hooks/useTasks";
-import { useBulkSelection } from "@/hooks/useBulkSelection";
+import { taskDetailPath } from "@/lib/task-routes";
+import { CreateTaskModal } from "@/components/tasks/CreateTaskModal";
+import { Plus } from "lucide-react";
 
-type ViewMode = "list" | "gallery" | "chart";
+type ViewMode = "list" | "gallery" | "chart" | "calendar" | "table" | "gantt";
 
 interface SmartListPageProps {
   list: SmartList;
@@ -33,11 +44,13 @@ const INFINITE_LISTS: SmartList[] = ["next7", "assigned"];
 
 const VIEW_STORAGE_KEY = "oxy:smart-list-view";
 
+const VALID_VIEWS: ViewMode[] = ["list", "gallery", "chart", "calendar", "table", "gantt"];
+
 function getStoredView(list: SmartList): ViewMode {
   if (typeof window === "undefined") return "list";
   try {
     const raw = window.localStorage.getItem(`${VIEW_STORAGE_KEY}:${list}`);
-    if (raw === "list" || raw === "gallery" || raw === "chart") return raw;
+    if (raw && VALID_VIEWS.includes(raw as ViewMode)) return raw as ViewMode;
   } catch {
     // ignore
   }
@@ -62,6 +75,7 @@ function InfiniteListBody({
   emptyTitle: string;
   emptyDescription: string;
 }) {
+  const navigate = useNavigate();
   const {
     data,
     isLoading,
@@ -70,42 +84,11 @@ function InfiniteListBody({
     hasNextPage,
     isFetchingNextPage,
   } = useTasksInfinite(list);
-  const [openId, setOpenId] = useState<string | null>(null);
 
   const tasks = useMemo<TTask[]>(
     () => data?.pages.flatMap((p) => p.rows) ?? [],
     [data],
   );
-
-  const bulk = useBulkSelection();
-
-  useEffect(() => {
-    bulk.setVisible(tasks.map((t) => t.id));
-  }, [tasks, bulk]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const isInput =
-        !!target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable);
-      if (isInput) return;
-
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a") {
-        if (!tasks.length) return;
-        e.preventDefault();
-        bulk.selectAll(tasks.map((t) => t.id));
-      } else if (e.key === "Escape" && bulk.bulkMode) {
-        bulk.clear();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [tasks, bulk]);
-
-  if (isLoading) return <ListSkeleton rows={6} />;
 
   if (error) {
     return (
@@ -115,23 +98,14 @@ function InfiniteListBody({
     );
   }
 
-  if (!tasks.length) {
-    return <EmptyState icon={Inbox} title={emptyTitle} description={emptyDescription} />;
-  }
-
   return (
     <>
-      <div className="space-y-2 pb-20">
-        {tasks.map((task, i) => (
-          <TaskRow
-            key={task.id}
-            task={task}
-            onOpen={setOpenId}
-            index={i}
-            bulkMode={bulk.bulkMode}
-          />
-        ))}
-      </div>
+      <TaskTableView
+        tasks={tasks}
+        onOpen={(id) => navigate(taskDetailPath(id))}
+        showProjectColumn
+        isLoading={isLoading}
+      />
       {hasNextPage && (
         <div className="flex justify-center pt-4">
           <Button
@@ -148,7 +122,39 @@ function InfiniteListBody({
           </Button>
         </div>
       )}
-      <TaskDetailSheet taskId={openId} onOpenChange={(o) => !o && setOpenId(null)} />
+      <BulkActionsToolbar />
+    </>
+  );
+}
+
+function FiniteListBody({
+  list,
+  emptyTitle,
+  emptyDescription,
+}: {
+  list: SmartList;
+  emptyTitle: string;
+  emptyDescription: string;
+}) {
+  const navigate = useNavigate();
+  const { data: tasks = [], isLoading, error } = useTasks(list);
+
+  if (error) {
+    return (
+      <Card className="border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
+        Erro ao carregar tarefas: {(error as Error).message}
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <TaskTableView
+        tasks={tasks as TTask[]}
+        onOpen={(id) => navigate(taskDetailPath(id))}
+        showProjectColumn
+        isLoading={isLoading}
+      />
       <BulkActionsToolbar />
     </>
   );
@@ -238,15 +244,25 @@ export default function SmartListPage({
     setStoredView(list, next);
   };
 
-  // Listas de "agenda-friendly": mostram a coluna lateral com card de agenda (igual print 3).
+  // Listas de "agenda-friendly": mostram a coluna lateral com card de agenda.
   const showAgenda = (list === "today" || list === "overdue") && view === "list";
-  const containerWidth = showAgenda ? "max-w-6xl" : view === "list" ? "max-w-3xl" : "max-w-6xl";
+  // Sempre container largo agora — TableView precisa de espaço.
+  const containerWidth = "max-w-6xl";
 
   const mainContent = (
     <Tabs value={view} onValueChange={handleViewChange} className="w-full">
-      <TabsList>
+      <TabsList className="flex-wrap">
         <TabsTrigger value="list">
           <ListTodo className="mr-1.5 h-3.5 w-3.5" /> Lista
+        </TabsTrigger>
+        <TabsTrigger value="table">
+          <TableIcon className="mr-1.5 h-3.5 w-3.5" /> Tabela
+        </TabsTrigger>
+        <TabsTrigger value="calendar">
+          <CalendarDays className="mr-1.5 h-3.5 w-3.5" /> Calendário
+        </TabsTrigger>
+        <TabsTrigger value="gantt">
+          <GanttChartSquare className="mr-1.5 h-3.5 w-3.5" /> Gantt
         </TabsTrigger>
         <TabsTrigger value="gallery">
           <LayoutGrid className="mr-1.5 h-3.5 w-3.5" /> Galeria
@@ -264,8 +280,40 @@ export default function SmartListPage({
             emptyDescription={emptyDescription}
           />
         ) : (
-          <TaskList list={list} emptyTitle={emptyTitle} emptyDescription={emptyDescription} />
+          <FiniteListBody
+            list={list}
+            emptyTitle={emptyTitle}
+            emptyDescription={emptyDescription}
+          />
         )}
+      </TabsContent>
+
+      <TabsContent value="table" className="mt-4">
+        {useInfinite ? (
+          <InfiniteListBody
+            list={list}
+            emptyTitle={emptyTitle}
+            emptyDescription={emptyDescription}
+          />
+        ) : (
+          <FiniteListBody
+            list={list}
+            emptyTitle={emptyTitle}
+            emptyDescription={emptyDescription}
+          />
+        )}
+      </TabsContent>
+
+      <TabsContent value="calendar" className="mt-4">
+        <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+          Calendário desta smart list em breve. Use o menu Calendário pra ver todas as tarefas com data.
+        </p>
+      </TabsContent>
+
+      <TabsContent value="gantt" className="mt-4">
+        <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+          Gantt aparece nas Listas (dentro de Espaços) com tarefas com data de início e vencimento.
+        </p>
       </TabsContent>
 
       <TabsContent value="gallery" className="mt-4">
@@ -291,16 +339,25 @@ export default function SmartListPage({
   return (
     <div className="container py-8">
       <div className={`mx-auto ${containerWidth} space-y-6`}>
-        <PageHeader
-          icon={Icon}
-          title={title}
-          description={description}
-          badge={
-            <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
-              Smart list
-            </Badge>
-          }
-        />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <PageHeader
+            icon={Icon}
+            title={title}
+            description={description}
+            badge={
+              <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
+                Smart list
+              </Badge>
+            }
+          />
+          <CreateTaskModal
+            trigger={
+              <Button>
+                <Plus className="mr-1.5 h-4 w-4" /> Tarefa
+              </Button>
+            }
+          />
+        </div>
 
         {showQuickAdd && <QuickAdd />}
 
