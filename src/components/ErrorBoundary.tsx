@@ -1,5 +1,4 @@
 import { Component, ErrorInfo, ReactNode } from "react";
-import { reportError } from "@/hooks/useErrorTracking";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 
@@ -13,7 +12,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { error };
   }
   componentDidCatch(error: Error, info: ErrorInfo) {
-    reportError(error, { componentStack: info.componentStack });
+    console.error("[ErrorBoundary]", error, info.componentStack);
   }
 
   render() {

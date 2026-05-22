@@ -1,81 +1,65 @@
-import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { ClickUpSidebar } from "./ClickUpSidebar";
-import { Topbar } from "./Topbar";
-import { CommandPalette } from "./CommandPalette";
-import { useTimerSync } from "@/hooks/useTimer";
-import { useI18n } from "@/hooks/useI18n";
-import { useGlobalShortcuts } from "@/hooks/useGlobalShortcuts";
-import { useTrackingInit } from "@/hooks/useTrackingInit";
-import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
-import { BrandingProvider } from "@/hooks/useBranding";
-import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { useNavigate } from "react-router-dom";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
-import { PullToRefreshIndicator } from "@/components/feedback/PullToRefreshIndicator";
-import { useQueryClient } from "@tanstack/react-query";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { useAuth } from "@/hooks/useAuth";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { LogOut, Settings as SettingsIcon, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-export default function AppLayout() {
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  useTimerSync();
-  useGlobalShortcuts();
-  useTrackingInit();
-  const { t } = useI18n();
+export function AppLayout() {
+  const { user } = useAuth();
+  const { tenantName, loading } = useWorkspace();
   const navigate = useNavigate();
-  const qc = useQueryClient();
-  const { pull, refreshing } = usePullToRefresh(async () => {
-    await qc.invalidateQueries();
-  });
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const k = e.key.toLowerCase();
-      // Cmd+K / Ctrl+K — abre Command Palette
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && k === "k") {
-        e.preventDefault();
-        setPaletteOpen((v) => !v);
-        return;
-      }
-      // Cmd+Shift+P / Ctrl+Shift+P — Quick Switcher (mesma palette)
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && k === "p") {
-        e.preventDefault();
-        setPaletteOpen(true);
-        return;
-      }
-    };
-    const onOpen = () => setPaletteOpen(true);
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("oxy:open-palette", onOpen);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("oxy:open-palette", onOpen);
-    };
-  }, []);
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
 
   return (
-    <BrandingProvider>
-    <SidebarProvider>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-elevated"
-      >
-        {t("common.skip_to_content")}
-      </a>
-      <div className="flex min-h-screen w-full bg-background">
-        <ClickUpSidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar onOpenCommand={() => setPaletteOpen(true)} />
-          <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
-            <Outlet />
-          </main>
-          <MobileBottomNav onQuickAdd={() => navigate("/app/inicio")} />
-        </div>
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <header className="flex h-14 items-center justify-between border-b bg-card px-4">
+          <div className="text-sm font-medium text-muted-foreground">{tenantName ?? "Workspace"}</div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Avatar className="h-7 w-7"><AvatarFallback>{initials}</AvatarFallback></Avatar>
+                <span className="hidden text-sm md:inline">{user?.email}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/app/settings")}>
+                <SettingsIcon className="mr-2 h-4 w-4" /> Configurações
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  navigate("/auth", { replace: true });
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </header>
+        <main className="flex-1 overflow-auto">
+          <Outlet />
+        </main>
       </div>
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
-      <OnboardingChecklist />
-      <PullToRefreshIndicator pull={pull} refreshing={refreshing} />
-    </SidebarProvider>
-    </BrandingProvider>
+    </div>
   );
 }
+
+// helper for typed NavLink (unused — placeholder to avoid lint)
+export const _NL = NavLink;

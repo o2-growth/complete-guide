@@ -1,322 +1,100 @@
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { parseQuickAdd } from "@/lib/quick-add-parser";
-import { queryProfile } from "@/lib/query-config";
-import { useConfetti } from "@/hooks/useConfetti";
-import { useTaskTypes } from "@/hooks/useTaskTypes";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
-export interface TaskRow {
+export type Priority = "none" | "low" | "medium" | "high" | "urgent";
+
+export interface Task {
   id: string;
   tenant_id: string;
-  project_id: string;
-  code: string | null;
+  list_id: string;
+  parent_task_id: string | null;
   number: number;
   title: string;
   description: string | null;
-  priority: "none" | "low" | "medium" | "high" | "urgent";
   status_id: string | null;
-  assignee_id: string | null;
+  priority: Priority;
   start_at: string | null;
   due_at: string | null;
+  completed_at: string | null;
   estimate_minutes: number | null;
-  spent_minutes: number;
-  type_id?: string | null;
-  parent_task_id?: string | null;
-  archived: boolean;
-  done_at: string | null;
+  progress_pct: number | null;
+  sort_order: number;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
-  custom_fields?: Record<string, unknown> | null;
-  checklist?: unknown;
-  progress_pct?: number | null;
-  ice_impact?: number | null;
-  ice_confidence?: number | null;
-  ice_ease?: number | null;
-  ice_score?: number | null;
-  persona_id?: string | null;
-  audience_id?: string | null;
-  gcal_event_id?: string | null;
-  gcal_calendar_id?: string | null;
-  gcal_etag?: string | null;
-  gcal_last_synced_at?: string | null;
-  social_channel?: string | null;
-  social_caption?: string | null;
-  publish_state?: string | null;
-  campaign_id?: string | null;
-  scheduled_at?: string | null;
+  assignees: { user_id: string; full_name: string | null; avatar_url: string | null }[];
 }
 
-export type SmartList =
-  | "inbox"
-  | "today"
-  | "next7"
-  | "overdue"
-  | "assigned"
-  | "assigned_by_me"
-  | "shared_with_me";
+export interface ListStatus { id: string; name: string; color: string; sort_order: number; is_done: boolean; }
 
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-function endOfToday() {
-  const d = new Date();
-  d.setHours(23, 59, 59, 999);
-  return d;
-}
-function endOfDayPlus(days: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  d.setHours(23, 59, 59, 999);
-  return d;
-}
-
-export function useTasks(list: SmartList) {
-  const { user } = useAuth();
-  const { tenantId, inboxProjectId, loading: wsLoading } = useWorkspace();
-
+export function useListStatuses(listId: string | null) {
   return useQuery({
-    ...queryProfile("workload"),
-    queryKey: ["tasks", list, user?.id, tenantId, inboxProjectId],
-    enabled: !!user && !wsLoading && !!tenantId,
-    queryFn: async (): Promise<TaskRow[]> => {
-      let q = supabase
-        .from("tasks")
-        .select("*")
-        .eq("archived", false)
-        .order("due_at", { ascending: true, nullsFirst: false })
-        .order("priority", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(200);
-
-      if (list === "inbox" && inboxProjectId) {
-        q = q.eq("project_id", inboxProjectId);
-      } else if (list === "today") {
-        q = q.gte("due_at", startOfToday().toISOString()).lte("due_at", endOfToday().toISOString());
-      } else if (list === "next7") {
-        q = q.gte("due_at", startOfToday().toISOString()).lte("due_at", endOfDayPlus(7).toISOString());
-      } else if (list === "overdue") {
-        q = q.lt("due_at", startOfToday().toISOString()).is("done_at", null);
-      } else if (list === "assigned" && user) {
-        q = q.eq("assignee_id", user.id).is("done_at", null);
-      } else if (list === "assigned_by_me" && user) {
-        // Tarefas que eu deleguei: sou reporter/criador, mas não sou o executor.
-        q = q
-          .or(`reporter_id.eq.${user.id},created_by.eq.${user.id}`)
-          .not("assignee_id", "is", null)
-          .not("assignee_id", "eq", user.id)
-          .is("done_at", null);
-      } else if (list === "shared_with_me" && user) {
-        // Tarefas que pingaram em mim por outra pessoa (assignee = eu, criada por outro).
-        q = q
-          .eq("assignee_id", user.id)
-          .not("created_by", "eq", user.id)
-          .is("done_at", null);
-      }
-
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data ?? []) as TaskRow[];
+    queryKey: ["statuses", listId],
+    enabled: !!listId,
+    staleTime: 60_000,
+    queryFn: async (): Promise<ListStatus[]> => {
+      if (!listId) return [];
+      const { data } = await supabase
+        .from("list_statuses")
+        .select("id,name,color,sort_order,is_done")
+        .eq("list_id", listId)
+        .order("sort_order");
+      return (data ?? []) as ListStatus[];
     },
   });
 }
 
-const TASKS_PAGE_SIZE = 50;
-
-export interface TasksPage {
-  rows: TaskRow[];
-  nextCursor: string | undefined;
+export function useTasks(listId: string | null) {
+  return useQuery({
+    queryKey: ["tasks", listId],
+    enabled: !!listId,
+    staleTime: 15_000,
+    queryFn: async (): Promise<Task[]> => {
+      if (!listId) return [];
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*, task_assignees(user_id, profiles:user_id(full_name, avatar_url))")
+        .eq("list_id", listId)
+        .is("archived_at", null)
+        .is("parent_task_id", null)
+        .order("sort_order");
+      if (error) throw error;
+      return (data ?? []).map((t) => {
+        const rawT = t as unknown as Record<string, unknown>;
+        const assigneesRaw = (rawT.task_assignees as Array<{ user_id: string; profiles: { full_name: string | null; avatar_url: string | null } | null }> | null) ?? [];
+        return {
+          ...(t as unknown as Omit<Task, "assignees">),
+          assignees: assigneesRaw.map((a) => ({
+            user_id: a.user_id,
+            full_name: a.profiles?.full_name ?? null,
+            avatar_url: a.profiles?.avatar_url ?? null,
+          })),
+        } as Task;
+      });
+    },
+  });
 }
 
-export interface TasksInfiniteFilters {
-  /** Filtro extra por projeto. */
-  projectId?: string | null;
-}
-
-/**
- * Versão paginada de tasks para listas grandes (next7/assigned).
- * Cursor é `created_at` desc — escolhi created_at em vez de due_at porque é
- * NOT NULL em todas as tasks (due_at é opcional) e monotônico, garantindo
- * paginação estável mesmo quando muitas tasks compartilham o mesmo due_at.
- */
-export function useTasksInfinite(list: SmartList, filters: TasksInfiniteFilters = {}) {
+export function useMyTasks() {
   const { user } = useAuth();
-  const { tenantId, inboxProjectId, loading: wsLoading } = useWorkspace();
-
-  return useInfiniteQuery({
-    ...queryProfile("workload"),
-    queryKey: [
-      "tasks-infinite",
-      list,
-      user?.id,
-      tenantId,
-      inboxProjectId,
-      filters.projectId ?? "all",
-    ],
-    enabled: !!user && !wsLoading && !!tenantId,
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: TasksPage) => lastPage.nextCursor,
-    queryFn: async ({ pageParam }): Promise<TasksPage> => {
-      let q = supabase
-        .from("tasks")
-        .select("*")
-        .eq("archived", false)
-        .order("created_at", { ascending: false })
-        .limit(TASKS_PAGE_SIZE);
-
-      if (pageParam) q = q.lt("created_at", pageParam);
-
-      if (list === "inbox" && inboxProjectId) {
-        q = q.eq("project_id", inboxProjectId);
-      } else if (list === "today") {
-        q = q
-          .gte("due_at", startOfToday().toISOString())
-          .lte("due_at", endOfToday().toISOString());
-      } else if (list === "next7") {
-        q = q
-          .gte("due_at", startOfToday().toISOString())
-          .lte("due_at", endOfDayPlus(7).toISOString());
-      } else if (list === "overdue") {
-        q = q.lt("due_at", startOfToday().toISOString()).is("done_at", null);
-      } else if (list === "assigned" && user) {
-        q = q.eq("assignee_id", user.id).is("done_at", null);
-      } else if (list === "assigned_by_me" && user) {
-        q = q
-          .or(`reporter_id.eq.${user.id},created_by.eq.${user.id}`)
-          .not("assignee_id", "is", null)
-          .not("assignee_id", "eq", user.id)
-          .is("done_at", null);
-      } else if (list === "shared_with_me" && user) {
-        q = q
-          .eq("assignee_id", user.id)
-          .not("created_by", "eq", user.id)
-          .is("done_at", null);
-      }
-
-      if (filters.projectId) q = q.eq("project_id", filters.projectId);
-
-      const { data, error } = await q;
-      if (error) throw error;
-      const rows = (data ?? []) as TaskRow[];
-      const nextCursor =
-        rows.length === TASKS_PAGE_SIZE ? rows[rows.length - 1].created_at : undefined;
-      return { rows, nextCursor };
-    },
-  });
-}
-
-export function useTaskStatuses() {
   const { tenantId } = useWorkspace();
   return useQuery({
-    ...queryProfile("workload"),
-    queryKey: ["task-statuses", tenantId],
-    enabled: !!tenantId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("task_statuses")
-        .select("id, name, slug, color, position, is_done")
-        .eq("tenant_id", tenantId!)
-        .order("position", { ascending: true });
-      if (error) throw error;
-      return data;
+    queryKey: ["my-tasks", user?.id, tenantId],
+    enabled: !!user?.id && !!tenantId,
+    queryFn: async (): Promise<Task[]> => {
+      if (!user || !tenantId) return [];
+      const { data: rows } = await supabase
+        .from("task_assignees")
+        .select("tasks!inner(*)")
+        .eq("user_id", user.id);
+      const tasks = (rows ?? [])
+        .map((r) => (r as unknown as { tasks: Task }).tasks)
+        .filter((t) => t && !t.completed_at && t.tenant_id === tenantId);
+      return tasks;
     },
-  });
-}
-
-export function useQuickAdd() {
-  const qc = useQueryClient();
-  const { user } = useAuth();
-  const { tenantId, inboxProjectId } = useWorkspace();
-  const { data: statuses } = useTaskStatuses();
-  const { data: taskTypes } = useTaskTypes();
-
-  return useMutation({
-    mutationFn: async (input: string | { text: string; projectId?: string }) => {
-      if (!user || !tenantId || !inboxProjectId) {
-        throw new Error("Workspace ainda não está pronto");
-      }
-      const text = typeof input === "string" ? input : input.text;
-      const targetProjectId =
-        typeof input === "string" ? inboxProjectId : (input.projectId ?? inboxProjectId);
-      const parsed = parseQuickAdd(text);
-      const todoStatus = statuses?.find((s) => s.slug === "todo");
-
-      // Default estimate: se o parser não capturou ~Xm/h, herda do tipo default
-      // do tenant (slug "task" tem prioridade; senão, primeiro tipo com
-      // default_estimate_minutes setado).
-      let estimate = parsed.estimateMinutes;
-      if (estimate == null && taskTypes && taskTypes.length > 0) {
-        const fallback =
-          taskTypes.find((t) => t.slug === "task" && t.default_estimate_minutes) ??
-          taskTypes.find((t) => t.default_estimate_minutes != null);
-        if (fallback?.default_estimate_minutes) {
-          estimate = fallback.default_estimate_minutes;
-        }
-      }
-
-      const payload = {
-        tenant_id: tenantId,
-        project_id: targetProjectId,
-        title: parsed.title,
-        priority: parsed.priority,
-        status_id: todoStatus?.id ?? null,
-        due_at: parsed.dueAt?.toISOString() ?? null,
-        start_at: parsed.startAt?.toISOString() ?? null,
-        estimate_minutes: estimate,
-        assignee_id: user.id,
-        reporter_id: user.id,
-        created_by: user.id,
-        number: 0, // será setado pelo trigger
-      };
-
-      const { data, error } = await supabase
-        .from("tasks")
-        .insert(payload)
-        .select()
-        .single();
-      if (error) throw error;
-      return data as TaskRow;
-    },
-    onSuccess: (task) => {
-      // Quando o parser empurra a data pra D+1+ (ex: "amanhã"), avisamos onde
-      // a task foi parar — sem isso o usuário fica procurando em /hoje.
-      const startOfTomorrow = (() => {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        d.setHours(0, 0, 0, 0);
-        return d;
-      })();
-      const dueDate = task.due_at ? new Date(task.due_at) : null;
-      const fallsInFuture = dueDate !== null && dueDate.getTime() >= startOfTomorrow.getTime();
-
-      if (fallsInFuture && dueDate) {
-        const relative = formatDistanceToNow(dueDate, {
-          locale: ptBR,
-          addSuffix: true,
-        });
-        toast.success(`Tarefa criada: ${task.code ?? task.title}`, {
-          description: `Vence ${relative}`,
-          action: {
-            label: "Ver em Próximos 7 dias",
-            onClick: () => {
-              if (typeof window !== "undefined") {
-                window.location.assign("/app/proximos");
-              }
-            },
-          },
-        });
-      } else {
-        toast.success(`Tarefa criada: ${task.code ?? task.title}`);
-      }
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-    },
-    onError: (err: Error) => toast.error("Erro ao criar tarefa: " + err.message),
   });
 }
 
@@ -324,455 +102,50 @@ export function useCreateTask() {
   const qc = useQueryClient();
   const { user } = useAuth();
   const { tenantId } = useWorkspace();
-  const { data: statuses } = useTaskStatuses();
-
   return useMutation({
-    mutationFn: async (input: {
-      projectId: string;
-      title: string;
-      statusId?: string | null;
-      assigneeId?: string | null;
-      priority?: TaskRow["priority"];
-    }) => {
-      if (!user || !tenantId) throw new Error("Workspace não pronto");
-      const todo = statuses?.find((s) => s.slug === "todo");
+    mutationFn: async (input: { list_id: string; title: string; status_id?: string | null }) => {
+      if (!tenantId || !user) throw new Error("workspace_not_ready");
       const { data, error } = await supabase
         .from("tasks")
         .insert({
           tenant_id: tenantId,
-          project_id: input.projectId,
+          list_id: input.list_id,
           title: input.title,
-          status_id: input.statusId ?? todo?.id ?? null,
-          assignee_id: input.assigneeId ?? user.id,
-          reporter_id: user.id,
+          status_id: input.status_id ?? null,
           created_by: user.id,
-          priority: input.priority ?? "none",
-          number: 0,
         })
         .select()
         .single();
       if (error) throw error;
-      return data as TaskRow;
+      return data;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      qc.invalidateQueries({ queryKey: ["project-tasks"] });
-      qc.invalidateQueries({ queryKey: ["my-work"] });
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["tasks", v.list_id] });
     },
-  });
-}
-
-export function useToggleTaskDone() {
-  const qc = useQueryClient();
-  const { data: statuses } = useTaskStatuses();
-  const fireConfetti = useConfetti();
-
-  return useMutation({
-    mutationFn: async (task: TaskRow) => {
-      const doneStatus = statuses?.find((s) => s.is_done);
-      const todoStatus = statuses?.find((s) => s.slug === "todo");
-      const isDone = !!task.done_at;
-      const { error } = await supabase
-        .from("tasks")
-        .update({
-          done_at: isDone ? null : new Date().toISOString(),
-          status_id: isDone ? todoStatus?.id ?? task.status_id : doneStatus?.id ?? task.status_id,
-        })
-        .eq("id", task.id);
-      if (error) throw error;
-      return { task, wasDone: isDone };
-    },
-    onSuccess: ({ task, wasDone }) => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      if (!wasDone) {
-        // useConfetti já respeita prefers-reduced-motion internamente.
-        fireConfetti(undefined, undefined, 50);
-        toast.success("Tarefa concluída", {
-          description: "Boa! Mais uma fora da lista.",
-          action: {
-            label: "Desfazer",
-            onClick: async () => {
-              await supabase
-                .from("tasks")
-                .update({ done_at: null, status_id: task.status_id })
-                .eq("id", task.id);
-              qc.invalidateQueries({ queryKey: ["tasks"] });
-            },
-          },
-        });
-      }
-    },
-    onError: (err: Error) => toast.error("Erro: " + err.message),
-  });
-}
-
-/**
- * Duplica uma tarefa preservando os campos principais (título recebe sufixo
- * "(cópia)"). Não copia anexos, comentários, time_entries — apenas o registro
- * raiz da task.
- */
-export function useDuplicateTask() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (task: TaskRow) => {
-      const payload = {
-        tenant_id: task.tenant_id,
-        project_id: task.project_id,
-        title: `${task.title} (cópia)`,
-        description: task.description,
-        priority: task.priority,
-        status_id: task.status_id,
-        assignee_id: task.assignee_id,
-        start_at: task.start_at,
-        due_at: task.due_at,
-        estimate_minutes: task.estimate_minutes,
-        type_id: task.type_id ?? null,
-        parent_task_id: task.parent_task_id ?? null,
-        custom_fields: (task.custom_fields ?? null) as never,
-        number: 0,
-      };
-      const { data, error } = await supabase
-        .from("tasks")
-        .insert(payload)
-        .select()
-        .single();
-      if (error) throw error;
-      return data as TaskRow;
-    },
-    onSuccess: (task) => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success(`Duplicada: ${task.code ?? task.title}`);
-    },
-    onError: (e: Error) => toast.error("Erro ao duplicar: " + e.message),
-  });
-}
-
-export function useDeleteTask() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (taskId: string) => {
-      const { error } = await supabase.from("tasks").update({ archived: true }).eq("id", taskId);
-      if (error) throw error;
-      return taskId;
-    },
-    onSuccess: (taskId) => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("Tarefa arquivada", {
-        action: {
-          label: "Desfazer",
-          onClick: async () => {
-            await supabase.from("tasks").update({ archived: false }).eq("id", taskId);
-            qc.invalidateQueries({ queryKey: ["tasks"] });
-          },
-        },
-      });
-    },
-    onError: (err: Error) => toast.error("Erro: " + err.message),
-  });
-}
-
-/**
- * Tarefas para o Kanban: todas ativas do tenant (até 500), agrupadas por status_id.
- * Filtro opcional por projeto.
- */
-export function useKanbanTasks(projectId?: string | null) {
-  const { tenantId, loading: wsLoading } = useWorkspace();
-
-  return useQuery({
-    ...queryProfile("workload"),
-    queryKey: ["tasks", "kanban", tenantId, projectId ?? "all"],
-    enabled: !wsLoading && !!tenantId,
-    queryFn: async (): Promise<TaskRow[]> => {
-      let q = supabase
-        .from("tasks")
-        .select("*")
-        .eq("tenant_id", tenantId!)
-        .eq("archived", false)
-        .order("priority", { ascending: false })
-        .order("due_at", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (projectId) q = q.eq("project_id", projectId);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data ?? []) as TaskRow[];
-    },
-  });
-}
-
-/**
- * Move uma tarefa para outro status. O trigger tg_auto_assign cuida do auto-assign.
- * Atualiza done_at quando o status destino é "done".
- */
-export function useMoveTaskStatus() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({
-      taskId,
-      statusId,
-      isDone,
-    }: {
-      taskId: string;
-      statusId: string;
-      isDone: boolean;
-    }) => {
-      const { error } = await supabase
-        .from("tasks")
-        .update({ status_id: statusId, done_at: isDone ? new Date().toISOString() : null })
-        .eq("id", taskId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      qc.invalidateQueries({ queryKey: ["task"] });
-    },
-    onError: (e: Error) => toast.error("Erro ao mover: " + e.message),
-  });
-}
-
-/**
- * Tarefas com due_at dentro de um intervalo (para o calendário).
- */
-export function useTasksInRange(from: Date | null, to: Date | null) {
-  const { tenantId, loading: wsLoading } = useWorkspace();
-  return useQuery({
-    ...queryProfile("workload"),
-    queryKey: ["tasks", "range", tenantId, from?.toISOString(), to?.toISOString()],
-    enabled: !wsLoading && !!tenantId && !!from && !!to,
-    queryFn: async (): Promise<TaskRow[]> => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("tenant_id", tenantId!)
-        .eq("archived", false)
-        .not("due_at", "is", null)
-        .gte("due_at", from!.toISOString())
-        .lte("due_at", to!.toISOString())
-        .order("due_at", { ascending: true })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as TaskRow[];
-    },
-  });
-}
-
-/**
- * Atualiza um conjunto de tasks em batch — usado pela toolbar de bulk actions.
- * Aceita patch parcial (priority, status_id, project_id, assignee_id, archived).
- * Usa `.in("id", ids)` para mandar uma query só.
- */
-export interface BulkTaskPatch {
-  priority?: TaskRow["priority"];
-  status_id?: string | null;
-  project_id?: string;
-  assignee_id?: string | null;
-  archived?: boolean;
-  done_at?: string | null;
-}
-
-export function useBulkUpdateTasks() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({
-      ids,
-      patch,
-    }: {
-      ids: string[];
-      patch: BulkTaskPatch;
-    }) => {
-      if (!ids.length) return { count: 0 };
-      const { error, count } = await supabase
-        .from("tasks")
-        .update(patch, { count: "exact" })
-        .in("id", ids);
-      if (error) throw error;
-      return { count: count ?? ids.length };
-    },
-    onSuccess: ({ count }) => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      qc.invalidateQueries({ queryKey: ["tasks-infinite"] });
-      qc.invalidateQueries({ queryKey: ["tasks-by-priority"] });
-      qc.invalidateQueries({ queryKey: ["tasks-by-priority-grouped"] });
-      toast.success(`${count} tarefa${count === 1 ? "" : "s"} atualizada${count === 1 ? "" : "s"}`);
-    },
-    onError: (e: Error) => toast.error("Erro no batch: " + e.message),
-  });
-}
-
-export type TaskPriority = TaskRow["priority"];
-
-/**
- * Tarefas ativas do tenant agrupadas por prioridade — alimenta a Matriz
- * Eisenhower. Não filtra por done_at: a página decide se quer só pendentes.
- */
-export function useTasksByPriority() {
-  const { tenantId, loading: wsLoading } = useWorkspace();
-
-  return useQuery({
-    ...queryProfile("workload"),
-    queryKey: ["tasks-by-priority", tenantId],
-    enabled: !wsLoading && !!tenantId,
-    queryFn: async (): Promise<Record<TaskPriority, TaskRow[]>> => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("tenant_id", tenantId!)
-        .eq("archived", false)
-        .is("done_at", null)
-        .order("due_at", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      const rows = (data ?? []) as TaskRow[];
-      const grouped: Record<TaskPriority, TaskRow[]> = {
-        urgent: [],
-        high: [],
-        medium: [],
-        low: [],
-        none: [],
-      };
-      rows.forEach((t) => grouped[t.priority]?.push(t));
-      return grouped;
-    },
-  });
-}
-
-/**
- * Versão da Eisenhower agrupada por projeto + bucket "open" / "done".
- * - `open`: tasks pendentes (done_at IS NULL) agrupadas por project_id.
- * - `done`: concluídas nos últimos 30 dias (done_at IS NOT NULL),
- *   pra povoar a seção "Concluído" colapsável de cada quadrante.
- */
-export function useTasksByPriorityGrouped() {
-  const { tenantId, loading: wsLoading } = useWorkspace();
-
-  return useQuery({
-    ...queryProfile("workload"),
-    queryKey: ["tasks-by-priority-grouped", tenantId],
-    enabled: !wsLoading && !!tenantId,
-    queryFn: async (): Promise<
-      Record<TaskPriority, { open: Record<string, TaskRow[]>; done: TaskRow[] }>
-    > => {
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - 30);
-      cutoff.setHours(0, 0, 0, 0);
-
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("tenant_id", tenantId!)
-        .eq("archived", false)
-        .or(`done_at.is.null,done_at.gte.${cutoff.toISOString()}`)
-        .order("due_at", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(1000);
-      if (error) throw error;
-
-      const rows = (data ?? []) as TaskRow[];
-      const result: Record<TaskPriority, { open: Record<string, TaskRow[]>; done: TaskRow[] }> = {
-        urgent: { open: {}, done: [] },
-        high: { open: {}, done: [] },
-        medium: { open: {}, done: [] },
-        low: { open: {}, done: [] },
-        none: { open: {}, done: [] },
-      };
-
-      rows.forEach((t) => {
-        const bucket = result[t.priority];
-        if (!bucket) return;
-        if (t.done_at) {
-          bucket.done.push(t);
-        } else {
-          const pid = t.project_id || "_none";
-          if (!bucket.open[pid]) bucket.open[pid] = [];
-          bucket.open[pid].push(t);
-        }
-      });
-
-      return result;
-    },
-  });
-}
-
-/**
- * Atualiza só a prioridade — usado pelo drag entre quadrantes da matriz
- * Eisenhower.
- */
-export function useUpdateTaskPriority() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ taskId, priority }: { taskId: string; priority: TaskPriority }) => {
-      const { error } = await supabase
-        .from("tasks")
-        .update({ priority })
-        .eq("id", taskId);
-      if (error) throw error;
-      return { taskId, priority };
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      qc.invalidateQueries({ queryKey: ["tasks-by-priority"] });
-      qc.invalidateQueries({ queryKey: ["tasks-by-priority-grouped"] });
-    },
-    onError: (e: Error) => toast.error("Erro ao repriorizar: " + e.message),
-  });
-}
-
-/**
- * Reagendar tarefa (drag no calendário). Preserva o horário original quando
- * possível e só troca a data.
- */
-export function useRescheduleTask() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({
-      taskId,
-      newDate,
-      keepTime = true,
-      currentDueAt,
-    }: {
-      taskId: string;
-      newDate: Date;
-      keepTime?: boolean;
-      currentDueAt?: string | null;
-    }) => {
-      const target = new Date(newDate);
-      if (keepTime && currentDueAt) {
-        const prev = new Date(currentDueAt);
-        target.setHours(prev.getHours(), prev.getMinutes(), 0, 0);
-      } else if (keepTime) {
-        target.setHours(9, 0, 0, 0);
-      }
-      const { error } = await supabase
-        .from("tasks")
-        .update({ due_at: target.toISOString() })
-        .eq("id", taskId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Tarefa reagendada");
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      qc.invalidateQueries({ queryKey: ["task"] });
-    },
-    onError: (e: Error) => toast.error("Erro ao reagendar: " + e.message),
+    onError: (e: Error) => toast.error(e.message || "Erro ao criar tarefa"),
   });
 }
 
 export function useUpdateTask() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
-      const { error } = await supabase
-        .from("tasks")
-        .update(patch as never)
-        .eq("id", id);
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Task> }) => {
+      const { assignees: _omit, ...rest } = patch as Record<string, unknown> & { assignees?: unknown };
+      void _omit;
+      const { data, error } = await supabase.from("tasks").update(rest as never).eq("id", id).select().single();
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      qc.invalidateQueries({ queryKey: ["task"] });
-      qc.invalidateQueries({ queryKey: ["kanban-tasks"] });
+    onSuccess: (d) => {
+      qc.invalidateQueries({ queryKey: ["tasks", d.list_id] });
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
     },
-    onError: (e: Error) => toast.error("Erro ao atualizar tarefa: " + e.message),
+    onError: (e: Error) => toast.error(e.message || "Erro ao atualizar"),
   });
+}
+
+export function useToggleComplete() {
+  const upd = useUpdateTask();
+  return (t: Task) =>
+    upd.mutate({ id: t.id, patch: { completed_at: t.completed_at ? null : new Date().toISOString() } as Partial<Task> });
 }
