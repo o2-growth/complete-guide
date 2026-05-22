@@ -56,24 +56,23 @@ export function useTasks(listId: string | null) {
       if (!listId) return [];
       const { data, error } = await supabase
         .from("tasks")
-        .select("*, task_assignees(user_id, profiles:user_id(full_name, avatar_url))")
+        .select("*, task_assignees(user_id)")
         .eq("list_id", listId)
         .is("archived_at", null)
         .is("parent_task_id", null)
         .order("sort_order");
       if (error) throw error;
-      return (data ?? []).map((t) => {
-        const rawT = t as unknown as Record<string, unknown>;
-        const assigneesRaw = (rawT.task_assignees as Array<{ user_id: string; profiles: { full_name: string | null; avatar_url: string | null } | null }> | null) ?? [];
-        return {
-          ...(t as unknown as Omit<Task, "assignees">),
-          assignees: assigneesRaw.map((a) => ({
-            user_id: a.user_id,
-            full_name: a.profiles?.full_name ?? null,
-            avatar_url: a.profiles?.avatar_url ?? null,
-          })),
-        } as Task;
-      });
+      const rows = (data ?? []) as unknown as Array<Omit<Task, "assignees"> & { task_assignees: { user_id: string }[] | null }>;
+      const userIds = Array.from(new Set(rows.flatMap((r) => (r.task_assignees ?? []).map((a) => a.user_id))));
+      const profMap = await fetchProfileMap(userIds);
+      return rows.map((t) => ({
+        ...(t as Omit<Task, "assignees">),
+        assignees: (t.task_assignees ?? []).map((a) => ({
+          user_id: a.user_id,
+          full_name: profMap[a.user_id]?.full_name ?? null,
+          avatar_url: profMap[a.user_id]?.avatar_url ?? null,
+        })),
+      })) as Task[];
     },
   });
 }
@@ -93,8 +92,51 @@ export function useMyTasks() {
       const tasks = (rows ?? [])
         .map((r) => (r as unknown as { tasks: Task }).tasks)
         .filter((t) => t && !t.completed_at && t.tenant_id === tenantId);
-      return tasks;
+      return tasks.map((t) => ({ ...t, assignees: t.assignees ?? [] }));
     },
+  });
+}
+
+async function fetchProfileMap(ids: string[]): Promise<Record<string, { full_name: string | null; avatar_url: string | null }>> {
+  if (!ids.length) return {};
+  const { data } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids);
+  const map: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
+  (data ?? []).forEach((p) => {
+    map[(p as { id: string }).id] = { full_name: (p as { full_name: string | null }).full_name, avatar_url: (p as { avatar_url: string | null }).avatar_url };
+  });
+  return map;
+}
+
+export function useTaskAssignees(taskId: string | null) {
+  return useQuery({
+    queryKey: ["task-assignees", taskId],
+    enabled: !!taskId,
+    queryFn: async () => {
+      if (!taskId) return [] as string[];
+      const { data } = await supabase.from("task_assignees").select("user_id").eq("task_id", taskId);
+      return (data ?? []).map((r) => (r as { user_id: string }).user_id);
+    },
+  });
+}
+
+export function useToggleAssignee() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ task_id, user_id, present }: { task_id: string; user_id: string; present: boolean }) => {
+      if (present) {
+        const { error } = await supabase.from("task_assignees").delete().eq("task_id", task_id).eq("user_id", user_id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("task_assignees").insert({ task_id, user_id });
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["task-assignees", v.task_id] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 }
 
