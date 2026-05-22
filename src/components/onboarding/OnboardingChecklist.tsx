@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
  */
 export function OnboardingChecklist() {
   const { steps, completed, total, allDone, dismissed, dismiss, loading } = useOnboardingChecklist();
-  const [expanded, setExpanded] = useState(true);
+  // Collapsed por padrão pra não cobrir conteúdo. O user expande clicando.
+  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
   if (loading || dismissed || allDone || total === 0) return null;

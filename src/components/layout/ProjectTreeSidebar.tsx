@@ -58,7 +58,14 @@ interface NewProjectDialogState {
   parentId: string | null;
 }
 
-export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
+export function ProjectTreeSidebar({
+  collapsed,
+  hideHeader = false,
+}: {
+  collapsed: boolean;
+  /** Quando o componente wrapper já renderiza um header "Espaços + Plus" externo, evita duplicação. */
+  hideHeader?: boolean;
+}) {
   const navigate = useNavigate();
   const { tree, isLoading, mutateMove, mutateRename, mutateCreate, maxDepth } = useProjectTree();
   const { data: squads = [] } = useSquads();
@@ -157,18 +164,20 @@ export function ProjectTreeSidebar({ collapsed }: { collapsed: boolean }) {
 
   return (
     <div className="px-1">
-      <div className="flex items-center justify-between px-2 pb-1 pt-2">
-        <span className="text-xs font-medium text-sidebar-foreground/60">Espaços</span>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-6 w-6"
-          aria-label="Novo projeto"
-          onClick={() => openNewProject(null)}
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </Button>
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center justify-between px-2 pb-1 pt-2">
+          <span className="text-xs font-medium text-sidebar-foreground/60">Espaços</span>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6"
+            aria-label="Novo projeto"
+            onClick={() => openNewProject(null)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      )}
       <NavLink
         to="/app/projetos"
         end

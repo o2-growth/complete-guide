@@ -148,7 +148,7 @@ export function ClickUpSidebar() {
               )}
             </div>
             <CollapsibleContent>
-              <ProjectTreeSidebar collapsed={collapsed} />
+              <ProjectTreeSidebar collapsed={collapsed} hideHeader />
             </CollapsibleContent>
           </Collapsible>
         </SidebarGroup>

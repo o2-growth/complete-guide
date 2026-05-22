@@ -16,7 +16,10 @@ import logoOxy from "@/assets/logo-oxy.png";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
+  // No login só exigimos que a senha esteja preenchida — quem define o
+  // requisito de tamanho é o Supabase. Contas antigas podem ter senhas
+  // mais curtas do que o limite atual.
+  password: z.string().min(1, "Informe sua senha"),
 });
 
 const signupSchema = z.object({
