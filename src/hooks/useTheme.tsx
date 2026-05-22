@@ -17,10 +17,12 @@ const ThemeContext = createContext<ThemeContextValue>({
 const STORAGE_KEY = "oxy-theme";
 
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
+  // Identidade O2 é dark-first (sidebar sempre dark, design system dark-default).
+  // Default é dark; só light se o user explicitamente escolheu via toggle.
+  if (typeof window === "undefined") return "dark";
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "dark";
 }
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
