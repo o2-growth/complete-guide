@@ -1,5 +1,7 @@
 import { useMemo } from "react";
-import { Flag, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Flag, Loader2, MessageSquare } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -71,6 +73,28 @@ export function TaskTableView({
     [members],
   );
 
+  // Count de comentários por task (batch via uma query só).
+  const taskIds = useMemo(() => tasks.map((t) => t.id), [tasks]);
+  const commentsQuery = useQuery({
+    queryKey: ["task-table-comment-counts", taskIds.join(",")],
+    enabled: taskIds.length > 0,
+    staleTime: 30_000,
+    queryFn: async (): Promise<Map<string, number>> => {
+      const { data, error } = await supabase
+        .from("comments")
+        .select("task_id")
+        .in("task_id", taskIds);
+      if (error) throw error;
+      const m = new Map<string, number>();
+      for (const r of data ?? []) {
+        const id = (r as { task_id: string }).task_id;
+        m.set(id, (m.get(id) ?? 0) + 1);
+      }
+      return m;
+    },
+  });
+  const commentCounts = commentsQuery.data ?? new Map<string, number>();
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-16 text-muted-foreground">
@@ -100,6 +124,9 @@ export function TaskTableView({
             <TableHead className="w-[100px]">Prioridade</TableHead>
             <TableHead className="w-[120px]">Vencimento</TableHead>
             <TableHead className="w-[72px] text-right">ICE</TableHead>
+            <TableHead className="w-[72px] text-center" aria-label="Comentários">
+              <MessageSquare className="mx-auto h-3.5 w-3.5 text-muted-foreground" />
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -244,6 +271,18 @@ export function TaskTableView({
                   ) : (
                     <span className="text-xs text-muted-foreground">—</span>
                   )}
+                </TableCell>
+                <TableCell className="text-center">
+                  {(() => {
+                    const c = commentCounts.get(task.id) ?? 0;
+                    if (c === 0) return <span className="text-xs text-muted-foreground">—</span>;
+                    return (
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                        <MessageSquare className="h-3 w-3" />
+                        {c}
+                      </span>
+                    );
+                  })()}
                 </TableCell>
               </TableRow>
             );

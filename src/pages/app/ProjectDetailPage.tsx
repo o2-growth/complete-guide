@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BarChart3, CalendarDays, ChevronLeft, ChevronRight, FileStack, Folder, GanttChartSquare, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock, Plus, Table as TableIcon, Users2 } from "lucide-react";
+import { ArrowLeft, BarChart3, Bot, CalendarDays, ChevronLeft, ChevronRight, FileStack, Folder, GanttChartSquare, Hash, Inbox, KanbanSquare, LayoutGrid, ListTodo, Loader2, Lock, MessageSquare, Plus, Share2, Sparkles, Table as TableIcon, Users2, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -146,7 +146,38 @@ export default function ProjectDetailPage() {
   return (
     <div className="container max-w-7xl py-6 space-y-5">
       <div>
-        <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2"><Link to="/app/projetos"><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Projetos</Link></Button>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <Button asChild variant="ghost" size="sm" className="-ml-2">
+            <Link to="/app/projetos">
+              <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Projetos
+            </Link>
+          </Button>
+          <div className="flex items-center gap-1">
+            <Button asChild variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground hover:text-foreground">
+              <Link to="/app/copilot">
+                <Bot className="mr-1 h-3.5 w-3.5" /> Agentes
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground hover:text-foreground">
+              <Link to="/app/automacoes">
+                <Zap className="mr-1 h-3.5 w-3.5" /> Automatizar
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground hover:text-foreground">
+              <Link to="/app/genio">
+                <Sparkles className="mr-1 h-3.5 w-3.5" /> Pergunte à IA
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setMembersOpen(true)}
+            >
+              <Share2 className="mr-1 h-3.5 w-3.5" /> Compartilhar
+            </Button>
+          </div>
+        </div>
         {path.length > 1 && (
           <nav aria-label="Caminho" className="mb-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
             {path.slice(0, -1).map((p, idx) => (

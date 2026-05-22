@@ -27,6 +27,8 @@ import { SmartList, useTasks, useTasksInfinite, type TaskRow as TTask } from "@/
 import { taskDetailPath } from "@/lib/task-routes";
 import { CreateTaskModal } from "@/components/tasks/CreateTaskModal";
 import { Plus } from "lucide-react";
+import { TaskFilterBar, useTaskFilter } from "@/components/tasks/TaskFilterBar";
+import { TaskGroupedByStatusView } from "@/components/tasks/TaskGroupedByStatusView";
 
 type ViewMode = "list" | "gallery" | "chart" | "calendar" | "table" | "gantt";
 
@@ -66,16 +68,22 @@ function setStoredView(list: SmartList, view: ViewMode) {
   }
 }
 
+interface BodyProps {
+  list: SmartList;
+  emptyTitle: string;
+  emptyDescription: string;
+  /** Se true, renderiza com agrupamento por status (estilo ClickUp). */
+  groupByStatus: boolean;
+}
+
 function InfiniteListBody({
   list,
   emptyTitle,
   emptyDescription,
-}: {
-  list: SmartList;
-  emptyTitle: string;
-  emptyDescription: string;
-}) {
+  groupByStatus,
+}: BodyProps) {
   const navigate = useNavigate();
+  const filter = useTaskFilter(`smartlist:${list}`);
   const {
     data,
     isLoading,
@@ -89,6 +97,7 @@ function InfiniteListBody({
     () => data?.pages.flatMap((p) => p.rows) ?? [],
     [data],
   );
+  const visible = useMemo(() => filter.apply(tasks), [filter, tasks]);
 
   if (error) {
     return (
@@ -100,12 +109,28 @@ function InfiniteListBody({
 
   return (
     <>
-      <TaskTableView
-        tasks={tasks}
-        onOpen={(id) => navigate(taskDetailPath(id))}
-        showProjectColumn
-        isLoading={isLoading}
+      <TaskFilterBar
+        state={filter.state}
+        onChange={filter.setState}
+        total={tasks.length}
+        filtered={visible.length}
       />
+      <div className="mt-4">
+        {groupByStatus ? (
+          <TaskGroupedByStatusView
+            tasks={visible}
+            isLoading={isLoading}
+            showProjectColumn
+          />
+        ) : (
+          <TaskTableView
+            tasks={visible}
+            onOpen={(id) => navigate(taskDetailPath(id))}
+            showProjectColumn
+            isLoading={isLoading}
+          />
+        )}
+      </div>
       {hasNextPage && (
         <div className="flex justify-center pt-4">
           <Button
@@ -131,13 +156,12 @@ function FiniteListBody({
   list,
   emptyTitle,
   emptyDescription,
-}: {
-  list: SmartList;
-  emptyTitle: string;
-  emptyDescription: string;
-}) {
+  groupByStatus,
+}: BodyProps) {
   const navigate = useNavigate();
+  const filter = useTaskFilter(`smartlist:${list}`);
   const { data: tasks = [], isLoading, error } = useTasks(list);
+  const visible = useMemo(() => filter.apply(tasks as TTask[]), [filter, tasks]);
 
   if (error) {
     return (
@@ -149,12 +173,28 @@ function FiniteListBody({
 
   return (
     <>
-      <TaskTableView
-        tasks={tasks as TTask[]}
-        onOpen={(id) => navigate(taskDetailPath(id))}
-        showProjectColumn
-        isLoading={isLoading}
+      <TaskFilterBar
+        state={filter.state}
+        onChange={filter.setState}
+        total={tasks.length}
+        filtered={visible.length}
       />
+      <div className="mt-4">
+        {groupByStatus ? (
+          <TaskGroupedByStatusView
+            tasks={visible}
+            isLoading={isLoading}
+            showProjectColumn
+          />
+        ) : (
+          <TaskTableView
+            tasks={visible}
+            onOpen={(id) => navigate(taskDetailPath(id))}
+            showProjectColumn
+            isLoading={isLoading}
+          />
+        )}
+      </div>
       <BulkActionsToolbar />
     </>
   );
@@ -278,12 +318,14 @@ export default function SmartListPage({
             list={list}
             emptyTitle={emptyTitle}
             emptyDescription={emptyDescription}
+            groupByStatus
           />
         ) : (
           <FiniteListBody
             list={list}
             emptyTitle={emptyTitle}
             emptyDescription={emptyDescription}
+            groupByStatus
           />
         )}
       </TabsContent>
@@ -294,12 +336,14 @@ export default function SmartListPage({
             list={list}
             emptyTitle={emptyTitle}
             emptyDescription={emptyDescription}
+            groupByStatus={false}
           />
         ) : (
           <FiniteListBody
             list={list}
             emptyTitle={emptyTitle}
             emptyDescription={emptyDescription}
+            groupByStatus={false}
           />
         )}
       </TabsContent>
