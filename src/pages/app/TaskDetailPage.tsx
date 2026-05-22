@@ -1,10 +1,12 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { X, Share2, Sparkles, MoreHorizontal, ChevronRight } from "lucide-react";
+import { X, Share2, Sparkles, MoreHorizontal, ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { TaskDetailContent } from "@/components/tasks/TaskDetailSheet";
+import { ActivityPanel } from "@/components/tasks/ActivityPanel";
 import { useTask } from "@/hooks/useTaskDetail";
 import { useProjects } from "@/hooks/useProjects";
 import SEO from "@/components/SEO";
@@ -14,6 +16,7 @@ export default function TaskDetailPage() {
   const navigate = useNavigate();
   const { data: task } = useTask(id ?? null);
   const { data: projects = [] } = useProjects();
+  const [activityOpen, setActivityOpen] = useState(true);
 
   if (!id) {
     return (
@@ -75,6 +78,19 @@ export default function TaskDetailPage() {
           <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
             <Share2 className="h-3.5 w-3.5" /> Compartilhar
           </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setActivityOpen((v) => !v)}
+            aria-label={activityOpen ? "Esconder atividade" : "Mostrar atividade"}
+          >
+            {activityOpen ? (
+              <PanelRightClose className="h-3.5 w-3.5" />
+            ) : (
+              <PanelRightOpen className="h-3.5 w-3.5" />
+            )}
+          </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7">
             <MoreHorizontal className="h-3.5 w-3.5" />
           </Button>
@@ -90,8 +106,15 @@ export default function TaskDetailPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto">
-        <TaskDetailContent taskId={id} />
+      <div className="flex flex-1 overflow-hidden">
+        <div className="min-w-0 flex-1 overflow-y-auto">
+          <TaskDetailContent taskId={id} />
+        </div>
+        {activityOpen && (
+          <aside className="hidden w-[380px] shrink-0 lg:flex">
+            <ActivityPanel taskId={id} />
+          </aside>
+        )}
       </div>
     </div>
   );
