@@ -1,89 +1,43 @@
-# Plano: Refazer o app do zero — Oxy Tasks (ClickUp-style)
+## Diagnóstico
 
-Escopo confirmado: descartar as 43 fases anteriores, **DELETE** dos dados de projetos/tarefas, manter apenas identidade visual (logo, paleta lima, Montserrat/Anton, dark theme). O app vira **um gestor de tarefas focado**, sem mídias sociais, IA Gênio, OKRs, automações, marketplace, etc.
+A criação **funciona** no banco — o problema é que a **leitura quebra com 400** logo depois, então a UI nunca mostra a tarefa nova e parece que "não criou".
 
-## Modelo de dados (novo, minimalista)
-
-```text
-tenants ── tenant_members (role: admin|member|guest)
-   │
-spaces (Espaço — ex: "Team IA & Automação")
-   └─ folders (Pasta — opcional, 1 nível)
-        └─ lists (Lista — onde tarefas vivem)
-             └─ tasks
-                  ├─ subtasks (self-FK, 3 níveis)
-                  ├─ task_assignees (N:N)
-                  ├─ task_tags
-                  ├─ task_checklists → checklist_items
-                  ├─ task_comments
-                  └─ task_activity (audit)
-
-statuses_per_list (cada Lista tem seus próprios status com cor)
+Causa raiz (logs de rede):
 ```
+GET /rest/v1/tasks?select=*,task_assignees(user_id,profiles:user_id(full_name,avatar_url))
+→ 400 PGRST200
+"Could not find a relationship between 'task_assignees' and 'user_id'"
+```
+`task_assignees.user_id` não tem FK para `profiles` no schema, então o embed aninhado `profiles:user_id(...)` falha. Resultado: `useTasks` joga erro, a lista fica vazia, contador "0 tarefa(s)" persiste mesmo após inserir.
 
-Migration destrutiva única: `DROP` em tudo de tasks/projects/social/ai/etc no schema `public`, recria as 10 tabelas acima com RLS por tenant_id.
+Comparando com o print: o usuário também acha a Lista visualmente pobre vs. ClickUp — colunas só com título, sem coluna de responsável, prazo, prioridade, sem hover de ações, sem badge de progresso.
 
-## Estrutura de rotas (enxuta)
+## Plano
 
-| Rota | O que é |
-|------|---------|
-| `/auth` | Login (mantém) |
-| `/app` | Home "Minhas tarefas" (Recentes + Meu trabalho + Agenda placeholder + Comentários) |
-| `/app/inbox` | Caixa de entrada |
-| `/app/atribuidas` | Atribuídas a mim |
-| `/app/hoje` | Hoje e atrasadas |
-| `/app/lista-pessoal` | Lista pessoal (privada) |
-| `/app/s/:spaceId` | Espaço (agregado) |
-| `/app/l/:listId` | Lista — com tabs Quadro/Lista/Calendar/Gantt/Table |
-| `/app/t/:taskId` | Painel detalhe (sheet sobre a lista atual) |
-| `/app/configuracoes` | Perfil, workspace, membros, aparência |
+### 1. Corrigir busca de tarefas (bug bloqueante)
+- `src/hooks/useTasks.tsx`
+  - Trocar embed aninhado por busca em 2 passos: `tasks` + `task_assignees(user_id)`; depois carregar `profiles` (id,full_name,avatar_url) em lote via `.in('id', userIds)` e fazer merge no cliente.
+  - Aplicar mesma correção em `useMyTasks` (hoje usa `tasks!inner(*)`, que está OK, mas garantir merge de assignees igual).
+- Resultado esperado: criar tarefa volta a aparecer instantaneamente; sem mais 400.
 
-Tudo o que não estiver acima vira 404. Páginas atuais (`social`, `genio`, `okrs`, `automacoes`, `marketplace`, etc.) deletadas.
+### 2. Aproximar a Lista do padrão ClickUp (visual + UX)
+Mantendo a identidade visual O2 (verde Lima sobre Ink).
 
-## Componentes-chave (novos)
+- `src/components/tasks/TaskRow.tsx` — virar linha tipo planilha com colunas:
+  - checkbox de concluir · título · tags · responsáveis (avatares empilhados) · prazo (pill colorido se atrasado) · prioridade (bandeira colorida) · #número.
+  - Hover revela botões rápidos (atribuir, prazo, prioridade, abrir).
+- `src/pages/app/ListPage.tsx`
+  - Cabeçalho de grupo de status: cor mais sutil (faixa fina + chip), não barra inteira saturada — fica menos "carnaval" e mais ClickUp.
+  - Adicionar linha-cabeçalho com rótulos das colunas (Tarefa, Responsável, Prazo, Prioridade) acima do primeiro grupo.
+  - Botão "+ Nova tarefa" **dentro de cada grupo** (cria já com aquele status), além do global no rodapé.
+  - Persistir colapso de grupos no `localStorage` por lista.
+- `src/components/tasks/TaskSheet.tsx` — adicionar seletor de responsáveis (multi) usando `useTenantMembers` + `task_assignees` (insert/delete). Usa a mesma RPC simples de `from('task_assignees').insert/delete`.
 
-1. **AppSidebar** — três blocos: Início (Inbox/Comentários/Minhas tarefas + filhos), Favoritos, Espaços (árvore Espaço→Pasta→Lista com contador, "+" inline, context-menu).
-2. **ListHeader** — breadcrumb Espaço/Pasta/Lista + tabs de view + ações (Agentes/Automatizar/Compartilhar — só visual nesta fase).
-3. **ListView** (default) — grupos colapsáveis por status com header colorido, colunas Nome/Responsável/Data/Prioridade/Status/Comentários, "+ Adicionar Tarefa" inline por grupo, "+ Novo status" no fim, BulkActionsBar inferior.
-4. **BoardView** (Quadro) — Kanban dnd-kit por status.
-5. **CalendarView** — mês com tarefas por dueAt.
-6. **TableView** — grid densa com inline edit.
-7. **GanttView** — placeholder simples (timeline horizontal por start/due).
-8. **TaskSheet** — painel direito: título, status pill, datas, responsáveis, prioridade, etiquetas, descrição, Subtarefas, Checklists, Anexos, Activity, comentários.
-9. **CreateTaskModal** — tabs Tarefa/Lembrete, picker de lista, chips OPEN/assignee/data/prioridade/etiqueta, botão Modelos (placeholder).
-10. **HomeDashboard** — grid 2x2: Recentes, Meu trabalho (tabs Pendente/Feito/Delegado), Agenda (placeholder conectar Google/Outlook), Comentários atribuídos.
+### 3. Sanidade pós-fix
+- Rodar fluxo no preview: abrir a lista atual, criar tarefa → deve aparecer sob "Pendente"; arrastar para "Em progresso" no Quadro → deve persistir; abrir sheet → trocar prioridade e atribuir alguém.
+- Verificar que `useMyTasks` continua mostrando o que foi atribuído.
 
-## Identidade visual preservada
+## Fora de escopo (próximo passo, se quiser)
+- Filtros (status/prioridade/responsável), busca, ordenação por coluna, agrupamento por responsável/prioridade, atalhos de teclado, vistas Calendário/Gantt.
 
-- `src/index.css` (paleta lima/ink), `tailwind.config.ts`, Montserrat/Anton/JetBrains Mono, logo O2 — **intocados**.
-- Todos os tokens semânticos (`bg-primary`, `text-foreground`) reutilizados.
-
-## Limpeza de código
-
-Deletar:
-- `src/pages/app/*` (exceto novos)
-- `src/components/{social,ai,automations,wiki,personas,atendimento,dashboard,calendar antigo,kanban antigo,workload,skills,sla,approvals,timer,modelos,saved-views,presence}/`
-- `src/hooks/*` exceto `useAuth`, `useWorkspace`, `useTheme`, `useBranding`, `useIsMobile`, `use-toast`
-- `supabase/functions/*` exceto `send-invite`, `admin-create-user`, `send-transactional-email`, `process-email-queue`, `handle-email-unsubscribe`, `handle-email-suppression`
-- Rotas correspondentes em `App.tsx`
-
-Manter:
-- Auth, convites, e-mail infra, branding, layout shell (Sidebar/Topbar reescritos).
-
-## Faseamento (build mode)
-
-1. **F1 — Demolição + Schema**: migration destrutiva (drop + create 10 tabelas + RLS + triggers de updated_at/audit/auto-number). DELETE em dados antigos.
-2. **F2 — Limpeza**: apagar pastas/arquivos listados, reescrever `App.tsx` com rotas novas, manter Auth.
-3. **F3 — Sidebar + Espaços/Pastas/Listas**: hooks `useSpaces`, `useLists`, sidebar com árvore, CRUD via context-menu.
-4. **F4 — ListView (lista agrupada por status)** + CreateTaskModal + TaskSheet básico.
-5. **F5 — Outras views**: Quadro, Calendar, Table, Gantt (placeholder).
-6. **F6 — Home + visões pessoais** (Inbox, Atribuídas, Hoje, Lista pessoal).
-7. **F7 — Polimento**: realtime broadcast por tenant, atalhos, bulk actions, breadcrumbs.
-
-## Riscos / decisões pendentes
-
-- **Destrutivo de verdade**: vou rodar `DROP TABLE ... CASCADE` em ~80 tabelas. Sem rollback. Você confirma na migration quando ela aparecer pra aprovar.
-- **Members do tenant atual são preservados** (não mexo em `auth.users` nem `tenant_members`).
-- **Sem IA** nesta versão. Se quiser readicionar Gênio depois, vira módulo separado.
-
-Quer que eu siga com essa estrutura ou prefere ajustar algo (ex: manter alguma área específica das 43 fases)?
+Quer que eu siga assim ou prefere só o **bug fix** agora e o polimento ClickUp depois?
