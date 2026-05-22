@@ -208,6 +208,8 @@ export function useProjectTree() {
       parentId?: string | null;
       icon?: string | null;
       color?: string | null;
+      /** Tipo ClickUp: space_root (raiz), folder (pasta), list (lista de tarefas). Default: list. */
+      kind?: "space_root" | "folder" | "list";
     }) => {
       if (!tenantId) throw new Error("Sem workspace");
       const trimmed = input.name.trim();
@@ -218,17 +220,23 @@ export function useProjectTree() {
           throw new Error(`Máximo de ${MAX_DEPTH} níveis de hierarquia`);
         }
       }
-      const key = trimmed
+      // Prefix por kind pra evitar colisão de keys (BANCO/IA/EXP usam letras).
+      const prefix = input.kind === "space_root" ? "S" : input.kind === "folder" ? "F" : "";
+      const slug = trimmed
         .normalize("NFD")
         .replace(/[̀-ͯ]/g, "")
         .replace(/[^A-Za-z0-9]/g, "")
         .slice(0, 6)
         .toUpperCase() || "PROJ";
+      const baseKey = (prefix + slug).slice(0, 6);
+      // Garante key único por tenant adicionando suffix random se já existir.
+      const key = `${baseKey}${Math.random().toString(36).slice(2, 4).toUpperCase()}`.slice(0, 10);
       const { error } = await supabase.from("projects").insert([
         {
           tenant_id: tenantId,
           name: trimmed,
           key,
+          kind: input.kind ?? "list",
           icon: input.icon ?? null,
           color: input.color ?? null,
           parent_id: input.parentId ?? null,

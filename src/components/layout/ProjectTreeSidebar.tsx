@@ -53,10 +53,19 @@ const COLOR_SWATCHES = [
   "#ef4444", "#a855f7", "#ec4899", "#14b8a6",
 ];
 
+type NewItemKind = "space_root" | "folder" | "list";
+
 interface NewProjectDialogState {
   open: boolean;
   parentId: string | null;
+  kind: NewItemKind;
 }
+
+const KIND_LABEL: Record<NewItemKind, { title: string; placeholder: string; submit: string }> = {
+  space_root: { title: "Novo Espaço", placeholder: "Ex: Team Marketing", submit: "Criar Espaço" },
+  folder: { title: "Nova Pasta", placeholder: "Ex: Campanhas Q3", submit: "Criar Pasta" },
+  list: { title: "Nova Lista", placeholder: "Ex: Tarefas semana", submit: "Criar Lista" },
+};
 
 export function ProjectTreeSidebar({
   collapsed,
@@ -74,7 +83,11 @@ export function ProjectTreeSidebar({
   const updateMeta = useUpdateProjectMeta();
   const qc = useQueryClient();
   const { tenantId } = useWorkspace();
-  const [newProject, setNewProject] = useState<NewProjectDialogState>({ open: false, parentId: null });
+  const [newProject, setNewProject] = useState<NewProjectDialogState>({
+    open: false,
+    parentId: null,
+    kind: "list",
+  });
   const [newName, setNewName] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [treeWidth, setTreeWidth] = useState(220);
@@ -135,15 +148,19 @@ export function ProjectTreeSidebar({
     mutateRename.mutate({ id, name });
   };
 
-  const openNewProject = (parentId: string | null) => {
+  const openNewProject = (parentId: string | null, kind: NewItemKind = "list") => {
     setNewName("");
-    setNewProject({ open: true, parentId });
+    setNewProject({ open: true, parentId, kind });
   };
 
   const submitNewProject = async () => {
     if (!newName.trim()) return;
-    await mutateCreate.mutateAsync({ name: newName.trim(), parentId: newProject.parentId });
-    setNewProject({ open: false, parentId: null });
+    await mutateCreate.mutateAsync({
+      name: newName.trim(),
+      parentId: newProject.parentId,
+      kind: newProject.kind,
+    });
+    setNewProject({ open: false, parentId: null, kind: "list" });
     setNewName("");
   };
 
@@ -171,8 +188,8 @@ export function ProjectTreeSidebar({
             size="icon"
             variant="ghost"
             className="h-6 w-6"
-            aria-label="Novo projeto"
-            onClick={() => openNewProject(null)}
+            aria-label="Novo Espaço"
+            onClick={() => openNewProject(null, "space_root")}
           >
             <Plus className="h-3.5 w-3.5" />
           </Button>
@@ -272,9 +289,7 @@ export function ProjectTreeSidebar({
       <Dialog open={newProject.open} onOpenChange={(o) => setNewProject((s) => ({ ...s, open: o }))}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {newProject.parentId ? "Nova pasta dentro deste projeto" : "Novo projeto"}
-            </DialogTitle>
+            <DialogTitle>{KIND_LABEL[newProject.kind].title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="new-project-name">Nome</Label>
@@ -282,7 +297,7 @@ export function ProjectTreeSidebar({
               id="new-project-name"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Ex: Lançamento Q3"
+              placeholder={KIND_LABEL[newProject.kind].placeholder}
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter" && newName.trim()) submitNewProject();
@@ -290,11 +305,14 @@ export function ProjectTreeSidebar({
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNewProject({ open: false, parentId: null })}>
+            <Button
+              variant="outline"
+              onClick={() => setNewProject({ open: false, parentId: null, kind: "list" })}
+            >
               Cancelar
             </Button>
             <Button onClick={submitNewProject} disabled={!newName.trim()}>
-              Criar
+              {KIND_LABEL[newProject.kind].submit}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -311,7 +329,7 @@ interface SquadGroupProps {
   width: number;
   onMove: MoveHandler<ProjectTreeNode>;
   onRename: (args: { id: string; name: string }) => void;
-  onAddChild: (parentId: string | null) => void;
+  onAddChild: (parentId: string | null, kind?: NewItemKind) => void;
   onNavigate: (id: string) => void;
   maxDepth: number;
   openCounts: Record<string, number>;
@@ -378,7 +396,7 @@ function SquadGroup({ label, color, icon, roots, width, onMove, onRename, onAddC
 }
 
 interface ProjectNodeProps extends NodeRendererProps<ProjectTreeNode> {
-  onAddChild: (parentId: string) => void;
+  onAddChild: (parentId: string, kind?: NewItemKind) => void;
   onNavigate: (id: string) => void;
   openCount: number;
   onArchive: (id: string) => void;
@@ -456,9 +474,24 @@ function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate, openCoun
                 <Lock className="h-3 w-3 shrink-0 text-muted-foreground" aria-label="Privado" />
               )}
               {openCount > 0 && (
-                <span className="ml-auto rounded bg-sidebar-accent px-1.5 text-[10px] font-medium tabular-nums text-sidebar-foreground/70">
+                <span className="rounded bg-sidebar-accent px-1.5 text-[10px] font-medium tabular-nums text-sidebar-foreground/70">
                   {openCount}
                 </span>
+              )}
+              {/* "+" inline ao hover — só pra space_root/folder (não pra list/inbox). */}
+              {node.data.kind !== "inbox" && node.data.kind !== "list" && (
+                <button
+                  type="button"
+                  className="hidden h-4 w-4 shrink-0 items-center justify-center rounded text-sidebar-foreground/50 hover:bg-sidebar-accent-foreground/10 hover:text-sidebar-foreground group-hover:flex"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Default: dentro de space_root cria pasta; dentro de folder cria lista.
+                    onAddChild(node.id, node.data.kind === "space_root" ? "folder" : "list");
+                  }}
+                  aria-label="Adicionar dentro"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
               )}
             </>
           )}
@@ -468,9 +501,16 @@ function ProjectNode({ node, style, dragHandle, onAddChild, onNavigate, openCoun
         <ContextMenuItem onClick={() => node.edit()}>
           <Pencil className="mr-2 h-3.5 w-3.5" /> Renomear
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => onAddChild(node.id)}>
-          <FolderPlus className="mr-2 h-3.5 w-3.5" /> Nova pasta dentro
-        </ContextMenuItem>
+        {node.data.kind !== "inbox" && node.data.kind !== "list" && (
+          <>
+            <ContextMenuItem onClick={() => onAddChild(node.id, "folder")}>
+              <FolderPlus className="mr-2 h-3.5 w-3.5" /> Nova Pasta
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => onAddChild(node.id, "list")}>
+              <ListIcon className="mr-2 h-3.5 w-3.5" /> Nova Lista
+            </ContextMenuItem>
+          </>
+        )}
         <ContextMenuItem onClick={() => onNavigate(node.id)}>
           <FolderKanban className="mr-2 h-3.5 w-3.5" /> Abrir
         </ContextMenuItem>
