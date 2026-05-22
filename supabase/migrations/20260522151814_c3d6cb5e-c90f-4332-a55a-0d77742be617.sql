@@ -1,0 +1,1 @@
+UPDATE public.tenant_members SET role='admin' WHERE user_id='6a4e0bbb-fa99-452c-b638-515ac6c72064' AND tenant_id='6494e686-aa8a-48f8-9666-7d4ea21a413e';
