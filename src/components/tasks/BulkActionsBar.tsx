@@ -68,7 +68,7 @@ export function BulkActionsBar() {
     patch: Record<string, unknown>,
     successMsg: string,
   ) => {
-    const { error } = await supabase.from("tasks").update(patch).in("id", ids);
+    const { error } = await supabase.from("tasks").update(patch as never).in("id", ids);
     if (error) {
       toast.error(error.message);
       return;
@@ -116,7 +116,7 @@ export function BulkActionsBar() {
       void done_at;
       return { ...rest, title: `${(rest.title as string) ?? ""} (cópia)` };
     });
-    const { error: insErr } = await supabase.from("tasks").insert(copies);
+    const { error: insErr } = await supabase.from("tasks").insert(copies as never);
     if (insErr) {
       toast.error(insErr.message);
       return;

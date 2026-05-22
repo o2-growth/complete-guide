@@ -11,9 +11,9 @@ export function useSeedClickUpSpaces() {
     enabled: !loading && !!tenantId,
     staleTime: Infinity,
     queryFn: async () => {
-      const { error } = await supabase.rpc("seed_clickup_spaces", {
+      const { error } = await supabase.rpc("seed_clickup_spaces" as never, {
         _tenant_id: tenantId!,
-      });
+      } as never);
       if (error) throw error;
       return true;
     },
