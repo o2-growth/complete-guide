@@ -854,6 +854,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      email_queue_dispatch: { Args: never; Returns: undefined }
       has_tenant_role: {
         Args: {
           _role: Database["public"]["Enums"]["tenant_role"]
